@@ -984,7 +984,7 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {
-			frm.set_df_property("patient", "hidden", 0);
+			frm.set_df_property("patients", "hidden", 0);
 			frm.set_df_property("patient_name", "hidden", 0);
 			frm.set_df_property("ref_practitioner", "hidden", 0);
 			if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
