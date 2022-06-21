@@ -1,0 +1,151 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-10-04 09:07:58.158636",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_password",
+  "naming_series",
+  "collection_date",
+  "collection_time",
+  "result_date",
+  "date",
+  "customer_name",
+  "mobile_no",
+  "passport_id",
+  "date_of_birth",
+  "gender",
+  "analysis_result",
+  "analysis_result_ref_range",
+  "result_flage",
+  "sample_collect_flag"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_password",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Password",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "SHW-COV-.YYYY.-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_date",
+   "fieldtype": "Date",
+   "label": "Collection Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_time",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Collection Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_date",
+   "fieldtype": "Date",
+   "label": "Result Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Browse Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "passport_id",
+   "fieldtype": "Data",
+   "label": "Passport ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Data",
+   "label": "Date of Birth",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Gender",
+   "options": "Male\nFemale",
+   "read_only": 1
+  },
+  {
+   "fieldname": "analysis_result",
+   "fieldtype": "Link",
+   "label": "Analysis Result",
+   "options": "Analysis Result",
+   "read_only": 1
+  },
+  {
+   "fieldname": "analysis_result_ref_range",
+   "fieldtype": "Data",
+   "label": "Analysis Result Ref Range",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_flage",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Result_Flage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sample_collect_flag",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sample Collect Flag",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "modified": "2020-10-04 12:01:36.093593",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "WebFormResult",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

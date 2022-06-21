@@ -1,0 +1,106 @@
+{
+ "autoname": "format:{customer_name}-{#####}",
+ "creation": "2021-03-23 05:19:09.727948",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_name",
+  "mobile_number",
+  "section_break_17",
+  "governorate",
+  "column_break_19",
+  "address_details",
+  "note",
+  "date_of_registration",
+  "patient_count",
+  "status_of_call",
+  "collector_name"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name"
+  },
+  {
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "governorate",
+   "fieldtype": "Select",
+   "label": "Governorate",
+   "options": "Ajloun\nAmman\nAqaba\nBalqa\nIrbid\nJerash\nKarak\nMaan\nMafraq\nMadaba\nTafilah\nZarqa"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "address_details",
+   "fieldtype": "Small Text",
+   "label": "Address Details"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date_of_registration",
+   "fieldtype": "Date",
+   "label": "Date of Registration"
+  },
+  {
+   "fieldname": "status_of_call",
+   "fieldtype": "Select",
+   "label": "Status of Call",
+   "options": "New\nPending\nWorking in progress\nReschedule\nDone"
+  },
+  {
+   "fieldname": "collector_name",
+   "fieldtype": "Select",
+   "label": "Collector Name"
+  },
+  {
+   "default": "1",
+   "fieldname": "patient_count",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Patient Count",
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21"
+  }
+ ],
+ "hide_toolbar": 1,
+ "modified": "2021-04-04 10:22:09.322576",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Self Customer Information",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

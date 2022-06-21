@@ -1,0 +1,107 @@
+{
+ "creation": "2021-08-04 19:04:05.371955",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "covid_form_serial",
+  "received_date",
+  "customer_name",
+  "party_list",
+  "analysis_amount",
+  "paid_amount",
+  "transfer_amount",
+  "customer_payment_type",
+  "receivable_payment_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "covid_form_serial",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COVID Form Serial",
+   "options": "COVID Analysis Form",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "received_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Received Date",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Data",
+   "label": "Party List",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "analysis_amount",
+   "fieldtype": "Float",
+   "label": "Analysis Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "paid_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Not Transfer Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "transfer_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Transfer Amount"
+  },
+  {
+   "columns": 1,
+   "fieldname": "customer_payment_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Customer Payment Type",
+   "options": "\nCash\nMEPS\nMOBI Cash\nVisa\nReceivable"
+  },
+  {
+   "columns": 1,
+   "fieldname": "receivable_payment_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Receivable Payment Type",
+   "options": "\nCheque\nCash\nBank"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-08-05 22:56:28.111617",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Covid Form Bank Transfer",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

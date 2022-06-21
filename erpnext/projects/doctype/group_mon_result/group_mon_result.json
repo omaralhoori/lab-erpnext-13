@@ -1,0 +1,92 @@
+{
+ "creation": "2021-01-03 10:49:32.124570",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "covid_form_serial",
+  "customer_name",
+  "party_list",
+  "medical_direction",
+  "mobile_no",
+  "analysis_result",
+  "collection_date",
+  "customer_password"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "covid_form_serial",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COVID Form Serial",
+   "options": "COVID Analysis Form"
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Party List",
+   "options": "Third Party",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mobile No"
+  },
+  {
+   "fieldname": "analysis_result",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Analysis Result",
+   "options": "Analysis Result",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Collection Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_password",
+   "fieldtype": "Data",
+   "label": "Customer Password"
+  },
+  {
+   "fieldname": "medical_direction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Medical Direction",
+   "options": "Medical Analysis Direction",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-01-03 11:49:21.631699",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Group MON Result",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

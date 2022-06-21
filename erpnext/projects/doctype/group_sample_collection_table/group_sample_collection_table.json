@@ -1,0 +1,83 @@
+{
+ "creation": "2020-10-10 00:23:19.295987",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "covid_form_serial",
+  "customer_name",
+  "party_list",
+  "received_date",
+  "medical_analysis_direction",
+  "collection_date",
+  "collection_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "covid_form_serial",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COVID Form Serial",
+   "options": "COVID Analysis Form"
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_date",
+   "fieldtype": "Date",
+   "label": "Received Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "medical_analysis_direction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Medical Analysis Direction",
+   "options": "Medical Analysis Direction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Collection Date"
+  },
+  {
+   "fieldname": "collection_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Collection Time"
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Party List",
+   "options": "Third Party",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-10-16 23:44:26.451488",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Group Sample Collection Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

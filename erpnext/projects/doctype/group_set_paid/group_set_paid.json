@@ -1,0 +1,222 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-12-13 20:58:22.454556",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "section_break_2",
+  "naming_series",
+  "transaction_date",
+  "column_break_5",
+  "party_list",
+  "section_break_7",
+  "get_data_by_serial",
+  "form_received_date",
+  "section_break_10",
+  "from_date",
+  "column_break_12",
+  "to_date",
+  "section_break_14",
+  "paid_amount",
+  "column_break_16",
+  "payment_method",
+  "section_break_18",
+  "from_serial",
+  "to_serial",
+  "get_form_received",
+  "group_party_list_paid",
+  "total_previous",
+  "total_paid",
+  "total_analysis",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Serial",
+   "options": "PAID-.YYYY.-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Transaction Date"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "label": "Party List",
+   "options": "Third Party"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "get_data_by_serial",
+   "fieldtype": "Check",
+   "label": "Get Data By Serial"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 0",
+   "fieldname": "form_received_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Forms Received Date "
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 1",
+   "fieldname": "from_serial",
+   "fieldtype": "Data",
+   "label": "From Serial"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 1",
+   "fieldname": "to_serial",
+   "fieldtype": "Data",
+   "label": "To Serial"
+  },
+  {
+   "fieldname": "get_form_received",
+   "fieldtype": "Button",
+   "label": "Get Form Received"
+  },
+  {
+   "fieldname": "group_party_list_paid",
+   "fieldtype": "Table",
+   "label": "group party list paid",
+   "options": "group party list paid"
+  },
+  {
+   "fieldname": "total_previous",
+   "fieldtype": "Float",
+   "label": "Total Previous Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_paid",
+   "fieldtype": "Float",
+   "label": "Total Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_analysis",
+   "fieldtype": "Float",
+   "label": "Total Analysis Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Group Set Paid",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Group Set Paid",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 0",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 0",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "paid_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Paid Amount"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Cash",
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payment method",
+   "options": "Cheque\nCash\nBank"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-08-04 22:18:36.883768",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Group Set Paid",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_views": 1
+}

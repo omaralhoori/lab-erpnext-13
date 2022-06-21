@@ -1,0 +1,173 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2022-01-24 08:35:33.729841",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "naming_series",
+  "column_break_5",
+  "transaction_date",
+  "section_break_2",
+  "party_list",
+  "payment_type",
+  "column_break_8",
+  "analysis_result",
+  "medical_direction",
+  "section_break_7",
+  "from_date",
+  "get_form_received",
+  "column_break_12",
+  "to_date",
+  "section_break_14",
+  "delete_covid_form_details",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Serial",
+   "options": "PAID-.YYYY.-",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Transaction Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "label": "Party List",
+   "options": "Third Party"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Creation Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Creation Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_form_received",
+   "fieldtype": "Button",
+   "label": "Get Form Received"
+  },
+  {
+   "fieldname": "delete_covid_form_details",
+   "fieldtype": "Table",
+   "label": "Delete COVID Form Details",
+   "options": "Delete COVID Form Details"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Delete COVID Form",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "medical_direction",
+   "fieldtype": "Link",
+   "label": "Medical Direction",
+   "options": "Medical Analysis Direction"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "analysis_result",
+   "fieldtype": "Link",
+   "label": "Analysis Result",
+   "options": "Analysis Result"
+  },
+  {
+   "fieldname": "payment_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Payment Type",
+   "options": "\nCash\nMEPS\nMOBI Cash\nVisa\nReceivable"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-01-24 21:51:00.357768",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Delete COVID Form",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Center Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_views": 1
+}

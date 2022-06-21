@@ -1,0 +1,95 @@
+{
+ "creation": "2022-01-24 08:28:31.839718",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "covid_form_serial",
+  "customer_name",
+  "collection_date",
+  "analysis_result",
+  "result_date",
+  "payment_type",
+  "party_list",
+  "medical_direction"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "covid_form_serial",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "COVID Form Serial"
+  },
+  {
+   "columns": 2,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "collection_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Collection Date",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "result_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Result Date",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Party List",
+   "options": "Third Party",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "medical_direction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Medical Direction",
+   "options": "Medical Analysis Direction",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "analysis_result",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Analysis Result",
+   "options": "Analysis Result"
+  },
+  {
+   "columns": 1,
+   "fieldname": "payment_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Payment Type",
+   "options": "Cash\nMEPS\nMOBI Cash\nVisa\nReceivable",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-01-24 10:08:13.578228",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Delete COVID Form Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

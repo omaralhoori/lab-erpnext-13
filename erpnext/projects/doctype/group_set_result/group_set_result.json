@@ -1,0 +1,152 @@
+{
+ "allow_events_in_timeline": 1,
+ "autoname": "naming_series:",
+ "creation": "2020-10-10 06:46:45.426311",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "section_break_2",
+  "naming_series",
+  "transaction_date",
+  "column_break_5",
+  "party_list",
+  "section_break_7",
+  "get_data_by_serial",
+  "form_received_date",
+  "from_serial",
+  "to_serial",
+  "set_analysis_result_to",
+  "get_form_received",
+  "group_result_table",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RES-.YYYY.-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Transaction Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "get_data_by_serial",
+   "fieldtype": "Check",
+   "label": "Get Data By Serial"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 0",
+   "fieldname": "form_received_date",
+   "fieldtype": "Date",
+   "label": "Forms Received Date "
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 1",
+   "fieldname": "from_serial",
+   "fieldtype": "Data",
+   "label": "From Serial"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 1",
+   "fieldname": "to_serial",
+   "fieldtype": "Data",
+   "label": "To Serial"
+  },
+  {
+   "fieldname": "get_form_received",
+   "fieldtype": "Button",
+   "label": "Get Form Received"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "group_result_table",
+   "fieldtype": "Table",
+   "label": "Group Result Table",
+   "options": "Group Result Table"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Group Set Result",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Group Set Result",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "Not Detected (Negative)",
+   "fieldname": "set_analysis_result_to",
+   "fieldtype": "Link",
+   "label": "Set Analysis Result To",
+   "options": "Analysis Result"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "label": "Party List",
+   "options": "Third Party"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2020-10-16 23:22:32.704720",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Group Set Result",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,170 @@
+{
+ "creation": "2020-10-10 08:10:17.853225",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "covid_form_serial",
+  "customer_name",
+  "party_list",
+  "mobile_no",
+  "national_id",
+  "email_address",
+  "date_of_birth",
+  "passport_id",
+  "gender",
+  "received_date",
+  "analysis_result",
+  "medical_analysis_direction",
+  "ct",
+  "medical_direction_code",
+  "collection_date",
+  "collection_time",
+  "result_date",
+  "result_time",
+  "analysis_result_ref_range"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "covid_form_serial",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COVID Form Serial",
+   "options": "COVID Analysis Form"
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "label": "National ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "email_address",
+   "fieldtype": "Data",
+   "label": "Email Address",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth",
+   "read_only": 1
+  },
+  {
+   "fieldname": "passport_id",
+   "fieldtype": "Data",
+   "label": "Passport ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_date",
+   "fieldtype": "Date",
+   "label": "Received Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "medical_analysis_direction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Medical Analysis Direction",
+   "options": "Medical Analysis Direction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "medical_direction_code",
+   "fieldtype": "Data",
+   "label": "Medical Direction Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_date",
+   "fieldtype": "Date",
+   "label": "Collection Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_time",
+   "fieldtype": "Time",
+   "label": "Collection Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Result Date"
+  },
+  {
+   "fieldname": "analysis_result",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Analysis Result",
+   "options": "Analysis Result"
+  },
+  {
+   "fieldname": "result_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Result Time"
+  },
+  {
+   "fieldname": "analysis_result_ref_range",
+   "fieldtype": "Data",
+   "label": "Analysis Result Ref Range",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Party List",
+   "options": "Third Party",
+   "read_only": 1
+  },
+  {
+   "default": "NA",
+   "fieldname": "ct",
+   "fieldtype": "Data",
+   "label": "CT"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-02-20 19:02:59.250661",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Group Result Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

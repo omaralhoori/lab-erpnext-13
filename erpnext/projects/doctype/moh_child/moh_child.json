@@ -1,0 +1,169 @@
+{
+ "creation": "2021-02-20 23:37:37.869556",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "covid_form_serial",
+  "full_name",
+  "t_check",
+  "correct",
+  "address_details",
+  "age",
+  "telephone",
+  "national_id",
+  "sample_entry_date",
+  "sample_entry_time",
+  "nationality",
+  "result",
+  "receive_aman_notification",
+  "aman_notification_type",
+  "another_telephone",
+  "government",
+  "result_date",
+  "result_time",
+  "company",
+  "txt"
+ ],
+ "fields": [
+  {
+   "fieldname": "covid_form_serial",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COVID Form Serial",
+   "options": "COVID Analysis Form",
+   "read_only": 1
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "t_check",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "correct",
+   "fieldtype": "Long Text",
+   "in_list_view": 1,
+   "label": "Correct",
+   "read_only": 1
+  },
+  {
+   "fieldname": "address_details",
+   "fieldtype": "Data",
+   "label": "Address Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "label": "Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "telephone",
+   "fieldtype": "Data",
+   "label": "Telephone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "label": "National ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sample_entry_date",
+   "fieldtype": "Data",
+   "label": "Sample Entry Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sample_entry_time",
+   "fieldtype": "Time",
+   "label": "Sample Entry Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nationality",
+   "fieldtype": "Data",
+   "label": "Nationality",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "Data",
+   "label": "Result",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receive_aman_notification",
+   "fieldtype": "Data",
+   "label": "Receive Aman Notification",
+   "read_only": 1
+  },
+  {
+   "fieldname": "aman_notification_type",
+   "fieldtype": "Data",
+   "label": "Aman Notification Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "another_telephone",
+   "fieldtype": "Data",
+   "label": "Another Telephone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "government",
+   "fieldtype": "Data",
+   "label": "Government",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_date",
+   "fieldtype": "Data",
+   "label": "Result Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_time",
+   "fieldtype": "Data",
+   "label": "Result Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "txt",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "TXT",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-02-20 23:38:05.698057",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "MOH Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

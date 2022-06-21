@@ -1,0 +1,193 @@
+{
+ "autoname": "format:{customer_name}-{#####}",
+ "creation": "2020-12-13 21:28:59.421212",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_name",
+  "mobile_number",
+  "mobile_2",
+  "column_break_4",
+  "customer_nationality",
+  "national_id",
+  "pass_id",
+  "column_break_8",
+  "destination_country",
+  "birth_date",
+  "customer_age",
+  "column_break_12",
+  "recive_aman",
+  "aman_type",
+  "email_add",
+  "rcv_flag",
+  "section_break_17",
+  "governorate",
+  "column_break_19",
+  "address_details",
+  "note",
+  "party_list",
+  "visit_type",
+  "collector_name"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name"
+  },
+  {
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Mobile Number"
+  },
+  {
+   "fieldname": "mobile_2",
+   "fieldtype": "Data",
+   "label": "Another Mobile Number"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_nationality",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nationality",
+   "options": "Country"
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "label": "National ID"
+  },
+  {
+   "fieldname": "pass_id",
+   "fieldtype": "Data",
+   "label": "Pasaport ID"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "birth_date",
+   "fieldtype": "Date",
+   "label": "Birth Date"
+  },
+  {
+   "fieldname": "customer_age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recive_aman",
+   "fieldtype": "Select",
+   "label": "Recive Aman Notification",
+   "options": "Y\nN"
+  },
+  {
+   "fieldname": "aman_type",
+   "fieldtype": "Select",
+   "label": "Aman Notification Type",
+   "options": "G\nY\nO\nR\nN"
+  },
+  {
+   "fieldname": "email_add",
+   "fieldtype": "Data",
+   "label": "Email Address",
+   "options": "Email"
+  },
+  {
+   "default": "0",
+   "fieldname": "rcv_flag",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "RCV Flag",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "governorate",
+   "fieldtype": "Select",
+   "label": "Governorate",
+   "options": "Ajloun\nAmman\nAqaba\nBalqa\nIrbid\nJerash\nKarak\nMaan\nMafraq\nMadaba\nTafilah\nZarqa"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_details",
+   "fieldtype": "Small Text",
+   "label": "Address Details"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  },
+  {
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "label": "Party List",
+   "options": "Third Party"
+  },
+  {
+   "default": "Home Visit",
+   "fieldname": "visit_type",
+   "fieldtype": "Select",
+   "label": "Visit Type",
+   "options": "In Centre\nHome Visit"
+  },
+  {
+   "fieldname": "collector_name",
+   "fieldtype": "Data",
+   "label": "Collector Name"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Destination Country",
+   "options": "\nNA\nKuwait"
+  }
+ ],
+ "modified": "2021-08-04 09:00:22.327263",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Customer information",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

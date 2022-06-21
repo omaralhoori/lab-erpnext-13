@@ -1,0 +1,110 @@
+{
+ "autoname": "field:sampleid",
+ "creation": "2020-09-22 22:13:50.443273",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sampleid",
+  "sample_collected_flag"
+ ],
+ "fields": [
+  {
+   "fieldname": "sample_collected_flag",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sample Collected Flag",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "sampleid",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "SampleID",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "modified": "2020-09-22 22:19:33.466127",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Sample Collected Flag",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Center Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reception User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Results Entry User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Print Stage User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sample Collection User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

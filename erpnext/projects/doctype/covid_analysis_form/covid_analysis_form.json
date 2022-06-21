@@ -1,0 +1,707 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-09-20 09:00:07.710393",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "if_customer",
+  "cus_info",
+  "column_break_2",
+  "send_sms_message",
+  "customer_picture",
+  "section_break_2",
+  "naming_series",
+  "barcode",
+  "daily_serial",
+  "customer_password",
+  "collection_date",
+  "collection_time",
+  "collect_sample",
+  "column_break_66",
+  "result_date",
+  "result_time",
+  "set_result",
+  "section_break_4",
+  "medical_direction",
+  "medical_direction_code",
+  "column_break_8",
+  "date",
+  "column_break_2111",
+  "visit_type",
+  "column_break_2112",
+  "collector_name",
+  "section_break_10",
+  "custmer_name",
+  "mobile_no",
+  "another_mobile_no",
+  "column_break_13",
+  "destination_country",
+  "nationality",
+  "passport_id",
+  "national_id",
+  "column_break_15",
+  "other_country",
+  "gender",
+  "date_of_birth",
+  "age",
+  "column_break_37",
+  "receive_aman_notification",
+  "aman_notification_type",
+  "email_address",
+  "section_break_17",
+  "governorate",
+  "column_break_43",
+  "address_details",
+  "section_break_45",
+  "airline",
+  "party_list",
+  "column_break_20",
+  "party_unlisted",
+  "party_name_other_party_name",
+  "section_break_23",
+  "analysis_amount",
+  "analysis_default_amount_org",
+  "government_amount",
+  "amount_change_approved_by",
+  "payment_type",
+  "receivable_payment_type",
+  "analysis_default_amount",
+  "fees_amount",
+  "amended_from",
+  "analysis_result",
+  "analysis_result_ref_range",
+  "notes",
+  "paid_amount",
+  "sample_collect_flag",
+  "collection_users",
+  "result_user",
+  "result_flage",
+  "new_customer_flage",
+  "update_result_date",
+  "update_result_time",
+  "update_result_user",
+  "ct",
+  "qrcode_path",
+  "bank_transfer"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "medical_direction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Medical Direction",
+   "options": "Medical Analysis Direction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "airline",
+   "fieldtype": "Data",
+   "label": "Destination Country "
+  },
+  {
+   "default": "NA",
+   "fieldname": "party_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Party List",
+   "options": "Third Party"
+  },
+  {
+   "default": "0",
+   "fieldname": "party_unlisted",
+   "fieldtype": "Check",
+   "label": "Party Unlisted"
+  },
+  {
+   "depends_on": "eval:doc.party_unlisted == 1",
+   "fieldname": "party_name_other_party_name",
+   "fieldtype": "Data",
+   "label": "Party Name (Other Party Name)"
+  },
+  {
+   "default": "35",
+   "fieldname": "analysis_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Analysis Amount",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "25",
+   "fieldname": "analysis_default_amount",
+   "fieldtype": "Currency",
+   "label": "Analysis Default Amount",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fees_amount",
+   "fieldtype": "Currency",
+   "label": "Fees Amount",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "COVID Analysis Form",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Barcode",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "J.YY.-.DD..MM.-"
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "National ID"
+  },
+  {
+   "fieldname": "passport_id",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Passport No"
+  },
+  {
+   "default": "Not Collected",
+   "fieldname": "analysis_result",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Analysis Result",
+   "options": "Analysis Result",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custmer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Name",
+   "reqd": 1
+  },
+  {
+   "default": "Cash",
+   "fieldname": "payment_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Payment Type",
+   "options": "Cash\nMEPS\nMOBI Cash\nVisa\nReceivable"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "medical_direction_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Medical Direction Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "default": "0",
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sample_collect_flag",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Sample Collect Flag",
+   "options": "Sample Collected Flag",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email_address",
+   "fieldtype": "Data",
+   "label": "Email Address",
+   "options": "Email"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale"
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth",
+   "options": "Date"
+  },
+  {
+   "fieldname": "collection_date",
+   "fieldtype": "Date",
+   "label": "Collection Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_time",
+   "fieldtype": "Time",
+   "label": "Collection Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collection_users",
+   "fieldtype": "Data",
+   "label": "Collection Users",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_date",
+   "fieldtype": "Date",
+   "label": "Result Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_time",
+   "fieldtype": "Time",
+   "label": "Result Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_user",
+   "fieldtype": "Data",
+   "label": "Result User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collect_sample",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Collect Sample ",
+   "permlevel": 3
+  },
+  {
+   "fieldname": "set_result",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Set Result",
+   "permlevel": 3
+  },
+  {
+   "fieldname": "result_flage",
+   "fieldtype": "Link",
+   "label": "Result_Flage",
+   "options": "Result Flag",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "new_customer_flage",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "New Customer Flage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "update_result_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Update Result Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "update_result_time",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Update Result Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "update_result_user",
+   "fieldtype": "Data",
+   "label": "Update Result User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "daily_serial",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Daily Serial"
+  },
+  {
+   "fieldname": "analysis_result_ref_range",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Analysis Result Ref Range",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.result_flage == 1",
+   "fieldname": "send_sms_message",
+   "fieldtype": "Button",
+   "label": "Send SMS Message"
+  },
+  {
+   "fieldname": "customer_password",
+   "fieldtype": "Data",
+   "label": "Customer Password",
+   "read_only": 1
+  },
+  {
+   "default": "In Centre",
+   "fieldname": "visit_type",
+   "fieldtype": "Select",
+   "label": "Visit Type",
+   "options": "In Centre\nHome Visit"
+  },
+  {
+   "depends_on": "eval:doc.visit_type == 'Home Visit'",
+   "fieldname": "collector_name",
+   "fieldtype": "Data",
+   "label": "Collector Name"
+  },
+  {
+   "default": "25",
+   "fieldname": "analysis_default_amount_org",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Analysis Default Amount Org",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:(doc.analysis_amount < doc.analysis_default_amount_org || doc.analysis_amount < doc.government_amount)\n",
+   "fieldname": "amount_change_approved_by",
+   "fieldtype": "Select",
+   "label": "Amount Change Approved By",
+   "options": "\nDr Mohammad Kamleh\nDr Smaira Barghothi\nAhamd Asfour\nHisham Al hamad\nOthman Salhe"
+  },
+  {
+   "default": "25",
+   "fieldname": "government_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Government Amount",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_66",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_2111",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_2112",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Jordan",
+   "fieldname": "nationality",
+   "fieldtype": "Link",
+   "label": "Nationality",
+   "options": "Country"
+  },
+  {
+   "default": "0",
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "N",
+   "fieldname": "receive_aman_notification",
+   "fieldtype": "Select",
+   "label": "Receive Aman Notification",
+   "options": "N\nY"
+  },
+  {
+   "default": "N",
+   "fieldname": "aman_notification_type",
+   "fieldtype": "Select",
+   "label": "Aman Notification Type",
+   "options": "G\nY\nO\nR\nN"
+  },
+  {
+   "default": "962",
+   "fieldname": "another_mobile_no",
+   "fieldtype": "Data",
+   "label": "Another Mobile No"
+  },
+  {
+   "default": "Amman",
+   "fieldname": "governorate",
+   "fieldtype": "Select",
+   "label": "Governorate",
+   "options": "Ajloun\nAmman\nAqaba\nBalqa\nIrbid\nJerash\nKarak\nMaan\nMafraq\nMadaba\nTafilah\nZarqa"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_details",
+   "fieldtype": "Small Text",
+   "label": "Address Details"
+  },
+  {
+   "fieldname": "section_break_45",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "if_customer",
+   "fieldtype": "Check",
+   "label": "If Customer Entered His Information",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "cus_info",
+   "fieldtype": "Link",
+   "label": "Customer Name",
+   "options": "Customer information",
+   "set_only_once": 1
+  },
+  {
+   "default": "NA",
+   "fieldname": "ct",
+   "fieldtype": "Data",
+   "label": "CT",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_picture",
+   "fieldtype": "Attach Image",
+   "label": "Customer Picture"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Select",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Destination Country",
+   "options": "\nNA\nKuwait",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_country",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Other Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "qrcode_path",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "QRCode Path"
+  },
+  {
+   "default": "0",
+   "fieldname": "bank_transfer",
+   "fieldtype": "Currency",
+   "label": "Bank Transfer",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receivable_payment_type",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Receivable Payment Type",
+   "options": "\nCheque\nCash\nBank",
+   "read_only": 1
+  }
+ ],
+ "modified": "2021-10-07 22:17:46.548240",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "COVID Analysis Form",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reception User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Center Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sample Collection User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Results Entry User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Print Stage User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Financial Users",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Updating (Gender,Birthday)",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_views": 1
+}

@@ -1,0 +1,186 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2021-02-20 23:38:23.669990",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "section_break_2",
+  "naming_series",
+  "transaction_date",
+  "column_break_5",
+  "medical_direction",
+  "column_break_7",
+  "all_medical_direction",
+  "section_break_9",
+  "get_data_by_serial",
+  "form_received_date",
+  "from_serial",
+  "to_serial",
+  "section_break_14",
+  "analysis_result",
+  "all_results",
+  "column_break_17",
+  "section_break_18",
+  "get_form_received",
+  "moh_child",
+  "amended_from",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "SMS-.YYYY.-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Transaction Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.all_medical_direction == 0",
+   "fieldname": "medical_direction",
+   "fieldtype": "Link",
+   "label": "Except Medical Direction",
+   "options": "Medical Analysis Direction"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "all_medical_direction",
+   "fieldtype": "Check",
+   "label": "All Medical Direction"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "get_data_by_serial",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Get Data By Serial"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 0",
+   "fieldname": "form_received_date",
+   "fieldtype": "Date",
+   "label": "Forms Received Date "
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 1",
+   "fieldname": "from_serial",
+   "fieldtype": "Data",
+   "label": "From Serial"
+  },
+  {
+   "depends_on": "eval:doc.get_data_by_serial == 1",
+   "fieldname": "to_serial",
+   "fieldtype": "Data",
+   "label": "To Serial"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.all_results == 0",
+   "fieldname": "analysis_result",
+   "fieldtype": "Link",
+   "label": "Analysis Result",
+   "options": "Analysis Result"
+  },
+  {
+   "default": "1",
+   "fieldname": "all_results",
+   "fieldtype": "Check",
+   "label": "All Results"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_form_received",
+   "fieldtype": "Button",
+   "label": "Get Form Received"
+  },
+  {
+   "fieldname": "moh_child",
+   "fieldtype": "Table",
+   "label": "MOH Child",
+   "options": "MOH Child"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Send Bulk MOH",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Send Bulk MOH",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-02-20 23:38:23.669990",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Send Bulk MOH",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
