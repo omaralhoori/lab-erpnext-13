@@ -80,7 +80,7 @@ def create_test_from_template(lab_test):
 	lab_test.result_legend = template.result_legend
 	lab_test.worksheet_instructions = template.worksheet_instructions
 
-	lab_test = create_sample_collection(lab_test, template, patient, None)
+	lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice)
 	lab_test = load_result_format(lab_test, template, None, None)
 
 @frappe.whitelist()
@@ -144,6 +144,7 @@ def create_lab_test_from_invoice(sales_invoice):
 					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company)
 					if item.reference_dt == 'Lab Prescription':
 						lab_test.prescription = item.reference_dn
+					lab_test.sales_invoice = sales_invoice
 					lab_test.save(ignore_permissions = True)
 					if item.reference_dt != 'Lab Prescription':
 						frappe.db.set_value('Sales Invoice Item', item.name, 'reference_dt', 'Lab Test')
@@ -236,7 +237,7 @@ def create_sample_doc(template, patient, invoice, company = None):
 				sample_details += _('Collection Details:') + '\n\t' + template.sample_details
 				frappe.db.set_value('Sample Collection', sample_collection.name, 'sample_details', sample_details)
 
-			frappe.db.set_value('Sample Collection', sample_collection.name, 'sample_qty', quantity)
+			frappe.db.set_value('Sample Collection', sample_collection.name, {'sample_qty': quantity, 'sales_invoice': invoice})
 
 		else:
 			# Create Sample Collection for template, copy vals from Invoice
@@ -251,6 +252,7 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection.sample_uom = template.sample_uom
 			sample_collection.sample_qty = template.sample_qty
 			sample_collection.company = company
+			sample_collection.sales_invoice = invoice
 
 			if template.sample_details:
 				sample_collection.sample_details = _('Test :') + (template.get('lab_test_name') or template.get('template')) + '\n' + 'Collection Detials:\n\t' + template.sample_details

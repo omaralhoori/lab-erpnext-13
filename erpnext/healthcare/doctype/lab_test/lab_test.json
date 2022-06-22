@@ -68,7 +68,8 @@
   "descriptive_toggle",
   "sensitivity_toggle",
   "amended_from",
-  "prescription"
+  "prescription",
+  "sales_invoice"
  ],
  "fields": [
   {
@@ -554,11 +555,17 @@
    "label": "Organism Test Result",
    "options": "Organism Test Result",
    "print_hide": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Invoice"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-10 10:10:55.957292",
+ "modified": "2022-06-22 10:12:11.597564",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

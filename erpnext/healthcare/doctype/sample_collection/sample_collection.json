@@ -29,7 +29,8 @@
   "num_print",
   "section_break_15",
   "sample_details",
-  "amended_from"
+  "amended_from",
+  "sales_invoice"
  ],
  "fields": [
   {
@@ -220,11 +221,17 @@
    "fieldtype": "Data",
    "label": "Patient Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Invoice"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-30 16:53:13.076104",
+ "modified": "2022-06-22 10:42:23.562287",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
