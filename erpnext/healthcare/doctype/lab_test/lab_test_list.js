@@ -19,6 +19,48 @@ frappe.listview_settings['Lab Test'] = {
 		listview.page.add_menu_item(__('Create Multiple'), function () {
 			create_multiple_dialog(listview);
 		});
+
+		let disabled = false;
+		let query = "";
+		let url = location.href;
+		document.body.addEventListener('click', ()=>{
+			requestAnimationFrame(()=>{
+			if(url!==location.href){
+				//$(document).find('*').off('keydown');
+				disabled = true;
+				query = "";
+				url = location.href
+			}
+
+			let urls = location.href.split("/");
+			if(urls[urls.length - 1] === "lab-test"){
+				disabled = false;
+			}
+			});
+		}, true);
+		
+		$(document).keydown(function(e) {
+			if(abandonedChars(e.which) || disabled ) return; // || !frm.is_dirty()
+			query += String.fromCharCode(switchedChars(e.which));
+			//console.log(e.which)
+			if(e.which == 13) {
+				// ctrl+b pressed
+				frappe.call({
+					method: "erpnext.healthcare.barcode_query.find_lab_test",
+					args: {
+						"test_code": query
+					},
+					callback: (res) => {
+						if(res.message != null && res.message != ""){
+							window.location.href =  res.message;
+						}
+					}
+				})
+				query = "";
+			}
+			
+		});
+			
 	}
 };
 
@@ -69,3 +111,19 @@ var create_multiple_dialog = function (listview) {
 
 	dialog.show();
 };
+
+
+
+function abandonedChars(charCode){
+	if(charCode == 16){
+		return true;
+	}
+	return false;
+}
+
+function switchedChars(charCode){
+    if(charCode == 189){
+		return 45;
+	}
+	return charCode;
+}

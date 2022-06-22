@@ -1,28 +1,6 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+frappe.listview_settings['Sample Collection'] = {
 
-// render
-frappe.listview_settings['Sales Invoice'] = {
-	add_fields: ["customer", "customer_name", "base_grand_total", "outstanding_amount", "due_date", "company",
-		"currency", "is_return"],
-	get_indicator: function(doc) {
-		const status_colors = {
-			"Draft": "grey",
-			"Unpaid": "orange",
-			"Paid": "green",
-			"Return": "gray",
-			"Credit Note Issued": "gray",
-			"Unpaid and Discounted": "orange",
-			"Partly Paid and Discounted": "yellow",
-			"Overdue and Discounted": "red",
-			"Overdue": "red",
-			"Partly Paid": "yellow",
-			"Internal Transfer": "darkgrey"
-		};
-		return [__(doc.status), status_colors[doc.status], "status,=,"+doc.status];
-	},
-	right_column: "grand_total",
-	onload: function (listview) {
+    onload: function (listview) {
 		let disabled = false;
 		let query = "";
 		let url = location.href;
@@ -34,8 +12,8 @@ frappe.listview_settings['Sales Invoice'] = {
 				query = "";
 				url = location.href
 			}
-			let urls = location.href.split("/");
-			if(urls[urls.length - 1] === "sales-invoice"){
+            let urls = location.href.split("/");
+			if(urls[urls.length - 1] === "sample-collection"){
 				disabled = false;
 			}
 			});
@@ -48,7 +26,7 @@ frappe.listview_settings['Sales Invoice'] = {
 			if(e.which == 13) {
 				// ctrl+b pressed
 				frappe.call({
-					method: "erpnext.healthcare.barcode_query.find_sales_invoice",
+					method: "erpnext.healthcare.barcode_query.find_sample_collection",
 					args: {
 						"test_code": query
 					},
@@ -64,7 +42,7 @@ frappe.listview_settings['Sales Invoice'] = {
 		});
 			
 	}
-};
+}
 
 
 
