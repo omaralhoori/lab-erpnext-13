@@ -47,6 +47,39 @@ frappe.ui.form.on('Patient', {
 				}, 'Create');
 				frm.toggle_enable(['customer'], 0);
 			}
+			frm.add_custom_button(__('Add Fingerprint'), function () {
+				let d = new frappe.ui.Dialog({
+					title: 'Add Fingerprint',
+					fields: [
+						{
+							label: 'Finger Name',
+							fieldname: 'finger_name',
+							fieldtype: 'Select',
+							selected: 0,
+							options: [
+								"Unknown finger",
+								"Right thumb",
+								"Right index finger",
+								"Right middle finger",
+								"Right ring finger",
+								"Right little finger",
+								"Left thumb",
+								"Left index finger",
+								"Left middle finger",
+								"Left ring finger",
+								"Left little finger"
+							]
+						},
+					],
+					primary_action_label: 'Capture',
+					primary_action(values) {
+						console.log(values);
+						d.hide();
+					}
+				});
+				
+				d.show();
+			});
 			frappe.contacts.render_address_and_contact(frm);
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		} else {
