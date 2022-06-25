@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import os
 
 import dateutil
 import frappe
@@ -296,3 +297,49 @@ def get_timeline_data(doctype, name):
 		patient_timeline_data.update(customer_timeline_data)
 
 	return patient_timeline_data
+
+from datetime import datetime
+
+@frappe.whitelist(allow_guest=True)
+def upload_fingerprint():
+	if frappe.request.files['file']:
+		file = frappe.request.files['file']
+		patient_name = frappe.form_dict.docname
+		finger_name = frappe.form_dict.finger_name
+		file_name = frappe.form_dict.filename
+		print(patient_name, finger_name, file_name)
+		file_content = file.stream.read()
+		now_date = datetime.now()
+		full_path = frappe.local.site + "/private/files/fingerprints/" + str(now_date.year) + "-" +str(now_date.month)
+		create_path(full_path)
+		file_path = get_file_path(full_path, file_name)
+		with open(file_path, 'wb') as fw:
+			fw.write(file_content)
+		patient = frappe.get_doc("Patient", patient_name)
+		row = patient.append("fingerprints")
+		row.finger = finger_name
+		row.capture_date = now_date
+		row.file_path = file_path
+		patient.save(ignore_permissions=True)
+		frappe.db.commit()
+	else:
+		frappe.throw(_("Fingerprint image is not uploaded"))
+	return "success"
+
+
+def create_path(full_path):
+	isExist = os.path.exists(full_path)
+	if not isExist:
+		os.makedirs(full_path)
+
+def get_file_path(full_path, file_name):
+	file_number = 0
+	while True:
+		if not os.path.exists(os.path.join(full_path, file_name + "_" + str(file_number))):
+			return os.path.join(full_path, file_name + "_" + str(file_number))
+		file_number += 1
+
+@frappe.whitelist(allow_guest=True)
+def get_fingerprints(patient):
+	patient_doc = frappe.get_doc("Patient", patient)
+	return patient_doc.fingerprints

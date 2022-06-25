@@ -25,6 +25,12 @@
   "op_consulting_charge_item",
   "column_break_13",
   "clinical_procedure_consumable_item",
+  "fingerprint_settings_section",
+  "fingerprint_scanner_url",
+  "column_break_22",
+  "match_fingerprints_only",
+  "matching_accuracy",
+  "selecting_method",
   "sb_in_ac",
   "income_account",
   "receivable_account",
@@ -322,11 +328,44 @@
    "fieldname": "do_not_bill_inpatient_encounters",
    "fieldtype": "Check",
    "label": "Do Not Bill Patient Encounters for Inpatients"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "fingerprint_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Fingerprint Settings"
+  },
+  {
+   "fieldname": "fingerprint_scanner_url",
+   "fieldtype": "Data",
+   "label": "Fingerprint Scanner Url"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "match_fingerprints_only",
+   "fieldtype": "Select",
+   "label": "Match Fingerprints Only",
+   "options": "Last day\nLast two days\nLast week\nLast Month\nLast two months\nAll time"
+  },
+  {
+   "fieldname": "matching_accuracy",
+   "fieldtype": "Select",
+   "label": "Matching Accuracy",
+   "options": "Basic\nNormal\nHigh\nExtreme"
+  },
+  {
+   "fieldname": "selecting_method",
+   "fieldtype": "Select",
+   "label": "Selecting Method",
+   "options": "First Match\nHighest Matching Score"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-01-13 09:04:35.877700",
+ "modified": "2022-06-25 12:51:09.598799",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
