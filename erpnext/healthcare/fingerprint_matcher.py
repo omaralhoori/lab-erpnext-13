@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from fileinput import filename
 import frappe
 
 import numpy as np
