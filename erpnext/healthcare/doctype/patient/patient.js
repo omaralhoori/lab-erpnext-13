@@ -76,6 +76,10 @@ frappe.ui.form.on('Patient', {
 						const capture_finger = async () => {
 							frappe.show_progress('Capturing..', 0, 100, 'Please wait');
 							var url = await frappe.db.get_single_value("Healthcare Settings", "fingerprint_scanner_url");
+							if(!url){
+								frappe.throw(__("Fingerprint scanner url is not set!"));
+								return;
+							}
 							frappe.show_progress('Capturing..', 10, 100, 'Please wait');
 							fetch(url).
 								then(response => response.blob())

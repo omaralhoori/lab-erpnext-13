@@ -1038,6 +1038,10 @@ frappe.ui.form.on('Sales Invoice', {
 								frappe.show_progress('Capturing..', 0, 100, 'Please wait');
 								var url = await frappe.db.get_single_value("Healthcare Settings", "fingerprint_scanner_url");
 								frappe.show_progress('Capturing..', 10, 100, 'Please wait');
+								if(!url){
+									frappe.throw(__("Fingerprint scanner url is not set!"));
+									return;
+								}
 								fetch(url).
 									then(response => response.blob())
 									.then(blob => {
