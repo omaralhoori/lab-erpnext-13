@@ -7,6 +7,12 @@ import os
 
 
 fingerprint_shape = (300, 260) # Height, Width
+matching_score_accuracy = {
+    "Basic": 10,
+    "Normal": 25,
+    "High": 50,
+    "Extreme": 80
+}
 
 def read_fingerprint(path):
     try:
@@ -22,11 +28,18 @@ def verify_fingerprint(fingerprint):
     best_score = 0
     patient = None
     
+    selecting_method = frappe.db.get_single_value("Healthcare Settings", "selecting_method")
+
+    first_match = True if selecting_method == "First Match" else False
+
+    matching_accuracy = frappe.db.get_single_value("Healthcare Settings", "matching_accuracy")
+    score_threshold = matching_score_accuracy.get(matching_accuracy, 90)
+
     sift = cv2.SIFT_create()
     keypoints_1, descriptor_1 = sift.detectAndCompute(np.frombuffer(fingerprint, np.dtype('B')).reshape(fingerprint_shape), None)
 
     for path in paths:
-        saved_fingerprint = read_fingerprint(path)
+        saved_fingerprint = read_fingerprint(path["file_path"])
         keypoints_2, descriptor_2 = sift.detectAndCompute(saved_fingerprint, None)
 
         matches = cv2.FlannBasedMatcher({'algorithm': 1, 'trees': 10}, {}).knnMatch(descriptor_1, descriptor_2, k=2)
@@ -44,10 +57,30 @@ def verify_fingerprint(fingerprint):
         
         if len(match_points) / keypoints * 100 > best_score:
             best_score = len(match_points) / keypoints * 100
-            patient = path.split("/")[-1].split("_")[0]
+            if best_score > score_threshold:
+                patient = path["parent"]#path.split("/")[-1].split("_")[0]
+                if first_match:
+                    return patient
     return patient
 
 def get_fingerprint_paths():
-    PATH = frappe.local.site + "/private/files/fingerprints"
-    result = [os.path.join(dp, f) for dp, dn, filenames in os.walk(PATH) for f in filenames]
+    #PATH = frappe.local.site + "/private/files/fingerprints"
+    #result = [os.path.join(dp, f) for dp, dn, filenames in os.walk(PATH) for f in filenames]
+    capture_date = frappe.db.get_single_value("Healthcare Settings", "match_fingerprints_only")
+    capture_dict = {
+        "Last day": "1 DAY",
+        "Last two days": "2 DAY",
+        "Last week": "1 WEEK",
+        "Last Month": "1 MONTH",
+        "Last two months": "2 MONTH"
+    }
+    where_clause = ""
+    if capture_date and capture_date != "" and capture_date != "All time":
+        where_clause = "WHERE  capture_date >= NOW() - INTERVAL " + capture_dict[capture_date]
+    result = frappe.db.sql("""
+        SELECT file_path, parent FROM `tabPatient Fingerprint`
+        {where_clause}
+        ORDER BY capture_date DESC
+    """.format(where_clause=where_clause), as_dict=True)
+
     return result

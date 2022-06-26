@@ -74,7 +74,15 @@ frappe.listview_settings['Sample Collection'] = {
 							var response = JSON.parse(xhr.response)
 							if(response.message && response.message.path){
 								window.location.href = response.message.path
+							}else{
+								frappe.msgprint({
+									title: __('Matching status'),
+									indicator: 'orange',
+									message: __('Fingerprint did not match!')
+								});
 							}
+						}else{
+							frappe.throw(__("Something went wrong!"))
 						}
 
 					})
