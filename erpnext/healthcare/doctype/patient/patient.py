@@ -356,7 +356,6 @@ def match_fingerprint():
 	if frappe.request.files['file']:
 		file = frappe.request.files['file']
 		file_content = file.stream.read()
-
 		patient = verify_fingerprint(file_content)
 		if patient and patient != "":
 			sample = frappe.db.get_value("Sample Collection", {"patient": patient}, ["name"])

@@ -5,6 +5,9 @@ import numpy as np
 import cv2
 import os
 
+import base64
+
+
 
 fingerprint_shape = (300, 260) # Height, Width
 matching_score_accuracy = {
@@ -14,13 +17,23 @@ matching_score_accuracy = {
     "Extreme": 80
 }
 
+def read_blob(blob):
+    # nparray = np.frombuffer(blob,  dtype=np.uint8)
+    # print(nparray)
+    # print(nparray.shape)
+    # return nparray.reshape(fingerprint_shape)
+    with open("temp.bmp", 'wb') as fw:
+        fw.write(blob)
+    img = cv2.imread("temp.bmp", cv2.IMREAD_GRAYSCALE)
+    os.remove("temp.bmp")
+    return img
 def read_fingerprint(path):
     try:
-        with open(path, "rb") as f:
-            numpy_data = np.fromfile(f, np.dtype('B'))
-        img = numpy_data.reshape(fingerprint_shape)
+        # with open(path, "rb") as f:
+        #     numpy_data = np.fromfile(f, np.dtype('B'))
+        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)#numpy_data.reshape(fingerprint_shape)
         return img
-    except IOError:
+    except:
         print('Error while opening the file:', path)
 
 def verify_fingerprint(fingerprint):
@@ -36,10 +49,16 @@ def verify_fingerprint(fingerprint):
     score_threshold = matching_score_accuracy.get(matching_accuracy, 90)
 
     sift = cv2.SIFT_create()
-    keypoints_1, descriptor_1 = sift.detectAndCompute(np.frombuffer(fingerprint, np.dtype('B')).reshape(fingerprint_shape), None)
+    #print(fingerprint)
+    #np.frombuffer(fingerprint, np.dtype('B')).reshape(fingerprint_shape)
+    img = read_blob(fingerprint)
+    keypoints_1, descriptor_1 = sift.detectAndCompute(img, None)
 
     for path in paths:
         saved_fingerprint = read_fingerprint(path["file_path"])
+        if saved_fingerprint is None:
+            print("error reading: ", path)
+            continue
         keypoints_2, descriptor_2 = sift.detectAndCompute(saved_fingerprint, None)
 
         matches = cv2.FlannBasedMatcher({'algorithm': 1, 'trees': 10}, {}).knnMatch(descriptor_1, descriptor_2, k=2)

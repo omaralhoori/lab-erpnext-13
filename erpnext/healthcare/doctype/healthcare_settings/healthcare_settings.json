@@ -27,6 +27,7 @@
   "clinical_procedure_consumable_item",
   "fingerprint_settings_section",
   "fingerprint_scanner_url",
+  "web_api_licence",
   "column_break_22",
   "match_fingerprints_only",
   "matching_accuracy",
@@ -361,11 +362,16 @@
    "fieldtype": "Select",
    "label": "Selecting Method",
    "options": "First Match\nHighest Matching Score"
+  },
+  {
+   "fieldname": "web_api_licence",
+   "fieldtype": "Data",
+   "label": "Web Api Licence "
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-06-25 12:51:09.598799",
+ "modified": "2022-06-28 10:57:09.559758",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
