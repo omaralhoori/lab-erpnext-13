@@ -1,40 +1,48 @@
 from __future__ import unicode_literals
 import frappe
 
-import numpy as np
-import cv2
+#import numpy as np
+#import cv2
 import os
+from erpnext.sgfingerprint.pysgfplib import *
+from ctypes import *
+from PIL import Image
 
-import base64
+#import base64
 
+# init
+sgfplib = PYSGFPLib()
+sgfplib.Create()
+sgfplib.Init(SGFDxDeviceName.SG_DEV_FDU03)
+
+def load_image(path):
+    grayScale = Image.open(path).convert('L')
+    img = grayScale.tobytes()
+    # imageBuffer = (c_char*(260*300))()
+    # imageBuffer.value = img
+    return img
 
 
 fingerprint_shape = (300, 260) # Height, Width
 matching_score_accuracy = {
-    "Basic": 10,
-    "Normal": 25,
-    "High": 50,
-    "Extreme": 80
+    "Basic": SGFDxSecurityLevel.SL_BELOW_NORMAL,
+    "Normal": SGFDxSecurityLevel.SL_NORMAL,
+    "High": SGFDxSecurityLevel.SL_HIGH,
+    "Extreme": SGFDxSecurityLevel.SL_HIGHEST
 }
 
 def read_blob(blob):
-    # nparray = np.frombuffer(blob,  dtype=np.uint8)
-    # print(nparray)
-    # print(nparray.shape)
-    # return nparray.reshape(fingerprint_shape)
     with open("temp.bmp", 'wb') as fw:
         fw.write(blob)
-    img = cv2.imread("temp.bmp", cv2.IMREAD_GRAYSCALE)
+    #img = cv2.imread("temp.bmp", cv2.IMREAD_GRAYSCALE)
+    img = load_image("temp.bmp")
     os.remove("temp.bmp")
     return img
-def read_fingerprint(path):
-    try:
-        # with open(path, "rb") as f:
-        #     numpy_data = np.fromfile(f, np.dtype('B'))
-        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)#numpy_data.reshape(fingerprint_shape)
-        return img
-    except:
-        print('Error while opening the file:', path)
+
+def create_template(img):
+    cMinutiaeBuffer1 = (c_char*sgfplib.constant_sg400_template_size)()
+    result = sgfplib.CreateSG400Template(img, cMinutiaeBuffer1)
+    return cMinutiaeBuffer1
 
 def verify_fingerprint(fingerprint):
     paths = get_fingerprint_paths()
@@ -46,40 +54,33 @@ def verify_fingerprint(fingerprint):
     first_match = True if selecting_method == "First Match" else False
 
     matching_accuracy = frappe.db.get_single_value("Healthcare Settings", "matching_accuracy")
-    score_threshold = matching_score_accuracy.get(matching_accuracy, 90)
+    security_level = matching_score_accuracy.get(matching_accuracy, SGFDxSecurityLevel.SL_NORMAL)
 
-    sift = cv2.SIFT_create()
-    #print(fingerprint)
-    #np.frombuffer(fingerprint, np.dtype('B')).reshape(fingerprint_shape)
+    
     img = read_blob(fingerprint)
-    keypoints_1, descriptor_1 = sift.detectAndCompute(img, None)
+    fingerprint_template = create_template(img)
 
     for path in paths:
-        saved_fingerprint = read_fingerprint(path["file_path"])
+        saved_fingerprint = load_image(path["file_path"])
         if saved_fingerprint is None:
             print("error reading: ", path)
             continue
-        keypoints_2, descriptor_2 = sift.detectAndCompute(saved_fingerprint, None)
 
-        matches = cv2.FlannBasedMatcher({'algorithm': 1, 'trees': 10}, {}).knnMatch(descriptor_1, descriptor_2, k=2)
-
-        match_points = []
-        for p, q in matches:
-            if p.distance < 0.1 * q.distance:
-                match_points.append(p)
+        saved_fingerprint_template = create_template(saved_fingerprint)
         
-        keypoints = 0
-        if len(keypoints_1) < len(keypoints_2):
-            keypoints = len(keypoints_1)
-        else:
-            keypoints = len(keypoints_2)
+        cMatched = c_bool(False)
+        result = sgfplib.MatchTemplate(fingerprint_template, saved_fingerprint_template, security_level, byref(cMatched))
         
-        if len(match_points) / keypoints * 100 > best_score:
-            best_score = len(match_points) / keypoints * 100
-            if best_score > score_threshold:
-                patient = path["parent"]#path.split("/")[-1].split("_")[0]
-                if first_match:
-                    return patient
+        if cMatched.value:
+            if first_match:
+                patient = path["parent"]
+                return patient
+            else:
+                cScore = c_int(0)
+                result = sgfplib.GetMatchingScore(fingerprint_template, saved_fingerprint_template,  byref(cScore))
+                if cScore.value > best_score:
+                    patient = path["parent"]
+                    best_score = cScore.value
     return patient
 
 def get_fingerprint_paths():

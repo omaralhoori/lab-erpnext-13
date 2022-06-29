@@ -558,14 +558,15 @@
   },
   {
    "fieldname": "sales_invoice",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Sales Invoice"
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-22 10:12:11.597564",
+ "modified": "2022-06-29 16:34:25.068505",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
