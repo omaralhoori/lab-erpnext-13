@@ -1034,71 +1034,90 @@ frappe.ui.form.on('Sales Invoice', {
 						],
 						primary_action_label: 'Capture',
 						async primary_action(values) {
-							const capture_finger = async () => {
+							const uploadFP = (frm, image, values) => {
+								frappe.show_progress('Capturing..', 50, 100, 'Please wait');
+								let xhr = new XMLHttpRequest();
+								
+								xhr.open('POST', '/api/method/erpnext.healthcare.doctype.patient.patient.upload_fingerprint', true);
+								xhr.setRequestHeader('Accept', 'application/json');
+		
+								xhr.setRequestHeader('X-Frappe-CSRF-Token', frappe.csrf_token);
+								let form_data = new FormData();
+								if (image) {
+									form_data.append('file', image, patient_name + "_" + (values.finger_name || "Unknown finger"));
+								}
+								form_data.append('docname', patient_name);
+								form_data.append('finger_name', values.finger_name || "Unknown finger");
+								form_data.append('filename', patient_name + "_" + (values.finger_name || "Unknown finger"));
+		
+								xhr.send(form_data);
+		
+								xhr.addEventListener("load", (res) => {
+									var progress = frappe.show_progress('Capturing..', 100, 100, 'Please wait');
+									progress.hide();
+									frappe.msgprint({
+										title: __('Capturing status'),
+										indicator: 'green',
+										message: __('Successfully captured')
+									});
+								})
+							}
+		
+							const  SuccessFunc = (frm, values, result)=> {
+								if (result.ErrorCode == 0) {
+									if (result != null && result.BMPBase64.length > 0) {
+										uploadFP(frm, b64toBlob(result.BMPBase64, "image/bmp"), values)
+									}else{
+										frappe.throw("Fingerprint Capture Fail");
+									}
+								}
+								else {
+									frappe.throw("Fingerprint Capture Error Code: " + result.ErrorCode )
+								}
+							}
+		
+							const ErrorFunc = (status) =>{
+								console.error(status);
+								var progress = frappe.show_progress('Capturing..', 100, 100, 'Please wait');
+								progress.hide();
+								frappe.msgprint({
+									title: __('Capturing status'),
+									indicator: 'red',
+									message: __('Fail to capture; Status =') + status
+								});
+							}
+		
+							const CallSGIFPGetData = async (frm, values, successCall, failCall) => {
 								frappe.show_progress('Capturing..', 0, 100, 'Please wait');
-								var url = await frappe.db.get_single_value("Healthcare Settings", "fingerprint_scanner_url");
-								frappe.show_progress('Capturing..', 10, 100, 'Please wait');
-								if(!url){
+								var uri = await frappe.db.get_single_value("Healthcare Settings", "fingerprint_scanner_url");
+								if(!uri){
 									frappe.throw(__("Fingerprint scanner url is not set!"));
 									return;
 								}
-								fetch(url).
-									then(response => response.blob())
-									.then(blob => {
-										frappe.show_progress('Capturing..', 50, 100, 'Please wait');
-										// xhr.open('POST', '/api/method/erpnext.healthcare.doctype.patient.patient.upload_fingerprint', true);
-										let xhr = new XMLHttpRequest();
+								var license = await frappe.db.get_single_value("Healthcare Settings", "web_api_licence");
 		
-										xhr.open('POST', '/api/method/erpnext.healthcare.doctype.patient.patient.upload_fingerprint', true);
-										xhr.setRequestHeader('Accept', 'application/json');
+								var xmlhttp = new XMLHttpRequest();
+								xmlhttp.onreadystatechange = function () {
+									if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+										var fpobject = JSON.parse(xmlhttp.responseText);
+										successCall(frm, values, fpobject);
+									}
+									else if (xmlhttp.status == 404) {
+										failCall(xmlhttp.status)
+									}
+								}
+								var params = "Timeout=" + "10000";
+								params += "&Quality=" + "50";
+								params += "&licstr=" + encodeURIComponent(license || "");
+								params += "&templateFormat=" + "ISO";
+								params += "&imageWSQRate=" + "0.75";
+								xmlhttp.open("POST", uri, true);
+								xmlhttp.send(params);
 		
-										xhr.setRequestHeader('X-Frappe-CSRF-Token', frappe.csrf_token);
-		
-										// let form_data = new FormData();
-		
-										// //var file = document.getElementById(‘id of the input file’).files[0];
-		
-										// form_data.append('file', blob, frm.doc.name + "_" + (values.finger_name || "Unknown finger") + ".raw");
-		
-										// xhr.send(form_data);
-		
-										// xhr.open('POST', '/api/method/upload_file', true);
-										// xhr.setRequestHeader('Accept', 'application/json');
-										// xhr.setRequestHeader('X-Frappe-CSRF-Token', frappe.csrf_token);
-		
-										let form_data = new FormData();
-										if (blob) {
-											form_data.append('file', blob, patient_name + "_" + (values.finger_name || "Unknown finger"));
-										}
-										form_data.append('docname', patient_name);
-										form_data.append('finger_name', values.finger_name || "Unknown finger");
-										form_data.append('filename', patient_name + "_" + (values.finger_name || "Unknown finger"));
-		
-										xhr.send(form_data);
-		
-										xhr.addEventListener("load", (res) => {
-											var progress = frappe.show_progress('Capturing..', 100, 100, 'Please wait');
-											progress.hide();
-											frappe.msgprint({
-												title: __('Capturing status'),
-												indicator: 'green',
-												message: __('Successfully captured')
-											});
-											d.hide();
-										})
-									})
-									.catch(err => {
-										console.error(err);
-										var progress = frappe.show_progress('Capturing..', 100, 100, 'Please wait');
-										progress.hide();
-										frappe.msgprint({
-											title: __('Capturing status'),
-											indicator: 'red',
-											message: __('Fail to capture')
-										});
-									})
+								xmlhttp.onerror = function () {
+									failCall(xmlhttp.statusText);
+								}
 							}
-							
 							var found = false;
 							var res = await frappe.call({"method": "erpnext.healthcare.doctype.patient.patient.get_fingerprints", args: {"patient": patient_name}})
 							var fingerprints = res.message
@@ -1107,7 +1126,7 @@ frappe.ui.form.on('Sales Invoice', {
 									found = true;
 									frappe.confirm(values.finger_name + ' already exists. Are you sure you want to proceed?',
 										() => {
-											capture_finger();
+											CallSGIFPGetData(frm, values, SuccessFunc, ErrorFunc);
 										}, () => {
 											// action to perform if No is selected
 										})
@@ -1116,7 +1135,7 @@ frappe.ui.form.on('Sales Invoice', {
 								
 							}
 							if(!found){
-								capture_finger();
+								CallSGIFPGetData(frm, values, SuccessFunc, ErrorFunc);
 							}
 	
 							// then(async res => {
