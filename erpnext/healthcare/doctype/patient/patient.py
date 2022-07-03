@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import os
 
 import dateutil
-import frappe
+import frappe, random
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.contacts.doctype.contact.contact import get_default_contact
@@ -34,6 +34,7 @@ class Patient(Document):
 		self.set_full_name()
 
 	def before_insert(self):
+		self.create_random_password()
 		self.set_missing_customer_details()
 
 	def after_insert(self):
@@ -42,6 +43,9 @@ class Patient(Document):
 		else:
 			send_registration_sms(self)
 		self.reload()
+	def create_random_password(self):
+		if not self.patient_password or self.patient_password == "":
+			self.patient_password = random.randrange(1234567, 9876543)
 
 	def on_update(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):

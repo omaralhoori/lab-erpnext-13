@@ -33,6 +33,7 @@
   "email",
   "invite_user",
   "user_id",
+  "patient_password",
   "address_contacts",
   "address_html",
   "column_break_22",
@@ -483,13 +484,20 @@
    "fieldtype": "Table",
    "label": "Fingerprints",
    "options": "Patient Fingerprint"
+  },
+  {
+   "fieldname": "patient_password",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Patient Password",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-06-28 14:24:51.031508",
+ "modified": "2022-07-03 19:31:18.871989",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

@@ -66,7 +66,21 @@ class LabTest(Document):
 				if not item.result_value and not item.allow_blank and item.require_result_value:
 					frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
 						item.idx, frappe.bold(item.lab_test_particulars)), title=_('Mandatory Results'))
-
+	
+	def format_normal_ranges(self, normal_range):
+		html = ""
+		ranges = normal_range.split("\n")
+		gender_based = False
+		for idx,range in enumerate(ranges):
+			range = range.split(";")
+			if (range[0].lower() == "male" or range[0].lower() == "female") and range[0].lower() != self.patient_sex.lower():
+				gender_based = True
+				continue
+			if idx == 0 or (idx == 1 and gender_based):
+				html += f"<tr><td>Normal Range:</td><td>{range[0]}</td><td>{range[1]}</td></tr>"
+			else:
+				html += f"<tr><td></td><td>{range[0]}</td><td>{range[1]}</td></tr>"
+		return html
 
 def create_test_from_template(lab_test):
 	template = frappe.get_doc('Lab Test Template', lab_test.template)
