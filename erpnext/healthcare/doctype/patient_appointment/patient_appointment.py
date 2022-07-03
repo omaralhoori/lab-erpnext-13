@@ -8,7 +8,7 @@ import datetime
 import json
 
 import frappe
-from frappe import _
+from frappe import _, get_user
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -344,16 +344,19 @@ def check_employee_wise_availability(date, practitioner_doc):
 			else:
 				frappe.throw(_('{0} is on Leave on {1}').format(practitioner_doc.name, date), title=_('Not Available'))
 
-
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 def get_available_slots(practitioner_doc, date):
 	available_slots = slot_details = []
 	weekday = date.strftime('%A')
 	practitioner = practitioner_doc.name
-
+	permissions = get_user_permissions(frappe.session.user)
 	for schedule_entry in practitioner_doc.practitioner_schedules:
 		validate_practitioner_schedules(schedule_entry, practitioner)
 		practitioner_schedule = frappe.get_doc('Practitioner Schedule', schedule_entry.schedule)
-
+		if permissions and permissions.get("Company"):
+			company = frappe.db.get_value("Healthcare Service Unit", schedule_entry.service_unit,"company")
+			has_permissions = any([item["doc"] == company for item in permissions.get("Company")])
+			if not has_permissions: continue
 		if practitioner_schedule and not practitioner_schedule.disabled:
 			available_slots = []
 			for time_slot in practitioner_schedule.time_slots:
