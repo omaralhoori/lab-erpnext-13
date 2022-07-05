@@ -14,7 +14,7 @@ from frappe.model.document import Document
 from frappe.model.naming import set_name_by_naming_series
 from frappe.utils import cint, cstr, getdate
 from frappe.utils.nestedset import get_root_of
-
+from frappe.model.naming import make_autoname
 from erpnext import get_default_currency
 from erpnext.accounts.party import get_dashboard_info
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
@@ -35,6 +35,9 @@ class Patient(Document):
 
 	def before_insert(self):
 		self.create_random_password()
+		format_ser = "PTN" + ".####"
+		prg_serial = make_autoname(format_ser)
+		self.patient_number = prg_serial
 		self.set_missing_customer_details()
 
 	def after_insert(self):

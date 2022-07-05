@@ -47,6 +47,7 @@
   "remind_before",
   "sb_lab_settings",
   "create_lab_test_on_si_submit",
+  "create_lab_test_separated",
   "create_sample_collection_for_lab_test",
   "column_break_34",
   "lab_test_approval_required",
@@ -367,11 +368,17 @@
    "fieldname": "web_api_licence",
    "fieldtype": "Data",
    "label": "Web Api Licence "
+  },
+  {
+   "default": "0",
+   "fieldname": "create_lab_test_separated",
+   "fieldtype": "Check",
+   "label": "Create Lab Test Separately"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-06-28 10:57:09.559758",
+ "modified": "2022-07-04 16:16:31.221432",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

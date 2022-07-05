@@ -67,35 +67,25 @@ class LabTest(Document):
 					frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
 						item.idx, frappe.bold(item.lab_test_particulars)), title=_('Mandatory Results'))
 	
-	def format_normal_ranges(self, normal_range):
-		html = ""
-		ranges = normal_range.split("\n")
-		gender_based = False
-		for idx,range in enumerate(ranges):
-			range = range.split(";")
-			if (range[0].lower() == "male" or range[0].lower() == "female") and range[0].lower() != self.patient_sex.lower():
-				gender_based = True
-				continue
-			if idx == 0 or (idx == 1 and gender_based):
-				html += f"<tr><td>Normal Range:</td><td>{range[0]}</td><td>{range[1]}</td></tr>"
-			else:
-				html += f"<tr><td></td><td>{range[0]}</td><td>{range[1]}</td></tr>"
-		return html
 
 def create_test_from_template(lab_test):
-	template = frappe.get_doc('Lab Test Template', lab_test.template)
-	patient = frappe.get_doc('Patient', lab_test.patient)
+	templates = lab_test.template if isinstance(lab_test.template, list) else [lab_test.template]
+	for template_name in templates:
+		if template_name.get("template"):
+			template_name = template_name.get("template")
+		template = frappe.get_doc('Lab Test Template', template_name)
+		patient = frappe.get_doc('Patient', lab_test.patient)
 
-	lab_test.lab_test_name = template.lab_test_name
-	lab_test.result_date = getdate()
-	lab_test.department = template.department
-	lab_test.lab_test_group = template.lab_test_group
-	lab_test.legend_print_position = template.legend_print_position
-	lab_test.result_legend = template.result_legend
-	lab_test.worksheet_instructions = template.worksheet_instructions
+		lab_test.lab_test_name = template.lab_test_name
+		lab_test.result_date = getdate()
+		lab_test.department = template.department
+		lab_test.lab_test_group = template.lab_test_group
+		lab_test.legend_print_position = template.legend_print_position
+		lab_test.result_legend = template.result_legend
+		lab_test.worksheet_instructions = template.worksheet_instructions
 
-	lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice)
-	lab_test = load_result_format(lab_test, template, None, None)
+		lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice)
+		lab_test = load_result_format(lab_test, template, None, None)
 
 @frappe.whitelist()
 def update_status(status, name):
@@ -143,6 +133,37 @@ def create_lab_test_from_encounter(encounter):
 
 def create_lab_test_from_invoice(sales_invoice):
 	lab_tests_created = False
+	separate = frappe.db.get_single_value("Healthcare Settings", "create_lab_test_separated")
+	if not separate or separate == 0:
+		lab_tests_created = create_lab_test_joined(sales_invoice)
+	else:
+		lab_tests_created = create_lab_test_separated(sales_invoice)
+	return lab_tests_created
+
+def create_lab_test_joined(sales_invoice):
+	lab_tests_created = False
+	invoice = frappe.get_doc('Sales Invoice', sales_invoice)
+	if invoice and invoice.patient:
+		patient = frappe.get_doc('Patient', invoice.patient)
+		test_created = False
+		for item in invoice.items:
+			template = get_lab_test_template(item.item_code)
+			if template:
+				if not test_created:
+					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company)
+					test_created = True
+				else:
+					template_row = lab_test.append("template")
+					template_row.template = template.name
+		if lab_test:
+			lab_test.sales_invoice = sales_invoice
+			lab_test.save(ignore_permissions = True)
+			lab_tests_created = lab_test.name
+	return lab_tests_created
+
+
+def create_lab_test_separated(sales_invoice):
+	lab_tests_created = False
 	invoice = frappe.get_doc('Sales Invoice', sales_invoice)
 	if invoice and invoice.patient:
 		patient = frappe.get_doc('Patient', invoice.patient)
@@ -186,7 +207,9 @@ def create_lab_test_doc(invoiced, practitioner, patient, template, company):
 	lab_test.mobile = patient.mobile
 	lab_test.report_preference = patient.report_preference
 	lab_test.department = template.department
-	lab_test.template = template.name
+	#lab_test.template = template.name
+	template_row = lab_test.append("template")
+	template_row.template = template.name
 	lab_test.lab_test_group = template.lab_test_group
 	lab_test.result_date = getdate()
 	lab_test.company = company
@@ -238,21 +261,32 @@ def create_sample_doc(template, patient, invoice, company = None):
 			'doctype': 'Sample Collection',
 			'patient': patient.name,
 			'docstatus': 0,
-			'sample': template.sample
+			'sales_invoice': invoice
+			# 'sample': template.sample
 		})
 
 		if sample_exists:
 			# update sample collection by adding quantity
 			sample_collection = frappe.get_doc('Sample Collection', sample_exists[0][0])
-			quantity = int(sample_collection.sample_qty) + int(template.sample_qty)
+
+			if template.lab_test_template_type == "Single":
+				add_template_sample(template, sample_collection)
+			elif template.lab_test_template_type == "Multiline" or template.lab_test_template_type == "Grouped":
+				for group_item in template.lab_test_groups:
+					group_template = frappe.get_doc("Lab Test Template", group_item.lab_test_template)
+					add_template_sample(group_template, sample_collection)
+	
+			test_template = sample_collection.append("lab_test_templates")
+			test_template.template = template.name
+
 			if template.sample_details:
 				sample_details = sample_collection.sample_details + '\n-\n' + _('Test :')
 				sample_details += (template.get('lab_test_name') or template.get('template')) +	'\n'
 				sample_details += _('Collection Details:') + '\n\t' + template.sample_details
 				frappe.db.set_value('Sample Collection', sample_collection.name, 'sample_details', sample_details)
 
-			frappe.db.set_value('Sample Collection', sample_collection.name, {'sample_qty': quantity, 'sales_invoice': invoice})
-
+			#frappe.db.set_value('Sample Collection', sample_collection.name, {'sales_invoice': invoice})
+			sample_collection.save(ignore_permissions=True)
 		else:
 			# Create Sample Collection for template, copy vals from Invoice
 			sample_collection = frappe.new_doc('Sample Collection')
@@ -262,9 +296,20 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection.patient = patient.name
 			sample_collection.patient_age = patient.get_age()
 			sample_collection.patient_sex = patient.sex
-			sample_collection.sample = template.sample
-			sample_collection.sample_uom = template.sample_uom
-			sample_collection.sample_qty = template.sample_qty
+
+			# sample_collection.sample = template.sample
+			# sample_collection.sample_uom = template.sample_uom 
+			# sample_collection.sample_qty = template.sample_qty
+			test_template = sample_collection.append("lab_test_templates")
+			test_template.template = template.name
+
+			if template.lab_test_template_type == "Single":
+				create_template_sample(template, sample_collection)
+			elif template.lab_test_template_type == "Multiline" or template.lab_test_template_type == "Grouped":
+				for group_item in template.lab_test_groups:
+					group_template = frappe.get_doc("Lab Test Template", group_item.lab_test_template)
+					create_template_sample(group_template, sample_collection)
+
 			sample_collection.company = company
 			sample_collection.sales_invoice = invoice
 
@@ -273,6 +318,30 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
+
+def create_template_sample(template, sample_collection):
+	sample_detail = sample_collection.append("sample_collection_detail")
+	sample_detail.sample = template.sample
+	sample_detail.sample_uom = template.sample_uom
+	sample_detail.sample_qty = template.sample_qty
+	sample_collection.num_print = int(sample_collection.num_print) + 1
+
+def add_template_sample(template, sample_collection):
+	template_found = False
+	for sample_detail in sample_collection.sample_collection_detail:
+		if template.sample == sample_detail.sample:
+			quantity = int(sample_detail.sample_qty) + int(template.sample_qty)
+			sample_detail.sample_qty = quantity
+			sample_detail.num_print = int(sample_detail.num_print) + 1
+			sample_collection.num_print = int(sample_collection.num_print) + 1
+			template_found = True
+			break
+	if not template_found:
+		sample_detail = sample_collection.append("sample_collection_detail")
+		sample_detail.sample = template.sample
+		sample_detail.sample_uom = template.sample_uom
+		sample_detail.sample_qty = template.sample_qty
+		sample_collection.num_print = int(sample_collection.num_print) + 1
 
 def create_sample_collection(lab_test, template, patient, invoice):
 	if frappe.get_cached_value('Healthcare Settings', None, 'create_sample_collection_for_lab_test'):
@@ -294,7 +363,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 	elif template.lab_test_template_type == 'Descriptive':
 		create_descriptives(template, lab_test)
 
-	elif template.lab_test_template_type == 'Grouped':
+	elif template.lab_test_template_type == 'Grouped' or template.lab_test_template_type == 'Multiline':
 		# Iterate for each template in the group and create one result for all.
 		for lab_test_group in template.lab_test_groups:
 			# Template_in_group = None
