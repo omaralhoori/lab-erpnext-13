@@ -54,9 +54,12 @@
   "insurance_party_type",
   "insurance_party",
   "coverage_percentage",
+  "get_items_from_party",
   "column_break_48",
   "currency",
   "conversion_rate",
+  "patient_card_no",
+  "form_no",
   "column_break2",
   "selling_price_list",
   "price_list_currency",
@@ -229,7 +232,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "ACC-SINV-.YYYY.-\nACC-SINV-RET-.YYYY.-",
+   "options": "JO\nACC-SINV-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -613,6 +616,7 @@
    "width": "50%"
   },
   {
+   "fetch_from": "insurance_party.default_price_list",
    "fieldname": "selling_price_list",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -2055,6 +2059,24 @@
    "fieldtype": "Float",
    "label": "Coverage Percentage %",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.insurance_party != null && doc.insurance_party != \"\"",
+   "fieldname": "get_items_from_party",
+   "fieldtype": "Button",
+   "label": "Get Items from Party"
+  },
+  {
+   "depends_on": "eval:doc.insurance_party != null && doc.insurance_party != \"\"",
+   "fieldname": "patient_card_no",
+   "fieldtype": "Data",
+   "label": "Patient Card No"
+  },
+  {
+   "depends_on": "eval:doc.insurance_party != null && doc.insurance_party != \"\"",
+   "fieldname": "form_no",
+   "fieldtype": "Data",
+   "label": "Form No"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2067,7 +2089,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-02 18:51:49.767779",
+ "modified": "2022-07-06 21:17:45.542170",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

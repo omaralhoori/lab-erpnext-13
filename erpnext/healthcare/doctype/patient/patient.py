@@ -41,6 +41,7 @@ class Patient(Document):
 		self.set_missing_customer_details()
 
 	def after_insert(self):
+		self.generate_qrcode()
 		if frappe.db.get_single_value('Healthcare Settings', 'collect_registration_fee'):
 			frappe.db.set_value('Patient', self.name, 'status', 'Disabled')
 		else:
@@ -49,6 +50,9 @@ class Patient(Document):
 	def create_random_password(self):
 		if not self.patient_password or self.patient_password == "":
 			self.patient_password = random.randrange(1234567, 9876543)
+
+	def generate_qrcode(self):
+		qrcode_gen(str(self.patient_password), self.name)
 
 	def on_update(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
@@ -232,6 +236,18 @@ class Patient(Document):
 		contact.flags.skip_patient_update = True
 		contact.save(ignore_permissions=True)
 
+
+@frappe.whitelist()
+def qrcode_gen(customer_password,docname):
+	codname = customer_password + '_' + docname 
+
+	nyear= frappe.utils.now_datetime().strftime('%Y')
+	nmonth= frappe.utils.now_datetime().strftime('%m')
+	qrpath = '/public/files/patientqrcode/' + nyear + '/' + nmonth + '/'
+	qrpath_db = 'files/patientqrcode/' + nyear + '/' + nmonth + '/'
+
+	frappe.utils.generate_qrcode("94.142.51.110:1952",codname,qrpath)
+	frappe.db.set_value("Patient", {"name": docname}, "qrcode_path", qrpath_db + codname)
 
 def create_customer(doc):
 	customer = frappe.get_doc({

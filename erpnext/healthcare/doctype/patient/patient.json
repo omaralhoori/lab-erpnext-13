@@ -70,7 +70,8 @@
   "surrounding_factors",
   "other_risk_factors",
   "more_info",
-  "patient_details"
+  "patient_details",
+  "qrcode_path"
  ],
  "fields": [
   {
@@ -499,13 +500,20 @@
    "label": "Patient Number",
    "read_only": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "qrcode_path",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "QR Code Path",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-07-04 21:58:20.513682",
+ "modified": "2022-07-06 11:43:09.978773",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

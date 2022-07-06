@@ -1160,7 +1160,6 @@ frappe.ui.form.on('Sales Invoice', {
 					d.show();
 				});
 			}
-		
 	},
 
 	create_invoice_discounting: function(frm) {
@@ -1169,7 +1168,35 @@ frappe.ui.form.on('Sales Invoice', {
 			frm: frm
 		});
 	},
+	get_items_from_party: async function(frm){
+		if(frm.doc.selling_price_list == "" || frm.doc.selling_price_list == 'Standard Selling'){
+			frappe.msgprint(__("Please select selling price list"));
+		}else{
+			var items = await frappe.db.get_list("Item Price", {filters:{"price_list": frm.doc.selling_price_list}, fields:["item_code"]});
+			items = items.map(item => item.item_code);
+			var existing_items = [];
+			for(var item of frm.doc.items){
+				if(items.includes(item.item_code)){
+					existing_items.push(item.item_code)
+					frappe.msgprint(__("Item exists: ") + item.item_code);
+				}
+			}
+			var last_row = frm.doc.items[frm.doc.items.length - 1];
+			if(last_row.item_code == null || last_row.item_code == ""){
+				frm.doc.items.splice(last_row, 1)
 
+			}
+			items = items.filter(item => !existing_items.includes(item) )
+			for (var item of items){
+
+				var row = cur_frm.add_child("items");
+				frappe.model.set_value(row.doctype, row.name, "item_code",  item);
+				//row.item_code = item.item_code;
+			}
+
+			frm.refresh_fields("items");
+		}
+	},	
 	create_dunning: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",

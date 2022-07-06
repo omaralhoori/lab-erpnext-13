@@ -679,7 +679,11 @@ def get_price_list_rate(args, item_doc, out=None):
 		# variant
 		if price_list_rate is None and item_doc.variant_of:
 			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
-
+		# Omar
+		# if price list is not standard and item not exist
+		if price_list_rate is None and args.get("doctype") == "Sales Invoice":
+			args.price_list = "Standard Selling"
+			price_list_rate = get_price_list_rate_for(args, item_doc.name)
 		# insert in database
 		if price_list_rate is None:
 			if args.price_list and args.rate:
