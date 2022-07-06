@@ -1032,7 +1032,6 @@ class SalesInvoice(SellingController):
 			if not patient.qrcode_path or patient.qrcode_path == "":
 				patient.generate_qrcode()
 			code_path = patient.qrcode_path
-		print("code_path: ", code_path)
 		return code_path
 
 	def get_asset(self, item):

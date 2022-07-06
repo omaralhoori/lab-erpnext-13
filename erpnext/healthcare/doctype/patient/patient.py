@@ -52,7 +52,9 @@ class Patient(Document):
 			self.patient_password = random.randrange(1234567, 9876543)
 
 	def generate_qrcode(self):
+		self.create_random_password()
 		qrcode_gen(str(self.patient_password), self.name)
+		frappe.db.commit()
 
 	def on_update(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
@@ -244,10 +246,10 @@ def qrcode_gen(customer_password,docname):
 	nyear= frappe.utils.now_datetime().strftime('%Y')
 	nmonth= frappe.utils.now_datetime().strftime('%m')
 	qrpath = '/public/files/patientqrcode/' + nyear + '/' + nmonth + '/'
-	qrpath_db = 'files/patientqrcode/' + nyear + '/' + nmonth + '/'
+	qrpath_db = '/files/patientqrcode/' + nyear + '/' + nmonth + '/' + codname
 
-	frappe.utils.generate_qrcode("94.142.51.110:1952",codname,qrpath)
-	frappe.db.set_value("Patient", {"name": docname}, "qrcode_path", qrpath_db + codname)
+	frappe.utils.generate_qrcode(frappe.db.get_single_value("Healthcare Settings", "result_url"),codname,qrpath)
+	frappe.db.set_value("Patient", {"name": docname}, "qrcode_path", qrpath_db)
 
 def create_customer(doc):
 	customer = frappe.get_doc({
