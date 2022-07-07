@@ -13,6 +13,8 @@
   "item_group_name",
   "parent_item_group",
   "is_group",
+  "need_lab_test",
+  "need_sample_collection",
   "image",
   "column_break_5",
   "defaults",
@@ -206,6 +208,18 @@
    "fieldname": "website_title",
    "fieldtype": "Data",
    "label": "Title"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_lab_test",
+   "fieldtype": "Check",
+   "label": "Need Lab Test"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_sample_collection",
+   "fieldtype": "Check",
+   "label": "Need Sample Collection"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -214,7 +228,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2021-02-18 13:40:30.049650",
+ "modified": "2022-07-07 20:12:33.385938",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
