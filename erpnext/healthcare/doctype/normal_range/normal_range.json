@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "NRG-.#",
+ "creation": "2022-07-05 23:22:17.822410",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "range_type",
+  "gender",
+  "range_from",
+  "range_to",
+  "age_range",
+  "from_age",
+  "from_age_period",
+  "to_age",
+  "to_age_period",
+  "range_text",
+  "criteria_text",
+  "min_si_value",
+  "max_si_value",
+  "si_range_text",
+  "effective_date",
+  "expiry_date",
+  "calculate_exact_age",
+  "range_order",
+  "race",
+  "oldserial"
+ ],
+ "fields": [
+  {
+   "fieldname": "range_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Range Type",
+   "options": "All\nConfirmation\nMachineEdge\nNormal\nPanic\nQC Level1\nQC Level2\nQC Level1 Mean\nQC Level2 Mean\nQC Level3\nQC Level3 Mean"
+  },
+  {
+   "fieldname": "range_from",
+   "fieldtype": "Float",
+   "label": "Range From"
+  },
+  {
+   "fieldname": "range_to",
+   "fieldtype": "Float",
+   "label": "Range To"
+  },
+  {
+   "fieldname": "range_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Range Text"
+  },
+  {
+   "fieldname": "si_range_text",
+   "fieldtype": "Small Text",
+   "label": "SI Range Text"
+  },
+  {
+   "fieldname": "age_range",
+   "fieldtype": "Select",
+   "label": "Age Range",
+   "options": "\nAll\n<\n>\n=\nBetween"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fieldname": "race",
+   "fieldtype": "Select",
+   "label": "Race",
+   "options": "All\nCaucasian\nJordanian"
+  },
+  {
+   "fieldname": "criteria_text",
+   "fieldtype": "Data",
+   "label": "Criteria Text"
+  },
+  {
+   "fieldname": "effective_date",
+   "fieldtype": "Date",
+   "label": "Effective Date"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "calculate_exact_age",
+   "fieldtype": "Check",
+   "label": "Calculate Exact Age"
+  },
+  {
+   "fieldname": "range_order",
+   "fieldtype": "Int",
+   "label": "Range Order"
+  },
+  {
+   "fieldname": "oldserial",
+   "fieldtype": "Data",
+   "label": "OldSerial"
+  },
+  {
+   "fieldname": "from_age",
+   "fieldtype": "Int",
+   "label": "From Age"
+  },
+  {
+   "fieldname": "from_age_period",
+   "fieldtype": "Select",
+   "label": "From Age Period",
+   "options": "\nDay(s)\nMonth(s)\nYear(s)"
+  },
+  {
+   "fieldname": "to_age",
+   "fieldtype": "Int",
+   "label": "To Age"
+  },
+  {
+   "fieldname": "to_age_period",
+   "fieldtype": "Select",
+   "label": "To Age Period",
+   "options": "\nDay(s)\nMonth(s)\nYear(s)"
+  },
+  {
+   "fieldname": "min_si_value",
+   "fieldtype": "Float",
+   "label": "Min SI Value"
+  },
+  {
+   "fieldname": "max_si_value",
+   "fieldtype": "Float",
+   "label": "Max SI Value"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-07-06 22:46:57.609928",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Normal Range",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

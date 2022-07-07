@@ -22,12 +22,23 @@
   "section_break_description",
   "lab_test_description",
   "section_break_normal",
+  "default_value",
+  "required",
   "lab_test_uom",
   "secondary_uom",
-  "conversion_factor",
+  "formula",
   "column_break_10",
+  "conventional_round_digits",
+  "si_round_digits",
+  "control_type",
+  "conversion_factor",
+  "conv_integer_decimal_places",
+  "si_integer_decimal_places",
   "lab_test_normal_range",
+  "normal_range_section",
+  "attribute_normal_range",
   "section_break_compound",
+  "symbol",
   "normal_test_templates",
   "section_break_special",
   "sensitivity",
@@ -36,6 +47,7 @@
   "lab_test_groups",
   "sb_sample_collection",
   "sample",
+  "container_type",
   "sample_uom",
   "sample_qty",
   "column_break_33",
@@ -48,7 +60,56 @@
   "result_legend_section",
   "legend_print_position",
   "result_legend",
-  "change_in_item"
+  "change_in_item",
+  "section_break_41",
+  "is_anesthesia",
+  "is_consultation",
+  "service_type",
+  "code",
+  "alias",
+  "standard_code",
+  "is_standard",
+  "needs_upload",
+  "gender",
+  "speciality",
+  "process_hours",
+  "minimum_amount",
+  "printing_order",
+  "expected_tat",
+  "expected_tat_unit",
+  "is_published_online",
+  "report_code",
+  "worksheet_report_code",
+  "test_timing",
+  "manual_test_method",
+  "default_comment",
+  "instructions",
+  "medical_test_questions",
+  "accept_multi_results",
+  "is_culture_test",
+  "is_histo_test",
+  "order",
+  "mandatory",
+  "visible",
+  "is_printed",
+  "normal_range_label",
+  "print_if_empty",
+  "is_preanalytical",
+  "hide_if_empty",
+  "font_name",
+  "is_bold",
+  "print_all_normal_ranges",
+  "effective_date",
+  "expiry_date",
+  "mapping_code",
+  "normal_value",
+  "is_culture_attribute",
+  "is_antibiotic_attribute",
+  "auto_calculate_qc_range",
+  "attribute_id",
+  "form_id",
+  "form_name",
+  "medical_test_id"
  ],
  "fields": [
   {
@@ -95,8 +156,7 @@
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Department",
-   "options": "Medical Department",
-   "reqd": 1
+   "options": "Medical Department"
   },
   {
    "fieldname": "column_break_3",
@@ -108,7 +168,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Result Format",
-   "options": "\nSingle\nCompound\nDescriptive\nGrouped\nNo Result"
+   "options": "\nSingle\nMultiline\nGrouped\nCompound\nDescriptive\nNo Result"
   },
   {
    "default": "1",
@@ -158,14 +218,16 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "in_list_view": 1,
-   "label": "UOM",
+   "label": "SI Unit",
    "options": "Lab Test UOM"
   },
   {
    "fieldname": "lab_test_normal_range",
    "fieldtype": "Long Text",
+   "hidden": 1,
    "ignore_xss_filter": 1,
-   "label": "Normal Range"
+   "label": "Normal Range",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_10",
@@ -195,7 +257,7 @@
    "label": "Sensitivity"
   },
   {
-   "depends_on": "eval:doc.lab_test_template_type == 'Grouped'",
+   "depends_on": "eval:doc.lab_test_template_type == 'Grouped'||doc.lab_test_template_type == 'Multiline'",
    "fieldname": "section_break_group",
    "fieldtype": "Section Break",
    "label": "Group Tests"
@@ -203,6 +265,7 @@
   {
    "fieldname": "lab_test_groups",
    "fieldtype": "Table",
+   "label": "Group Test",
    "options": "Lab Test Group Template"
   },
   {
@@ -284,13 +347,14 @@
    "options": "Bottom\nTop\nBoth"
   },
   {
+   "depends_on": "eval:!in_list([\"Date\", \"Yes or No\", \"Drop Down List\",\"Nil\",\"Upload File\"], doc.control_type)",
    "fieldname": "secondary_uom",
    "fieldtype": "Link",
-   "label": "Secondary UOM",
+   "label": "Conventional Unit",
    "options": "Lab Test UOM"
   },
   {
-   "depends_on": "secondary_uom",
+   "depends_on": "eval:!in_list([\"Free Text\", \"Date\", \"Date\"], doc.control_type)",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "Conversion Factor",
@@ -316,10 +380,355 @@
   {
    "fieldname": "column_break_33",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_41",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_anesthesia",
+   "fieldtype": "Check",
+   "label": "Is Anesthesia"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_consultation",
+   "fieldtype": "Check",
+   "label": "Is Consultation"
+  },
+  {
+   "fieldname": "service_type",
+   "fieldtype": "Select",
+   "label": "Service Type",
+   "options": "\nSERVICE\nUSCLS\nCPT\nHCPCS\nDRUG\nDRG\nService Code"
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code"
+  },
+  {
+   "fieldname": "standard_code",
+   "fieldtype": "Data",
+   "label": "Standard Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_standard",
+   "fieldtype": "Check",
+   "label": "Is Standard"
+  },
+  {
+   "default": "0",
+   "fieldname": "needs_upload",
+   "fieldtype": "Check",
+   "label": "Needs Upload"
+  },
+  {
+   "fieldname": "alias",
+   "fieldtype": "Data",
+   "label": "Alias"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fieldname": "speciality",
+   "fieldtype": "Link",
+   "label": "Speciality",
+   "options": "Speciality"
+  },
+  {
+   "fieldname": "process_hours",
+   "fieldtype": "Float",
+   "label": "Process Hours"
+  },
+  {
+   "fieldname": "minimum_amount",
+   "fieldtype": "Float",
+   "label": "Minimum Amount"
+  },
+  {
+   "fieldname": "printing_order",
+   "fieldtype": "Data",
+   "label": "Printing Order"
+  },
+  {
+   "fieldname": "expected_tat",
+   "fieldtype": "Float",
+   "label": "Expected TAT"
+  },
+  {
+   "fieldname": "expected_tat_unit",
+   "fieldtype": "Select",
+   "label": "Expected TAT Unit",
+   "options": "\nMinute\nHour\nDay\nMonth"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_published_online",
+   "fieldtype": "Check",
+   "label": "Is Published Online"
+  },
+  {
+   "fieldname": "report_code",
+   "fieldtype": "Data",
+   "label": "Report Code"
+  },
+  {
+   "fieldname": "worksheet_report_code",
+   "fieldtype": "Data",
+   "label": "Worksheet Report Code"
+  },
+  {
+   "fieldname": "test_timing",
+   "fieldtype": "Float",
+   "label": "Test Timing"
+  },
+  {
+   "default": "DEFAULT METHOD",
+   "fieldname": "manual_test_method",
+   "fieldtype": "Data",
+   "label": "Manual Test Method"
+  },
+  {
+   "fieldname": "default_comment",
+   "fieldtype": "Small Text",
+   "label": "Default Comment"
+  },
+  {
+   "fieldname": "instructions",
+   "fieldtype": "Small Text",
+   "label": "Instructions"
+  },
+  {
+   "fieldname": "medical_test_questions",
+   "fieldtype": "Data",
+   "label": "Medical Test Questions"
+  },
+  {
+   "default": "0",
+   "fieldname": "accept_multi_results",
+   "fieldtype": "Check",
+   "label": "Accept Multi Results"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_culture_test",
+   "fieldtype": "Check",
+   "label": "Is Culture Test"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_histo_test",
+   "fieldtype": "Check",
+   "label": "Is Histo Test"
+  },
+  {
+   "fieldname": "container_type",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Container Type",
+   "options": "Container Type"
+  },
+  {
+   "fieldname": "control_type",
+   "fieldtype": "Select",
+   "label": "Control Type",
+   "options": "\nFree Text\nNumeric\nDate\nYes or No\nDrop Down List\nCheckBoxes\nRedio Buttons\nImage\nPercentage\nNil\nPlus Minus\nFormula\nRatio\nUpload File"
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Int",
+   "label": "Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "mandatory",
+   "fieldtype": "Check",
+   "label": "Mandatory"
+  },
+  {
+   "default": "0",
+   "fieldname": "visible",
+   "fieldtype": "Check",
+   "label": "Visible"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_printed",
+   "fieldtype": "Check",
+   "label": "Is Printed"
+  },
+  {
+   "fieldname": "normal_range_label",
+   "fieldtype": "Data",
+   "label": "Normal Range Label"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_preanalytical",
+   "fieldtype": "Check",
+   "label": "Is PreAnalytical"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_if_empty",
+   "fieldtype": "Check",
+   "label": "Hide If Empty"
+  },
+  {
+   "fieldname": "font_name",
+   "fieldtype": "Data",
+   "label": "Font Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_bold",
+   "fieldtype": "Check",
+   "label": "Is Bold"
+  },
+  {
+   "default": "0",
+   "fieldname": "print_all_normal_ranges",
+   "fieldtype": "Check",
+   "label": "Print All Normal Ranges"
+  },
+  {
+   "depends_on": "eval:!in_list([\"Date\", \"Yes or No\", \"Drop Down List\",\"Nil\",\"Upload File\"], doc.control_type)",
+   "fieldname": "conventional_round_digits",
+   "fieldtype": "Int",
+   "label": "Conventional Round Digits"
+  },
+  {
+   "fieldname": "effective_date",
+   "fieldtype": "Date",
+   "label": "Effective Date"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date"
+  },
+  {
+   "fieldname": "si_round_digits",
+   "fieldtype": "Int",
+   "label": "SI Round Digits"
+  },
+  {
+   "depends_on": "eval:!in_list([\"Date\", \"Yes or No\", \"Drop Down List\",\"Nil\",\"Upload File\"], doc.control_type)",
+   "fieldname": "conv_integer_decimal_places",
+   "fieldtype": "Int",
+   "label": "Conv Integer Decimal Places"
+  },
+  {
+   "fieldname": "si_integer_decimal_places",
+   "fieldtype": "Int",
+   "label": "SI Integer Decimal Places"
+  },
+  {
+   "fieldname": "mapping_code",
+   "fieldtype": "Data",
+   "label": "Mapping Code"
+  },
+  {
+   "fieldname": "normal_value",
+   "fieldtype": "Small Text",
+   "label": "Normal Value"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_calculate_qc_range",
+   "fieldtype": "Check",
+   "label": "Auto Calculate QC Range"
+  },
+  {
+   "fieldname": "symbol",
+   "fieldtype": "Data",
+   "label": "Symbol"
+  },
+  {
+   "depends_on": "eval:doc.control_type == \"Formula\"",
+   "description": "Ex: Attribute 1 Symbol + Attribute 1 Symbol",
+   "fieldname": "formula",
+   "fieldtype": "Small Text",
+   "label": "Formula"
+  },
+  {
+   "fieldname": "default_value",
+   "fieldtype": "Small Text",
+   "label": "Default Value"
+  },
+  {
+   "fieldname": "required",
+   "fieldtype": "Data",
+   "label": "Required"
+  },
+  {
+   "default": "0",
+   "fieldname": "print_if_empty",
+   "fieldtype": "Check",
+   "label": "Print If Empty"
+  },
+  {
+   "fieldname": "attribute_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Attribute ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "form_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Form ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "form_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Form Name",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_culture_attribute",
+   "fieldtype": "Check",
+   "label": "Is Culture Attribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_antibiotic_attribute",
+   "fieldtype": "Check",
+   "label": "Is Antibiotic Attribute"
+  },
+  {
+   "depends_on": "eval:doc.lab_test_template_type == 'Single'",
+   "fieldname": "normal_range_section",
+   "fieldtype": "Section Break",
+   "label": "Normal Range"
+  },
+  {
+   "fieldname": "attribute_normal_range",
+   "fieldtype": "Table",
+   "label": "Attribute Normal Range",
+   "options": "Attribute Normal Range"
+  },
+  {
+   "fieldname": "medical_test_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Medical Test ID",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-07-30 14:32:40.449818",
+ "modified": "2022-07-07 09:13:16.660242",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

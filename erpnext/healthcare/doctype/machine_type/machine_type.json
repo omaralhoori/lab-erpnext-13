@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:machine_name",
+ "creation": "2022-07-03 11:38:09.468944",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "machine_name",
+  "disable",
+  "section_break_3",
+  "communication_standard_type",
+  "column_break_5",
+  "communication_standard_format",
+  "column_break_7",
+  "functional_type",
+  "column_break_9",
+  "connection_type",
+  "section_break_9",
+  "lab_list_time_out",
+  "column_break_13",
+  "lab_list_maximum_number",
+  "section_break_14",
+  "barcode_type",
+  "column_break_17",
+  "barcode_length",
+  "section_break_17",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disable",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Disable"
+  },
+  {
+   "fieldname": "communication_standard_type",
+   "fieldtype": "Data",
+   "label": "Communication Standard Type"
+  },
+  {
+   "fieldname": "communication_standard_format",
+   "fieldtype": "Data",
+   "label": "Communication Standard Format"
+  },
+  {
+   "fieldname": "functional_type",
+   "fieldtype": "Data",
+   "label": "Functional Type"
+  },
+  {
+   "fieldname": "lab_list_time_out",
+   "fieldtype": "Int",
+   "label": "Lab List Time Out"
+  },
+  {
+   "fieldname": "lab_list_maximum_number",
+   "fieldtype": "Int",
+   "label": "Lab List Maximum Number"
+  },
+  {
+   "fieldname": "barcode_type",
+   "fieldtype": "Select",
+   "label": "Barcode Type",
+   "options": "\nEAN\nUPC-A"
+  },
+  {
+   "fieldname": "barcode_length",
+   "fieldtype": "Data",
+   "label": "Barcode Length"
+  },
+  {
+   "fieldname": "connection_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Connection Type"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-07-03 11:56:19.702082",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Machine Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "machine_name",
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

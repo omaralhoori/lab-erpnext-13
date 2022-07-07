@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-07-06 22:40:02.246473",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "normal_range_id",
+  "range_type",
+  "gender",
+  "criteria_text",
+  "range_text",
+  "si_range_text"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "normal_range_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Normal Range ID",
+   "options": "Normal Range",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "normal_range_id.range_type",
+   "fieldname": "range_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Range Type",
+   "options": "All\nConfirmation\nMachineEdge\nNormal\nPanic\nQC Level1\nQC Level2\nQC Level1 Mean\nQC Level2 Mean\nQC Level3\nQC Level3 Mean",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "normal_range_id.gender",
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Gender",
+   "options": "Gender",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "normal_range_id.criteria_text",
+   "fieldname": "criteria_text",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Criteria Text",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "normal_range_id.range_text",
+   "fieldname": "range_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Range Text",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "normal_range_id.si_range_text",
+   "fieldname": "si_range_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "SI Range Text",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-07-06 22:44:21.593778",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Attribute Normal Range",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

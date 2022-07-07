@@ -4,14 +4,17 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:sample",
- "beta": 1,
  "creation": "2016-04-04 17:35:44.823951",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
   "sample",
-  "sample_uom"
+  "max_temperature",
+  "min_temperature",
+  "validity_hours",
+  "sample_uom",
+  "oldserial"
  ],
  "fields": [
   {
@@ -29,10 +32,33 @@
    "in_list_view": 1,
    "label": "UOM",
    "options": "Lab Test UOM"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "max_temperature",
+   "fieldtype": "Float",
+   "label": "Max Temperature"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "min_temperature",
+   "fieldtype": "Float",
+   "label": "Min Temperature"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "validity_hours",
+   "fieldtype": "Float",
+   "label": "Validity Hours"
+  },
+  {
+   "fieldname": "oldserial",
+   "fieldtype": "Data",
+   "label": "OldSerial"
   }
  ],
  "links": [],
- "modified": "2022-06-09 19:37:33.047913",
+ "modified": "2022-07-05 07:30:50.352405",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Sample",
