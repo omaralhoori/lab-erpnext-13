@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <div class="print-format-gutter">
+        <div class="print-format">
+            {{ body }}
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const page_div = document.querySelector('.page-break');
+    
+            page_div.style.display = 'flex';
+            page_div.style.flexDirection = 'column';
+    
+            const footer_html = document.getElementById('footer-html');
+            footer_html.classList.add('hidden-pdf');
+            footer_html.classList.remove('visible-pdf');
+            footer_html.style.order = 1;
+            footer_html.style.marginTop = '20px';
+        });
+    
+    
+            //allow wrapping of long tr
+            var elements = document.getElementsByTagName("tr");
+            var i = elements.length;
+            while (i--) {
+                if(elements[i].clientHeight>300){
+                    elements[i].setAttribute("style", "page-break-inside: auto;");
+                }
+            }
+    
+            //window.print();
+    
+            // close the window after print
+            // NOTE: doesn't close if print is cancelled in Chrome
+            // Changed timeout to 5s from 1s because it blocked mobile view rendering
+            // setTimeout(function() {
+            //     window.close();
+            // }, 5000);
+    </script>
+</body>
+</html>

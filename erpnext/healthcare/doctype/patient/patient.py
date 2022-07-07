@@ -248,7 +248,7 @@ def qrcode_gen(customer_password,docname):
 	qrpath = '/public/files/patientqrcode/' + nyear + '/' + nmonth + '/'
 	qrpath_db = '/files/patientqrcode/' + nyear + '/' + nmonth + '/' + codname
 
-	frappe.utils.generate_qrcode(frappe.db.get_single_value("Healthcare Settings", "result_url"),codname,qrpath)
+	frappe.utils.generate_qrcode(frappe.db.get_single_value("Healthcare Settings", "result_url"),codname,qrpath, '', 'test-result')
 	frappe.db.set_value("Patient", {"name": docname}, "qrcode_path", qrpath_db)
 
 def create_customer(doc):

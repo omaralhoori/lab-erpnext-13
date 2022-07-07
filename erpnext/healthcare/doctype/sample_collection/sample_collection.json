@@ -27,7 +27,8 @@
   "sample_details",
   "amended_from",
   "sales_invoice",
-  "num_print"
+  "num_print",
+  "collection_serial"
  ],
  "fields": [
   {
@@ -169,7 +170,7 @@
    "options": "Sample Collection Detail"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "num_print",
    "fieldtype": "Int",
    "label": "No. Print"
@@ -184,11 +185,18 @@
    "fieldtype": "Table",
    "label": "Lab Test Templates",
    "options": "Lab Test Template Table"
+  },
+  {
+   "fieldname": "collection_serial",
+   "fieldtype": "Data",
+   "label": "Collection Series",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-05 11:17:34.751645",
+ "modified": "2022-07-07 11:19:42.670818",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
