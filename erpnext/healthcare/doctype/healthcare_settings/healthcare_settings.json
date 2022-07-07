@@ -32,6 +32,9 @@
   "match_fingerprints_only",
   "matching_accuracy",
   "selecting_method",
+  "lab_test_result_settings_section",
+  "result_url",
+  "show_all_results",
   "sb_in_ac",
   "income_account",
   "receivable_account",
@@ -47,6 +50,7 @@
   "remind_before",
   "sb_lab_settings",
   "create_lab_test_on_si_submit",
+  "create_lab_test_separated",
   "create_sample_collection_for_lab_test",
   "column_break_34",
   "lab_test_approval_required",
@@ -367,11 +371,35 @@
    "fieldname": "web_api_licence",
    "fieldtype": "Data",
    "label": "Web Api Licence "
+  },
+  {
+   "default": "0",
+   "fieldname": "create_lab_test_separated",
+   "fieldtype": "Check",
+   "label": "Create Lab Test Separately"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "lab_test_result_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Lab Test Result Settings"
+  },
+  {
+   "fieldname": "result_url",
+   "fieldtype": "Data",
+   "label": "Result Url"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this will allow the patient to see all his tests.",
+   "fieldname": "show_all_results",
+   "fieldtype": "Check",
+   "label": "Show All Results"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-06-28 10:57:09.559758",
+ "modified": "2022-07-06 23:10:52.813985",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

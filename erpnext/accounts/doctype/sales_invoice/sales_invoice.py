@@ -1025,6 +1025,15 @@ class SalesInvoice(SellingController):
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
+	def get_qrcode(self):
+		code_path = ""
+		patient = frappe.get_doc("Patient", self.patient)
+		if patient:
+			if not patient.qrcode_path or patient.qrcode_path == "":
+				patient.generate_qrcode()
+			code_path = patient.qrcode_path
+		return code_path
+
 	def get_asset(self, item):
 		if item.get('asset'):
 			asset = frappe.get_doc("Asset", item.asset)

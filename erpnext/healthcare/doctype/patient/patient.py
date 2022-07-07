@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import os
 
 import dateutil
-import frappe
+import frappe, random
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.contacts.doctype.contact.contact import get_default_contact
@@ -14,7 +14,7 @@ from frappe.model.document import Document
 from frappe.model.naming import set_name_by_naming_series
 from frappe.utils import cint, cstr, getdate
 from frappe.utils.nestedset import get_root_of
-
+from frappe.model.naming import make_autoname
 from erpnext import get_default_currency
 from erpnext.accounts.party import get_dashboard_info
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
@@ -34,14 +34,27 @@ class Patient(Document):
 		self.set_full_name()
 
 	def before_insert(self):
+		self.create_random_password()
+		format_ser = "PTN" + ".####"
+		prg_serial = make_autoname(format_ser)
+		self.patient_number = prg_serial
 		self.set_missing_customer_details()
 
 	def after_insert(self):
+		self.generate_qrcode()
 		if frappe.db.get_single_value('Healthcare Settings', 'collect_registration_fee'):
 			frappe.db.set_value('Patient', self.name, 'status', 'Disabled')
 		else:
 			send_registration_sms(self)
 		self.reload()
+	def create_random_password(self):
+		if not self.patient_password or self.patient_password == "":
+			self.patient_password = random.randrange(1234567, 9876543)
+
+	def generate_qrcode(self):
+		self.create_random_password()
+		qrcode_gen(str(self.patient_password), self.name)
+		frappe.db.commit()
 
 	def on_update(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
@@ -225,6 +238,18 @@ class Patient(Document):
 		contact.flags.skip_patient_update = True
 		contact.save(ignore_permissions=True)
 
+
+@frappe.whitelist()
+def qrcode_gen(customer_password,docname):
+	codname = customer_password + '_' + docname 
+
+	nyear= frappe.utils.now_datetime().strftime('%Y')
+	nmonth= frappe.utils.now_datetime().strftime('%m')
+	qrpath = '/public/files/patientqrcode/' + nyear + '/' + nmonth + '/'
+	qrpath_db = '/files/patientqrcode/' + nyear + '/' + nmonth + '/' + codname
+
+	frappe.utils.generate_qrcode(frappe.db.get_single_value("Healthcare Settings", "result_url"),codname,qrpath, '', 'test-result')
+	frappe.db.set_value("Patient", {"name": docname}, "qrcode_path", qrpath_db)
 
 def create_customer(doc):
 	customer = frappe.get_doc({

@@ -13,6 +13,7 @@
  "field_order": [
   "basic_info",
   "naming_series",
+  "patient_number",
   "first_name",
   "middle_name",
   "last_name",
@@ -33,6 +34,7 @@
   "email",
   "invite_user",
   "user_id",
+  "patient_password",
   "address_contacts",
   "address_html",
   "column_break_22",
@@ -68,7 +70,8 @@
   "surrounding_factors",
   "other_risk_factors",
   "more_info",
-  "patient_details"
+  "patient_details",
+  "qrcode_path"
  ],
  "fields": [
   {
@@ -449,7 +452,7 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "default": "1",
+   "default": "0",
    "fieldname": "invite_user",
    "fieldtype": "Check",
    "label": "Invite as User",
@@ -483,13 +486,34 @@
    "fieldtype": "Table",
    "label": "Fingerprints",
    "options": "Patient Fingerprint"
+  },
+  {
+   "fieldname": "patient_password",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Patient Password",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_number",
+   "fieldtype": "Data",
+   "label": "Patient Number",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "qrcode_path",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "QR Code Path",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-06-28 14:24:51.031508",
+ "modified": "2022-07-06 11:43:09.978773",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

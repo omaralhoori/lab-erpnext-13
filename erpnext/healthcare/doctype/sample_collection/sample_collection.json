@@ -19,18 +19,16 @@
   "inpatient_record",
   "company",
   "invoiced",
+  "test_templates_section",
+  "lab_test_templates",
   "section_break_6",
-  "sample",
-  "sample_uom",
-  "sample_qty",
-  "column_break_10",
-  "collected_by",
-  "collected_time",
-  "num_print",
+  "sample_collection_detail",
   "section_break_15",
   "sample_details",
   "amended_from",
-  "sales_invoice"
+  "sales_invoice",
+  "num_print",
+  "collection_serial"
  ],
  "fields": [
   {
@@ -49,9 +47,10 @@
    "fieldtype": "Select",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_list_view": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "HLC-SC-.YYYY.-",
+   "options": "SC-",
    "print_hide": 1,
    "reqd": 1
   },
@@ -73,6 +72,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
@@ -120,63 +120,6 @@
    "label": "Sample Details"
   },
   {
-   "fieldname": "sample",
-   "fieldtype": "Link",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "ignore_user_permissions": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Sample",
-   "options": "Lab Test Sample",
-   "reqd": 1,
-   "search_index": 1
-  },
-  {
-   "fetch_from": "sample.sample_uom",
-   "fieldname": "sample_uom",
-   "fieldtype": "Data",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "in_list_view": 1,
-   "label": "UOM",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break",
-   "hide_days": 1,
-   "hide_seconds": 1
-  },
-  {
-   "fieldname": "collected_by",
-   "fieldtype": "Link",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "ignore_user_permissions": 1,
-   "label": "Collected By",
-   "options": "User"
-  },
-  {
-   "fieldname": "collected_time",
-   "fieldtype": "Datetime",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Collected On"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "1",
-   "description": "Number of prints required for labelling the samples",
-   "fieldname": "num_print",
-   "fieldtype": "Int",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "No. of prints",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -192,15 +135,6 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "sample_qty",
-   "fieldtype": "Float",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "in_list_view": 1,
-   "label": "Quantity"
   },
   {
    "fieldname": "sample_details",
@@ -228,11 +162,41 @@
    "label": "Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "sample_collection_detail",
+   "fieldtype": "Table",
+   "label": "Sample Collection Details",
+   "options": "Sample Collection Detail"
+  },
+  {
+   "default": "1",
+   "fieldname": "num_print",
+   "fieldtype": "Int",
+   "label": "No. Print"
+  },
+  {
+   "fieldname": "test_templates_section",
+   "fieldtype": "Section Break",
+   "label": "Test Templates"
+  },
+  {
+   "fieldname": "lab_test_templates",
+   "fieldtype": "Table",
+   "label": "Lab Test Templates",
+   "options": "Lab Test Template Table"
+  },
+  {
+   "fieldname": "collection_serial",
+   "fieldtype": "Data",
+   "label": "Collection Series",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-29 16:33:44.662821",
+ "modified": "2022-07-07 11:19:42.670818",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
@@ -254,7 +218,7 @@
   }
  ],
  "restrict_to_domain": "Healthcare",
- "search_fields": "patient, sample",
+ "search_fields": "patient, sales_invoice",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
