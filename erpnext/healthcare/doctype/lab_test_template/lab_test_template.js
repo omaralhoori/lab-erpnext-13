@@ -10,13 +10,34 @@ frappe.ui.form.on('Lab Test Template', {
 	},
 	refresh : function(frm) {
 		// Restrict Special, Grouped type templates in Child Test Groups
-		frm.set_query('lab_test_template', 'lab_test_groups', function() {
-			return {
-				filters: {
-					lab_test_template_type: ['in', ['Single','Compound']]
-				}
-			};
-		});
+		if (frm.doc.lab_test_template_type == 'Multiline'){
+			frm.set_query('lab_test_template', 'lab_test_groups', function() {
+				return {
+					filters: {
+						 //lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+						lab_test_template_type: ['in', ['Single']]
+					}
+				};
+			});
+		}else if (frm.doc.lab_test_template_type == 'Grouped'){
+			frm.set_query('lab_test_template', 'lab_test_groups', function() {
+				return {
+					filters: {
+						 //lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+						lab_test_template_type: ['in', ['Multiline','Grouped']]
+					}
+				};
+			});
+		}else{
+			frm.set_query('lab_test_template', 'lab_test_groups', function() {
+				return {
+					filters: {
+						 //lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+						lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+					}
+				};
+			});
+		}
 	},
 	medical_code: function(frm) {
 		frm.set_query('medical_code', function() {
@@ -26,6 +47,37 @@ frappe.ui.form.on('Lab Test Template', {
 				}
 			};
 		});
+	},
+	lab_test_template_type:function(frm) {
+		// Restrict Special, Grouped type templates in Child Test Groups
+		if (frm.doc.lab_test_template_type == 'Multiline'){
+			frm.set_query('lab_test_template', 'lab_test_groups', function() {
+				return {
+					filters: {
+						 //lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+						lab_test_template_type: ['in', ['Single']]
+					}
+				};
+			});
+		}else if (frm.doc.lab_test_template_type == 'Grouped'){
+			frm.set_query('lab_test_template', 'lab_test_groups', function() {
+				return {
+					filters: {
+						 //lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+						lab_test_template_type: ['in', ['Multiline','Grouped']]
+					}
+				};
+			});
+		}else{
+			frm.set_query('lab_test_template', 'lab_test_groups', function() {
+				return {
+					filters: {
+						 //lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+						lab_test_template_type: ['in', ['Single','Multiline','Compound']]
+					}
+				};
+			});
+		}
 	}
 });
 

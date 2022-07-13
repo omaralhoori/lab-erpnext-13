@@ -13,6 +13,8 @@
   "basic_info",
   "naming_series",
   "supplier_name",
+  "supplier_no",
+  "supplier_oldid",
   "country",
   "default_bank_account",
   "tax_id",
@@ -426,6 +428,17 @@
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
    "options": "Address"
+  },
+  {
+   "fieldname": "supplier_no",
+   "fieldtype": "Data",
+   "label": "Supplier No"
+  },
+  {
+   "fieldname": "supplier_oldid",
+   "fieldtype": "Data",
+   "label": "Supplier OldID",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
@@ -438,7 +451,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-09-06 17:37:56.522233",
+ "modified": "2022-07-12 13:29:56.020520",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

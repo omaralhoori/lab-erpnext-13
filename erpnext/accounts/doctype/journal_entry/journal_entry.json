@@ -11,6 +11,7 @@
   "entry_type_and_date",
   "title",
   "voucher_type",
+  "sub_type",
   "naming_series",
   "finance_book",
   "tax_withholding_category",
@@ -61,7 +62,9 @@
   "stock_entry",
   "subscription_section",
   "auto_repeat",
-  "amended_from"
+  "amended_from",
+  "oldid",
+  "oldserial"
  ],
  "fields": [
   {
@@ -97,7 +100,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "ACC-JV-.YYYY.-",
+   "options": "JV-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -515,17 +518,35 @@
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Apply Tax Withholding Amount "
+  },
+  {
+   "depends_on": "eval:doc.voucher_type=='Journal Entry'",
+   "fieldname": "sub_type",
+   "fieldtype": "Select",
+   "label": "Sub Type",
+   "options": "Journal Entry\nBill\nInvoice\nPayment Voucher\nReceipt Voucher"
+  },
+  {
+   "fieldname": "oldid",
+   "fieldtype": "Data",
+   "label": "OldID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "oldserial",
+   "fieldtype": "Data",
+   "label": "OldSerial",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-09 15:31:14.484029",
+ "modified": "2022-07-13 19:29:35.944188",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

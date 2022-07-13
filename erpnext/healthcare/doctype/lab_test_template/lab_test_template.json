@@ -109,7 +109,8 @@
   "attribute_id",
   "form_id",
   "form_name",
-  "medical_test_id"
+  "medical_test_id",
+  "medical_service_id"
  ],
  "fields": [
   {
@@ -163,9 +164,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "<b>Single</b>: Results which require only a single input.\n<br>\n<b>Compound</b>: Results which require multiple event inputs.\n<br>\n<b>Descriptive</b>: Tests which have multiple result components with manual result entry.\n<br>\n<b>Grouped</b>: Test templates which are a group of other test templates.\n<br>\n<b>No Result</b>: Tests with no results, can be ordered and billed but no Lab Test will be created. e.g.. Sub Tests for Grouped results",
+   "description": "<b>Single</b>: Results which require only a single input.\n<br>\n<b>Multiline</b>: Test templates which are a group of other Single test templates.\n<br>\n<b>Grouped</b>: Test templates which are a group of other test templates.\n<br>\n<b>Compound</b>: Results which require multiple event inputs.\n<br>\n<b>Descriptive</b>: Tests which have multiple result components with manual result entry.\n<br>\n<b>No Result</b>: Tests with no results, can be ordered and billed but no Lab Test will be created. e.g.. Sub Tests for Grouped results",
    "fieldname": "lab_test_template_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Result Format",
    "options": "\nSingle\nMultiline\nGrouped\nCompound\nDescriptive\nNo Result"
@@ -725,10 +727,15 @@
    "hidden": 1,
    "label": "Medical Test ID",
    "read_only": 1
+  },
+  {
+   "fieldname": "medical_service_id",
+   "fieldtype": "Data",
+   "label": "Medical Service ID"
   }
  ],
  "links": [],
- "modified": "2022-07-07 20:26:15.625672",
+ "modified": "2022-07-10 08:15:41.449784",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
