@@ -16,12 +16,14 @@
   "customer_name",
   "gender",
   "customer_number",
-  "customer_oldid",
   "customer_type",
   "coverage_percentage",
+  "is_child_customer",
+  "parent_customer",
+  "customer_mobile_no",
+  "national_id",
+  "country",
   "pan",
-  "tax_withholding_category",
-  "default_bank_account",
   "lead_name",
   "opportunity_name",
   "image",
@@ -30,12 +32,16 @@
   "customer_group",
   "territory",
   "tax_id",
+  "tax_withholding_category",
+  "default_bank_account",
   "tax_category",
   "so_required",
   "dn_required",
   "disabled",
   "is_internal_customer",
   "represents_company",
+  "customer_oldid",
+  "customer_oldinsuranceid",
   "allowed_to_transact_section",
   "companies",
   "currency_and_price_list",
@@ -119,13 +125,14 @@
    "options": "Gender"
   },
   {
+   "allow_in_quick_entry": 1,
    "default": "Company",
    "fieldname": "customer_type",
    "fieldtype": "Select",
    "label": "Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual\nPayer\nInsurance Company",
+   "options": "Company\nIndividual\nPayer\nInsurance Company\nInsurance Company Parties\nLoyalty",
    "reqd": 1
   },
   {
@@ -233,7 +240,6 @@
    "options": "Allowed To Transact With"
   },
   {
-   "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List"
@@ -523,8 +529,43 @@
   {
    "fieldname": "customer_oldid",
    "fieldtype": "Data",
-   "label": "Customer OldID",
-   "read_only": 1
+   "label": "Customer OldID"
+  },
+  {
+   "fieldname": "customer_mobile_no",
+   "fieldtype": "Data",
+   "label": "Customer Mobile No"
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "label": "National ID"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "0",
+   "fieldname": "is_child_customer",
+   "fieldtype": "Check",
+   "label": "Is Child Customer"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "is_child_customer",
+   "fieldname": "parent_customer",
+   "fieldtype": "Link",
+   "label": "Parent Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "customer_oldinsuranceid",
+   "fieldtype": "Data",
+   "label": "Customer OldInsuranceID"
   }
  ],
  "icon": "fa fa-user",
@@ -538,7 +579,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-11 20:41:04.662143",
+ "modified": "2022-07-13 23:32:53.322348",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
