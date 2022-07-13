@@ -262,7 +262,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			concat(substr(tabItem.description, 1, 40), "..."), description) as description
 		{columns}
 		from tabItem
+		INNER JOIN ( SELECT item as template_item, lab_test_template_type from `tabLab Test Template` ) as ltt ON ltt.template_item=name
 		where tabItem.docstatus < 2
+			and lab_test_template_type!='Single'
 			and tabItem.disabled=0
 			and tabItem.has_variants=0
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')

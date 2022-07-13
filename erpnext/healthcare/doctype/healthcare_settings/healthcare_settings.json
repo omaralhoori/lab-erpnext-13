@@ -35,6 +35,8 @@
   "lab_test_result_settings_section",
   "result_url",
   "show_all_results",
+  "column_break_30",
+  "result_sms_message",
   "sb_in_ac",
   "income_account",
   "receivable_account",
@@ -395,11 +397,20 @@
    "fieldname": "show_all_results",
    "fieldtype": "Check",
    "label": "Show All Results"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "result_sms_message",
+   "fieldtype": "Small Text",
+   "label": "Result SMS Message"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-07-06 23:10:52.813985",
+ "modified": "2022-07-09 01:41:09.458256",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

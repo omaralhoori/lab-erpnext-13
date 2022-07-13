@@ -54,6 +54,7 @@
   "insurance_party_type",
   "insurance_party",
   "coverage_percentage",
+  "sms_to_payer",
   "get_items_from_party",
   "column_break_48",
   "currency",
@@ -2077,6 +2078,14 @@
    "fieldname": "form_no",
    "fieldtype": "Data",
    "label": "Form No"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.insurance_party != null && doc.insurance_party != \"\"",
+   "description": "Enabling this will send result message to payer instead of patient.",
+   "fieldname": "sms_to_payer",
+   "fieldtype": "Check",
+   "label": "Send SMS to Payer"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2089,7 +2098,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-06 21:17:45.542170",
+ "modified": "2022-07-08 18:22:12.546801",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
