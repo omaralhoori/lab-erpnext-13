@@ -268,6 +268,9 @@ def create_normals(template, lab_test, group_template=None):
 	normal.require_result_value = 1
 	normal.allow_blank = 0
 	normal.template = template.name
+	normal.report_code = template.worksheet_report_code
+	if group_template and not  template.worksheet_report_code:
+		normal.report_code = group_template.worksheet_report_code
 
 def create_compounds(template, lab_test, is_group):
 	lab_test.normal_toggle = 1
@@ -348,7 +351,6 @@ def create_sample_doc(template, patient, invoice, company = None):
 			# sample_collection.sample_qty = template.sample_qty
 			test_template = sample_collection.append("lab_test_templates")
 			test_template.template = template.name
-
 			if template.lab_test_template_type == "Single":
 				create_template_sample(template, sample_collection)
 			elif template.lab_test_template_type == "Multiline":
@@ -400,8 +402,8 @@ def add_template_sample(template, sample_collection):
 			qty = template.sample_qty or 1
 			quantity = int(sample_detail.sample_qty) + int(qty)
 			sample_detail.sample_qty = quantity
-			sample_detail.num_print = int(sample_detail.num_print) + 1
-			sample_collection.num_print = int(sample_collection.num_print) + 1
+			sample_detail.num_print = int(sample_detail.num_print or 1) + 1
+			sample_collection.num_print = int(sample_collection.num_print or 1) + 1
 			template_found = True
 			break
 	if not template_found:
@@ -411,9 +413,15 @@ def add_template_sample(template, sample_collection):
 		sample_detail.sample_qty = template.sample_qty or 1
 		sample_collection.num_print = int(sample_collection.num_print) + 1
 
-def create_sample_collection(lab_test, template, patient, invoice):
-	if frappe.get_cached_value('Healthcare Settings', None, 'create_sample_collection_for_lab_test'):
-		sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
+def create_sample_collection(lab_test, template, patient, invoice, depth=1):
+	if depth < 4 and frappe.get_cached_value('Healthcare Settings', None, 'create_sample_collection_for_lab_test'):
+		sample_collection = None
+		if template.lab_test_template_type == "Grouped":
+			for group_item in template.lab_test_groups:
+				group_template = frappe.get_doc("Lab Test Template", group_item.lab_test_template)
+				lab_test = create_sample_collection(lab_test, group_template, patient, invoice, depth + 1)#create_sample_doc(group_template, patient, invoice, lab_test.company)
+		else:
+			sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
 		if sample_collection:
 			lab_test.sample = sample_collection.name
 			sample_collection_doc = get_link_to_form('Sample Collection', sample_collection.name)
@@ -421,7 +429,8 @@ def create_sample_collection(lab_test, template, patient, invoice):
 				title=_('Sample Collection'), indicator='green')
 	return lab_test
 
-def load_result_format(lab_test, template, prescription, invoice):
+def load_result_format(lab_test, template, prescription, invoice, depth=1):
+	if depth > 3 : return lab_test
 	if template.lab_test_template_type == 'Single':
 		create_normals(template, lab_test)
 
@@ -438,7 +447,8 @@ def load_result_format(lab_test, template, prescription, invoice):
 		for lab_test_group in template.lab_test_groups:
 			if lab_test_group.lab_test_template:
 				template_in_group = frappe.get_doc('Lab Test Template', lab_test_group.lab_test_template)
-				create_multiline_normals(template_in_group, lab_test)
+				#create_multiline_normals(template_in_group, lab_test)
+				lab_test = load_result_format(lab_test, template_in_group, prescription, invoice, depth + 1)
 
 	if template.lab_test_template_type != 'No Result':
 		if prescription:

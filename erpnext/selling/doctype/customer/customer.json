@@ -15,6 +15,8 @@
   "salutation",
   "customer_name",
   "gender",
+  "customer_number",
+  "customer_oldid",
   "customer_type",
   "coverage_percentage",
   "pan",
@@ -512,6 +514,17 @@
    "fieldname": "coverage_percentage",
    "fieldtype": "Float",
    "label": "Coverage Percentage"
+  },
+  {
+   "fieldname": "customer_number",
+   "fieldtype": "Data",
+   "label": "Customer Number"
+  },
+  {
+   "fieldname": "customer_oldid",
+   "fieldtype": "Data",
+   "label": "Customer OldID",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
@@ -525,7 +538,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-06-08 22:07:02.151986",
+ "modified": "2022-07-11 20:41:04.662143",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
