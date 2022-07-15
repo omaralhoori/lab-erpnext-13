@@ -1,0 +1,140 @@
+<style>
+    table {
+        width: 100%;
+    }
+    .width-50{
+        width:50%;
+    }
+    .width-25{
+        width: 25%;
+    }
+    .width-100{
+        width: 100%;
+    }
+    .red{
+        color: red;
+    }
+    .b-bottom{
+        border-bottom: 1px solid;
+    }
+    .center{
+        text-align: center;
+    }
+
+    @media screen {
+    body{
+        padding: 10px 30px;
+    }
+  div.divFooter {
+    display: none;
+  }
+  .download-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px
+  }
+}
+@media print {
+  div.divFooter {
+    position: fixed;
+    bottom: 0;
+    text-align:left;
+    border-top: 1px solid;
+    width: 100%;
+    padding-top: 3px;
+  }
+  div.divFooter img{
+    position: absolute;
+    width: 80px;
+    height: 40px;
+    right: 10px;
+    top: 5px;
+  }
+  .download-btn {
+    display: none;
+  }
+}
+
+</style>
+
+<div class="header-html" id="header-html">
+    <table>
+    <tr>
+        <td class="center">
+            <img height="160" src="{{frappe.utils.get_url()}}/files/josante-logo.png" alt="josante_logo">
+        </td>
+    </tr>
+    <tr>
+        <td class="b-bottom">
+            <table>
+                <tr>
+                    <td class="width-50">
+                        <table>
+                            <tr>
+                                <td>
+                                    Patient Name
+                                </td>
+                                <td>
+                                    : <span class="red">{{ patient_name }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>File No</td>
+                                <td>: {{ patient_number }}</td>
+                            </tr>
+                            <tr>
+                                <td>Visit No. </td>
+                                <td>: {{ sales_invoice }}</td>
+                            </tr>
+                            <tr>
+                                <td>Consultant</td>
+                                <td>: {{ practitioner_name or 'outpatient Doctor' }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td class="width-50">
+                        <table>
+                            <tr><td>
+                                Age
+                            </td>
+                            <td>
+                                : {{ patient_age }}
+                            </td></tr>
+                            <tr>
+                                <td>Gender</td>
+                    <td>: {{ patient_gender }}</td>
+                            </tr>
+                            <tr>
+                                <td>External No.</td>
+                                <td>: </td>
+                            </tr>
+                            <tr>
+                                <td>Sample Date</td>
+                    <td>: {{ frappe.utils.get_datetime(sample_date).strftime("%d/%m/%Y %r",) }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                    
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr  >
+        <td class="b-bottom">
+            <table>
+                <tr>
+                    <td class="width-50">
+                        Laboratory Result
+                    </td>
+                    <td class="width-25">
+                        SI Units
+                    </td>
+                    <td class="width-25">
+                        Conventional Units 
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</div>

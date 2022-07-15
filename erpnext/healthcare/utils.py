@@ -799,3 +799,8 @@ def update_patient_email_and_phone_numbers(contact, method):
 
 			if new_contact_details:
 				frappe.db.set_value('Patient', link.get('link_name'), new_contact_details)
+
+
+@frappe.whitelist()
+def is_embassy():
+	return frappe.local.conf.is_embassy

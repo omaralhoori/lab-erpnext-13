@@ -1,3 +1,6 @@
+<!doctype html>
+<html>
+<head>
 <style>
     table {
         width: 100%;
@@ -28,6 +31,16 @@
   div.divFooter {
     display: none;
   }
+  .download-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px
+  }
+  .print-btn {
+    position: absolute;
+    top: 10px;
+    right: 60px
+  }
 }
 @media print {
   div.divFooter {
@@ -37,6 +50,7 @@
     border-top: 1px solid;
     width: 100%;
     padding-top: 3px;
+    display: none;
   }
   div.divFooter img{
     position: absolute;
@@ -45,120 +59,223 @@
     right: 10px;
     top: 5px;
   }
+  .header-html {
+    position: fixed;
+    top: 0;
+    
+  }
+  .download-btn {
+    display: none;
+  }
+  .print-btn {
+    display: none;
+  }
+
 }
     
 </style>
-
+</head>
+<body>
 <table>
     <thead>
-        <tr>
-            <td class="center">
-                <img height="160" src="/files/josante-logo.png" alt="josante_logo">
-            </td>
-        </tr>
-        <tr>
-            <td class="b-bottom">
-                <table>
-                    <tr>
-                        <td class="width-50">
-                            <table>
-                                <tr>
-                                    <td>
-                                        Patient Name
+        <table>
+            <tr>
+                <td class="center">
+                    <img height="160" src="{{frappe.utils.get_url()}}/files/josante-logo.png" alt="josante_logo">
+                </td>
+            </tr>
+            <tr>
+                <td class="b-bottom">
+                    <table>
+                        <tr>
+                            <td class="width-50">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            Patient Name
+                                        </td>
+                                        <td>
+                                            : <span class="red">{{ patient_name }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>File No</td>
+                                        <td>: {{ patient_number }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Visit No. </td>
+                                        <td>: {{ sales_invoice }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Consultant</td>
+                                        <td>: {{ practitioner_name or 'outpatient Doctor' }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td class="width-50">
+                                <table>
+                                    <tr><td>
+                                        Age
                                     </td>
                                     <td>
-                                        : <span class="red">{{ patient_name }}</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>File No</td>
-                                    <td>: {{ patient_number }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Visit No. </td>
-                                    <td>: {{ sales_invoice }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Consultant</td>
-                                    <td>: {{ practitioner_name }}</td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td class="width-50">
-                            <table>
-                                <tr><td>
-                                    Age
-                                </td>
-                                <td>
-                                    : {{ patient_age }}
-                                </td></tr>
-                                <tr>
-                                    <td>Gender</td>
-                        <td>: {{ patient_gender }}</td>
-                                </tr>
-                                <tr>
-                                    <td>External No.</td>
-                                    <td>: </td>
-                                </tr>
-                                <tr>
-                                    <td>Sample Date</td>
-                        <td>: {{ frappe.utils.get_datetime(sample_date).strftime("%d/%m/%Y %r",) }}</td>
-                                </tr>
-                            </table>
-                        </td>
-                        
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr  >
-            <td class="b-bottom">
-                <table>
-                    <tr>
-                        <td class="width-50">
-                            Laboratory Result
-                        </td>
-                        <td class="width-25">
-                            SI Units
-                        </td>
-                        <td class="width-25">
-                            Conventional Units 
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
+                                        : {{ patient_age }}
+                                    </td></tr>
+                                    <tr>
+                                        <td>Gender</td>
+                            <td>: {{ patient_gender }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>External No.</td>
+                                        <td>: </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sample Date</td>
+                            <td>: {{ frappe.utils.get_datetime(sample_date).strftime("%d/%m/%Y %r",) }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- <tr  >
+                <td class="b-bottom">
+                    <table>
+                        <tr>
+                            <td class="width-50">
+                                Laboratory Result
+                            </td>
+                            <td class="width-25">
+                                SI Units
+                            </td>
+                            <td class="width-25">
+                                Conventional Units 
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr> -->
+        </table>
     </thead>
     <tbody>
         <table>
-            {% for test_result in results %}
+            {% for report_code, test_results in results.items() %}
+            <tr  >
+                <td class="b-bottom"  {% if loop.index > 1 %}  style="padding-top: 30px" {% endif %}>
+                    <table>
+                        <tr>
+                            <td class="width-50">
+                                Laboratory Result
+                            </td>
+                            <td class="width-25">
+                                SI Units
+                            </td>
+                            <td class="width-25">
+                                Conventional Units 
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            {% for test_result in test_results %}
+                {% if test_result['lab_test_uom'] or test_result['si_unit_name'] %}
                 <tr >
                     <td class="b-bottom" style="padding: 5px">
                         <table>
                             <tr>
-                                <td class="width-50">
+                                <td class="width-50" style="padding-bottom: 15px">
                                     {{ test_result['lab_test_name'] }}
                                 </td>
                                 <td class="width-25">
-                                    {{ test_result['result_value'] }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] }}
+                                    {% if test_result['si_unit_name']  %}
+                                        {{ test_result['result_value'] or '' }} &nbsp; &nbsp; {{ test_result['si_unit_name'] or '' }}
+                                    {% endif %}
                                 </td>
                                 <td class="width-25">
-                                    {{'%0.3f'| format(test_result['secondary_uom_result']|float)}} &nbsp; &nbsp; {{ test_result['secondary_uom'] }}
+                                    {% if test_result['lab_test_uom'] %}
+                                    {{'%0.3f'| format(test_result['secondary_uom_result']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                    {% endif %}
                                 </td>
                             </tr>
+                            {% for normal_range in test_result['template'] %}
+                            {% if loop.index == 1 %} 
+                                <tr>
+                                    <td>
+                                        {{ test_result['normal_range_label'] or "" }}
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            {% endif %}  
+                                <tr>
+                                    <td style="padding: 10px 0 10px 10px" >
+                                      {{ normal_range['criteria_text'] or '' }} &nbsp;
+                                        <!-- {% if normal_range['range_type'] != 'All' %}
+                                        {{ normal_range['range_type'] or '' }} &nbsp;
+
+                                        {% endif %}
+                                        {% if normal_range['gender'] != 'All' %}
+                                        {{ normal_range['gender'] or '' }} &nbsp;
+
+                                        {% endif %} -->
+                                    </td>
+                                    <td>
+                                        {{ normal_range['si_range_text'] or '' }}
+                                    </td>
+                                    <td>
+                                        {{ normal_range['range_text'] or '' }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
                         </table>
                         {% if test_result['lab_test_comment'] %}
                             <span class="red"><strong>Comment: </strong>&nbsp; &nbsp; {{lab_test_comment}}</span>
                         {% endif %}
                     </td>
                 </tr>
+                {% endif %}
+            {% endfor %}
             {% endfor %}
         </table>
     </tbody>
 </table>
 
+<button class="download-btn">
+    PDF
+</button>
+<button class="print-btn">
+    print
+</button>
 <div class="divFooter">
     This electronic copy of your tests result has been finalized by the laboratory director. <br />
     The original signed copy is available at the laboratory.
     <img src="/files/josante-logo.png" />
 </div>
+
+<script>
+    var downloadBtn = document.querySelector(".download-btn")
+    var usercode = window.location.href.split("?")[1].split("=")[1]
+    var password=  usercode.split("_")[0]
+    var patient = usercode.split("_")[1]
+    downloadBtn.onclick  = () => {
+        fetch(`/api/method/erpnext.www.test-result.index.download_pdf?patient=${patient}&password=${password}`).then(response => response.blob())
+        .then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = "test-result.pdf";
+            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+            a.click();    
+            a.remove();  //afterwards we remove the element again         
+        });
+    }
+
+    var printBtn = document.querySelector(".print-btn")
+    printBtn.onclick = () =>{
+        print()
+    }
+</script>
+
+</body>
+</html>

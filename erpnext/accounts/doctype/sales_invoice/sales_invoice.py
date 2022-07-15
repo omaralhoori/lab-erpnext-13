@@ -2203,3 +2203,12 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			message += " " + ", ".join(payment_entries_link) + " "
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
 			frappe.throw(message)
+
+
+@frappe.whitelist()
+def is_customer_parent(customer):
+	res = frappe.db.sql("""
+		SELECT name FROM `tabCustomer`
+		WHERE parent_customer='{customer}'
+	""".format(customer=customer))
+	return len(res) > 0

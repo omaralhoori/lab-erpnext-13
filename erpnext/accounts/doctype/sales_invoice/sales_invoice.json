@@ -25,6 +25,9 @@
   "posting_time",
   "set_posting_time",
   "due_date",
+  "passport_no",
+  "passport_issue_date",
+  "passport_expiry_date",
   "return_against",
   "amended_from",
   "accounting_dimensions_section",
@@ -53,6 +56,7 @@
   "currency_and_price_list",
   "insurance_party_type",
   "insurance_party",
+  "insurance_party_child",
   "coverage_percentage",
   "sms_to_payer",
   "get_items_from_party",
@@ -2086,6 +2090,31 @@
    "fieldname": "sms_to_payer",
    "fieldtype": "Check",
    "label": "Send SMS to Payer"
+  },
+  {
+   "fieldname": "insurance_party_child",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Insurance Party Child",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "passport_issue_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Passport Issue Date"
+  },
+  {
+   "fieldname": "passport_expiry_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Passport Expiry Date"
+  },
+  {
+   "fieldname": "passport_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Passport No."
   }
  ],
  "icon": "fa fa-file-text",
@@ -2098,7 +2127,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-08 18:22:12.546801",
+ "modified": "2022-07-14 18:52:07.153537",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
