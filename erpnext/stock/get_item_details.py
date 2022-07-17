@@ -681,11 +681,15 @@ def get_price_list_rate(args, item_doc, out=None):
 			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 		# Omar
 		# if price list is not standard and item not exist
+		price_list = None
 		if price_list_rate is None and args.get("doctype") == "Sales Invoice":
-			args.price_list = "Standard Selling"
+			price_list = args.price_list
+			args.price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list")#"Standard Selling"
 			price_list_rate = get_price_list_rate_for(args, item_doc.name)
 		# insert in database
 		if price_list_rate is None:
+			if price_list:
+				args.price_list = price_list
 			if args.price_list and args.rate:
 				insert_item_price(args)
 			return out
