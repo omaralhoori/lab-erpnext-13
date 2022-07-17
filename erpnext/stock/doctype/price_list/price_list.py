@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _, throw
+from frappe import _, enqueue, throw
 from frappe.model.document import Document
 from frappe.utils import cint
 
@@ -80,3 +80,43 @@ def get_price_list_details(price_list):
 		frappe.cache().hset("price_list_details", price_list, price_list_details)
 
 	return price_list_details or {}
+
+
+@frappe.whitelist()
+def copy_items(price_list, new_price_list):
+	items = frappe.db.sql("""
+		SELECT item_code, uom, packing_unit, buying, selling, customer, batch_no, currency, price_list_rate, valid_from, valid_upto, is_discountable, is_chargable
+		FROM `tabItem Price` WHERE price_list='{price_list}'
+	""".format(price_list=price_list), as_dict=True)
+	if len(items) == 0:
+		frappe.throw("No item found!")
+	else:
+		frappe.db.set_value("Price List", new_price_list, {"is_copying": 1})
+		enqueue('erpnext.stock.doctype.price_list.price_list.copy_item_async', now=True, items=items, new_price_list= new_price_list)
+	return  True
+
+def copy_item_async(items, new_price_list):
+	for item in items:
+		if not frappe.db.exists("Item Price", {"item_code": item['item_code'], "price_list": new_price_list}):
+			doc = frappe.get_doc({
+				"doctype" : "Item Price",
+				"item_code": item['item_code'],
+				"price_list": new_price_list,
+				"uom": item['uom'],
+				"packing_unit": item['packing_unit'],
+				"buying": item['buying'],
+				"selling": item['selling'],
+				"customer": item['customer'],
+				"batch_no": item['batch_no'],
+				"currency": item['currency'],
+				"price_list_rate": item['price_list_rate'],
+				"valid_from": item['valid_from'],
+				"valid_upto": item['valid_upto'],
+				"is_discountable": item['is_discountable'],
+				"is_chargable": item['is_chargable']
+			})
+			doc.save(ignore_permissions=True)
+			frappe.db.commit()
+	frappe.db.set_value("Price List", new_price_list, {"is_copying": 0})
+	frappe.db.commit()
+	frappe.msgprint("Items copied successfully")

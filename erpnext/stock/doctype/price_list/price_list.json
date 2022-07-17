@@ -20,7 +20,8 @@
   "price_not_uom_dependent",
   "column_break_3",
   "countries",
-  "oldserial"
+  "oldserial",
+  "is_copying"
  ],
  "fields": [
   {
@@ -99,13 +100,20 @@
    "fieldtype": "Data",
    "label": "OldSerial",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_copying",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Copying"
   }
  ],
  "icon": "fa fa-tags",
  "idx": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2022-07-07 14:22:02.908668",
+ "modified": "2022-07-17 17:17:30.393572",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List",

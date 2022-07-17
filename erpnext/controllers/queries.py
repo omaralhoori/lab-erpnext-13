@@ -254,7 +254,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
-		# scan description only if items are less than 50000
+		# scan description only if items are less than 50000 			and lab_test_template_type!='Single'
 		description_cond = 'or tabItem.description LIKE %(txt)s'
 	return frappe.db.sql("""select
 			tabItem.name, tabItem.item_name, tabItem.item_group,
@@ -264,7 +264,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		from tabItem
 		INNER JOIN ( SELECT item as template_item, lab_test_template_type from `tabLab Test Template` ) as ltt ON ltt.template_item=name
 		where tabItem.docstatus < 2
-			and lab_test_template_type!='Single'
+
 			and tabItem.disabled=0
 			and tabItem.has_variants=0
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
