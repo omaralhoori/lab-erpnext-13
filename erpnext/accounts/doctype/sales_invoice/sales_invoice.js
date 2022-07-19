@@ -1208,10 +1208,7 @@ frappe.ui.form.on('Sales Invoice', {
 		});
 	},
 	get_items_from_party: async function (frm) {
-		if (frm.doc.selling_price_list == "" || frm.doc.selling_price_list == 'Standard Selling') {
-			frappe.msgprint(__("Please select selling price list"));
-		} else {
-			var items = await frappe.db.get_list("Item Price", { filters: { "price_list": frm.doc.selling_price_list }, fields: ["item_code"] });
+		const include_items = (items) => {
 			items = items.map(item => item.item_code);
 			var existing_items = [];
 			for (var item of frm.doc.items) {
@@ -1234,6 +1231,24 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 
 			frm.refresh_fields("items");
+		}
+
+		if (frm.doc.selling_price_list == "" || frm.doc.selling_price_list == 'Standard Selling') {
+			frappe.msgprint(__("Please select selling price list"));
+		} else {
+			var items = await frappe.db.get_list("Item Price", { filters: { "price_list": frm.doc.selling_price_list }, fields: ["item_code"] , limit: 'NULL'});
+			if (items.length > 100){
+						frappe.confirm(__(`There are ${items.length} items in this price list. Are you sure you want to proceed?`),
+			() => {
+				include_items(items);
+			}, () => {
+				// action to perform if No is selected
+			})
+			}else{
+				include_items(items)
+			}
+	
+			
 		}
 	},
 	create_dunning: function (frm) {
