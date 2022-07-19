@@ -37,18 +37,21 @@ class LabTest(Document):
 				
 		result_msg = frappe.db.get_single_value("Healthcare Settings", "result_sms_message")
 		if not result_msg or result_msg == "":
-			frappe.throw(_("Please setup result sms message in Healthcare Settings."))
+			frappe.msgprint(_("Fail to send sms. Result sms message is empty in Healthcare Settings."))
+			return
 
 		if send_to_payer:
-			receiver_number = frappe.db.get_value("Customer", invoice.insurance_party, "mobile_no")
+			receiver_number = frappe.db.get_value("Customer", invoice.insurance_party, "customer_mobile_no")
 		else:
-			receiver_number = frappe.db.get_value("Customer", invoice.customer, "mobile_no")
+			receiver_number = frappe.db.get_value("Customer", invoice.customer, "customer_mobile_no")
 		if not receiver_number or receiver_number == "":
-			frappe.throw(_("Please setup receiver mobile number."))
+			frappe.msgprint(_("Fail to send sms. Receiver mobile number is empty."))
+			return
 
 		result_url = frappe.db.get_single_value("Healthcare Settings", "result_url")
 		if not result_url or result_url == "":
-			frappe.throw(_("Please setup result url in Healthcare Settings."))
+			frappe.msgprint(_("Fail to send sms. Result url is empty in Healthcare Settings."))
+			return
 
 		if result_url[-1] != "/":
 			result_url += '/'
