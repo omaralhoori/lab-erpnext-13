@@ -11,6 +11,8 @@ from frappe.utils import get_link_to_form, getdate
 
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 
+import re
+
 class LabTest(Document):
 	def validate(self):
 		if not self.is_new():
@@ -55,6 +57,45 @@ class LabTest(Document):
 		result_msg += "\n"  + result_url
 
 		send_sms(msg=result_msg, receiver_list=[receiver_number])
+
+	def before_save(self):
+		for lab_test in self.normal_test_items:
+			if lab_test.control_type == 'Formula':
+				result = self.check_formula_result(lab_test.template)
+				if result:
+					if result[0]:
+						lab_test.result_value = result[0]
+					if result[1]:
+						lab_test.secondary_uom_result = result[1]
+
+	def check_formula_result(self, test_name):
+		try:
+			formula = frappe.db.get_value("Lab Test Template", test_name, ["formula"])
+			if not formula: return
+			#formula = formula[0][0]
+			items = re.findall('\[(.+?)\]', formula)
+			if len(items) == 0: return
+			si_result, conv_result = {}, {}
+			result_si, result_conv= None, None
+			for lab_test in self.normal_test_items:
+				if lab_test.test_symbol and lab_test.test_symbol in items:
+					#result[lab_test.symbol] = {}
+					if lab_test.result_value:
+						si_result[lab_test.test_symbol] = lab_test.result_value
+					if lab_test.secondary_uom_result:
+						conv_result[lab_test.test_symbol] = lab_test.secondary_uom_result
+			if len(si_result.keys()) == len(items):
+				formula_val = formula
+				for res in si_result:
+					formula_val = formula_val.replace(f'[{res}]', str(si_result[res]))
+				result_si = eval(formula_val)
+			if len(conv_result.keys()) == len(items):
+				for res in conv_result:
+					formula = formula.replace(f'[{res}]', str(conv_result[res]))
+				result_conv = eval(formula)
+			return result_si, result_conv
+		except:
+			frappe.msgprint("Couldn't calculate formula result for test: " + test_name)
 
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
@@ -271,6 +312,13 @@ def create_normals(template, lab_test, group_template=None):
 	normal.report_code = template.worksheet_report_code
 	if group_template and not  template.worksheet_report_code:
 		normal.report_code = group_template.worksheet_report_code
+
+	normal.control_type = template.control_type
+	
+	if group_template.alias and template.symbol:
+		normal.test_symbol = group_template.alias + "." + template.symbol
+	elif template.alias and template.symbol:
+		normal.test_symbol = template.alias + "." + template.symbol
 
 def create_compounds(template, lab_test, is_group):
 	lab_test.normal_toggle = 1

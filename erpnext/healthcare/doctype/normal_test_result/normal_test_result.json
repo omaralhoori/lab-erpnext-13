@@ -23,6 +23,8 @@
   "underline",
   "template",
   "require_result_value",
+  "control_type",
+  "test_symbol",
   "report_code"
  ],
  "fields": [
@@ -177,11 +179,21 @@
    "fieldname": "report_code",
    "fieldtype": "Data",
    "label": "Report Code"
+  },
+  {
+   "fieldname": "test_symbol",
+   "fieldtype": "Data",
+   "label": "Test Symbol"
+  },
+  {
+   "fieldname": "control_type",
+   "fieldtype": "Data",
+   "label": "Control Type"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-07-13 10:11:42.052508",
+ "modified": "2022-07-18 20:50:14.508869",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Result",
