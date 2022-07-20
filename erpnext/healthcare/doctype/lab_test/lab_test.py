@@ -133,7 +133,7 @@ class LabTest(Document):
 
 	def set_secondary_uom_result(self):
 		for item in self.normal_test_items:
-			if item.result_value and item.secondary_uom and item.conversion_factor:
+			if item.result_value and item.control_type != 'Formula' and item.secondary_uom and item.conversion_factor:
 				try:
 					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
 				except Exception:
@@ -156,6 +156,7 @@ class LabTest(Document):
 
 def create_test_from_template(lab_test):
 	templates = lab_test.template if isinstance(lab_test.template, list) else [lab_test.template]
+	sample_created = False
 	for template_name in templates:
 		if template_name.get("template"):
 			template_name = template_name.get("template")
@@ -170,7 +171,8 @@ def create_test_from_template(lab_test):
 		lab_test.result_legend = template.result_legend
 		lab_test.worksheet_instructions = template.worksheet_instructions
 
-		lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice)
+		lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice, sample_created=sample_created)
+		sample_created = True
 		lab_test = load_result_format(lab_test, template, None, None)
 
 @frappe.whitelist()
@@ -470,20 +472,22 @@ def add_template_sample(template, sample_collection):
 		sample_detail.sample_qty = template.sample_qty or 1
 		sample_collection.num_print = int(sample_collection.num_print) + 1
 
-def create_sample_collection(lab_test, template, patient, invoice, depth=1):
+def create_sample_collection(lab_test, template, patient, invoice, depth=1, sample_created=True):
 	if depth < 4 and frappe.get_cached_value('Healthcare Settings', None, 'create_sample_collection_for_lab_test'):
 		sample_collection = None
 		if template.lab_test_template_type == "Grouped":
 			for group_item in template.lab_test_groups:
 				group_template = frappe.get_doc("Lab Test Template", group_item.lab_test_template)
-				lab_test = create_sample_collection(lab_test, group_template, patient, invoice, depth + 1)#create_sample_doc(group_template, patient, invoice, lab_test.company)
+				lab_test = create_sample_collection(lab_test, group_template, patient, invoice, depth + 1, sample_created=sample_created)#create_sample_doc(group_template, patient, invoice, lab_test.company)
+				#sample_created = True
 		else:
 			sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
 		if sample_collection:
 			lab_test.sample = sample_collection.name
 			sample_collection_doc = get_link_to_form('Sample Collection', sample_collection.name)
-			frappe.msgprint(_('Sample Collection {0} has been created').format(sample_collection_doc),
-				title=_('Sample Collection'), indicator='green')
+			if not sample_created:
+				frappe.msgprint(_('Sample Collection {0} has been created').format(sample_collection_doc),
+					title=_('Sample Collection'), indicator='green')
 	return lab_test
 
 def load_result_format(lab_test, template, prescription, invoice, depth=1):
