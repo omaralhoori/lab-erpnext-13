@@ -12,6 +12,7 @@ from frappe.utils import get_link_to_form, getdate
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 
 import re
+from .lab_test_print import get_lab_test_result
 
 class LabTest(Document):
 	def validate(self):
@@ -70,7 +71,12 @@ class LabTest(Document):
 						lab_test.result_value = result[0]
 					if result[1]:
 						lab_test.secondary_uom_result = result[1]
-
+	def get_lab_test_print(self):
+		results = get_lab_test_result(self.patient, False, f"WHERE lt.name='{self.name}'")
+		if len(results) > 0:
+			html = frappe.render_template('templates/test_result/test_result.html', results[0])
+			return html
+		return "Unable to render template"
 	def check_formula_result(self, test_name):
 		try:
 			formula = frappe.db.get_value("Lab Test Template", test_name, ["formula"])
