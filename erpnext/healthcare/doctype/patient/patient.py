@@ -388,3 +388,12 @@ def match_fingerprint():
 			sample = frappe.db.get_value("Sample Collection", {"patient": patient}, ["name"])
 			return {"path": "/app/sample-collection/" + str(sample)}
 	return None
+
+def validate_invoice_paid(patient, invoice):
+	now = frappe.utils.now()
+	res = frappe.db.sql("""
+		SELECT patient FROM `tabPermitted Patient` WHERE patient='{patient}' and '{now}' > from_time AND '{now}' < to_time
+	""".format(patient=patient, now=now))
+	if len(res) > 0: return
+	if frappe.db.get_value("Sales Invoice", invoice, "outstanding_amount") != 0:
+		frappe.throw(_("Invoice is not paid"))

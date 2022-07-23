@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from erpnext.healthcare.doctype.patient.patient import validate_invoice_paid
 
 import re
 from .lab_test_print import get_lab_test_result
@@ -20,12 +21,22 @@ class LabTest(Document):
 			self.set_secondary_uom_result()
 
 	def on_submit(self):
+		self.validate_sample_released()
+		validate_invoice_paid(self.patient, self.sales_invoice)
 		self.validate_result_values()
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
 
 		if not self.sms_sent or self.sms_sent == 0:
 			self.send_result_sms()
+	
+	def validate_sample_released(self):
+		if not self.status == "Released":
+			frappe.throw(_("You didn't release the sample!"))
+	
+	def validate_invoice_paid(self):
+		if frappe.db.get_value("Sales Invoice", self.sales_invoice, "outstanding_amount") != 0:
+			frappe.throw(_("Invoice is not paid"))
 	
 	def send_result_sms(self):
 		send_to_payer = False
@@ -38,7 +49,7 @@ class LabTest(Document):
 				
 		result_msg = frappe.db.get_single_value("Healthcare Settings", "result_sms_message")
 		if not result_msg or result_msg == "":
-			frappe.msgprint(_("Fail to send sms. Result sms message is empty in Healthcare Settings."))
+			frappe.msgprint(_("Failed to send sms. Result sms message is empty in Healthcare Settings."))
 			return
 
 		if send_to_payer:
@@ -46,12 +57,12 @@ class LabTest(Document):
 		else:
 			receiver_number = frappe.db.get_value("Customer", invoice.customer, "customer_mobile_no")
 		if not receiver_number or receiver_number == "":
-			frappe.msgprint(_("Fail to send sms. Receiver mobile number is empty."))
+			frappe.msgprint(_("Failed to send sms. Receiver mobile number is empty."))
 			return
 
 		result_url = frappe.db.get_single_value("Healthcare Settings", "result_url")
 		if not result_url or result_url == "":
-			frappe.msgprint(_("Fail to send sms. Result url is empty in Healthcare Settings."))
+			frappe.msgprint(_("Failed to send sms. Result url is empty in Healthcare Settings."))
 			return
 
 		if result_url[-1] != "/":
@@ -231,6 +242,7 @@ def create_lab_test_from_invoice(sales_invoice):
 def create_lab_test_joined(sales_invoice):
 	lab_tests_created = False
 	invoice = frappe.get_doc('Sales Invoice', sales_invoice)
+	lab_test = None
 	if invoice and invoice.patient:
 		patient = frappe.get_doc('Patient', invoice.patient)
 		test_created = False
