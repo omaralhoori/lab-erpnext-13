@@ -272,6 +272,17 @@
    "link_to": "Healthcare Settings",
    "link_type": "DocType",
    "onboard": 1,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Permitted Patients",
+   "link_to": "Permitted Patient",
+   "link_type": "DocType",
+   "onboard": 1,
+   "only_for": "",
    "type": "Link"
   },
   {
@@ -279,6 +290,7 @@
    "is_query_report": 0,
    "label": "Laboratory Setup",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -336,6 +348,7 @@
    "is_query_report": 0,
    "label": "Laboratory",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -364,6 +377,7 @@
    "label": "Inpatient",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -398,6 +412,7 @@
    "is_query_report": 0,
    "label": "Rehabilitation and Physiotherapy",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -535,7 +550,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-10-29 14:31:16.795628",
+ "modified": "2022-07-24 12:19:16.266448",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
