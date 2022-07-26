@@ -87,8 +87,15 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	def calculate_grand_total(self):
+		self.grand_total = self.total + self.total_discount_provider
+
 	def validate(self):
+		print("lllllllllxxxxllllllllllllllllllllllllllllll")
+		print(self.coverage_percentage)
+		print(self.charged_percentage)
 		super(SalesInvoice, self).validate()
+		self.calculate_grand_total()
 		self.validate_auto_set_posting_time()
 
 		if not self.is_pos:
@@ -469,6 +476,9 @@ class SalesInvoice(SellingController):
 				data.sales_invoice = sales_invoice
 
 	def on_update(self):
+		print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+		print(self.coverage_percentage)
+		print(self.charged_percentage)
 		self.set_paid_amount()
 
 	def set_paid_amount(self):
@@ -834,7 +844,9 @@ class SalesInvoice(SellingController):
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
-
+			print("*********************************************************************")
+			print(gl_entries)
+			print(len(gl_entries))
 			if self.docstatus == 1:
 				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 			elif self.docstatus == 2:
@@ -853,28 +865,62 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
-
+		num = 0
 		self.make_customer_gl_entry(gl_entries)
 		#ibrahim
 		self.make_insurance_party_gl_entry(gl_entries)
-
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 		self.make_tax_gl_entries(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 		self.make_internal_transfer_gl_entries(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 
 		self.allocate_advance_taxes(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 
 		self.make_item_gl_entries(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 		self.make_discount_gl_entries(gl_entries)
-
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 		self.make_pos_gl_entries(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 
 		self.make_write_off_gl_entry(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 		self.make_gle_for_rounding_adjustment(gl_entries)
+		print(len(gl_entries))
+		num += 1
+		print(num, "ssssssssssssssss")
 
 		return gl_entries
 
@@ -886,7 +932,6 @@ class SalesInvoice(SellingController):
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
-
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -894,7 +939,7 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"due_date": self.due_date,
 					"against": self.against_income_account,
-					"debit": grand_total_in_company_currency,
+					"debit": grand_total_in_company_currency ,
 					"debit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
@@ -902,13 +947,13 @@ class SalesInvoice(SellingController):
 					"cost_center": self.cost_center,
 					"project": self.project
 				}, self.party_account_currency, item=self)
-			)
+		)
 	#ibrahim
 	def make_insurance_party_gl_entry(self, gl_entries):
 		if self.total_discount_provider > 0:
-			#frappe.msgprint("asdas")
-			#frappe.msgprint(self.insurance_party)
-			#frappe.msgprint(self.debit_to)
+			# frappe.msgprint("asdas")
+			# frappe.msgprint(self.insurance_party)
+			# frappe.msgprint(self.debit_to)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -960,6 +1005,7 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
+				print("cccccxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 				if item.is_fixed_asset:
 					asset = self.get_asset(item)
 
@@ -986,8 +1032,10 @@ class SalesInvoice(SellingController):
 					self.set_asset_status(asset)
 
 				else:
+					print("sssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
+						print('cscscscscscfff')
 						income_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
@@ -1006,9 +1054,11 @@ class SalesInvoice(SellingController):
 								"project": item.project or self.project
 							}, account_currency, item=item)
 						)
+						print(self.insurance_party , self.coverage_percentage)
 						#ibrahim
 						if self.insurance_party and self.coverage_percentage > 0:
 							if item.discount_amount > 0:
+								print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 								gl_entries.append(
 									self.get_gl_dict({
 										"account": income_account,

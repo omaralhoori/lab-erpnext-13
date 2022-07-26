@@ -57,7 +57,9 @@
   "insurance_party_type",
   "insurance_party",
   "insurance_party_child",
+  "charged_percentage",
   "coverage_percentage",
+  "coverage_type",
   "sms_to_payer",
   "column_break_48",
   "currency",
@@ -2059,7 +2061,6 @@
   },
   {
    "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.insurance_party_type)",
-   "fetch_from": "insurance_party.coverage_percentage",
    "fieldname": "coverage_percentage",
    "fieldtype": "Float",
    "label": "Coverage Percentage %",
@@ -2072,13 +2073,13 @@
    "label": "Get Items from Party"
   },
   {
-   "depends_on": "eval:doc.insurance_party != null && doc.insurance_party != \"\"",
+   "depends_on": "eval:doc.insurance_party_type == \"Insurance Company\"",
    "fieldname": "patient_card_no",
    "fieldtype": "Data",
    "label": "Patient Card No"
   },
   {
-   "depends_on": "eval:doc.insurance_party != null && doc.insurance_party != \"\"",
+   "depends_on": "eval:doc.insurance_party_type == \"Insurance Company\"",
    "fieldname": "form_no",
    "fieldtype": "Data",
    "label": "Form No"
@@ -2115,6 +2116,21 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Passport No."
+  },
+  {
+   "default": "100",
+   "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.insurance_party_type)",
+   "fieldname": "charged_percentage",
+   "fieldtype": "Float",
+   "label": "Charged Percentage",
+   "precision": "1"
+  },
+  {
+   "fetch_from": "insurance_party.coverage_type",
+   "fieldname": "coverage_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Coverage Type"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2127,7 +2143,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-25 12:41:08.572604",
+ "modified": "2022-07-26 18:10:29.478115",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

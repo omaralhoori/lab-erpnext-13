@@ -698,11 +698,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		//ibrahim && omar
 		//console.log('1111111111111111')
 		var me = this;
-		if (me.frm.doc.insurance_party_type){
+		if (me.frm.doc.insurance_party_type ){
 			if  (me.frm.doc.coverage_percentage != 0  && item.discount_updated < 3){
 				frappe.model.set_value(cdt, cdn,  "discount_updated", item.discount_updated + 1);
 				frappe.model.set_value(cdt, cdn,  "margin_type", 'Percentage');
-				frappe.model.set_value(cdt, cdn,  "discount_percentage", me.frm.doc.coverage_percentage);
+				console.log("discount items------------------", me.frm.doc.coverage_percentage, me.frm.doc.coverage_type);
+				frappe.model.set_value(cdt, cdn,  "discount_percentage", me.frm.doc.coverage_type !='Cash' ? me.frm.doc.coverage_percentage:0 );
 				
 			}
 		}

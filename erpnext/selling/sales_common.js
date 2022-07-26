@@ -141,6 +141,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	insurance_party_type:function() {
 		this.frm.set_value("insurance_party",null)
 		this.frm.set_value("coverage_percentage",0)
+		console.log("ccccccccccccccccccccccccccccccccc");
 	},
 
 	//ibrahim
@@ -158,17 +159,19 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	//ibrahim
-	coverage_percentage: function() {
+	coverage_percentage: async function(frm) {
 		//frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total", "total_discount_provider"]);
-		this.apply_coverage_on_item();
+			this.apply_coverage_on_item();
+		
 	},
 	//ibrahim
 	apply_coverage_on_item:function() {
 		var me = this;
+		console.log("discount coveragge------------------", me.frm.doc.coverage_percentage,  me.frm.doc.coverage_type !='Cash');
 		//ibrahim
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
-			frappe.model.set_value(item.doctype, item.name, "discount_percentage", me.frm.doc.coverage_percentage);
+			frappe.model.set_value(item.doctype, item.name, "discount_percentage", me.frm.doc.coverage_type !='Cash' ? me.frm.doc.coverage_percentage : 0);
 			});
 	},
 

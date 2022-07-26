@@ -833,6 +833,17 @@ frappe.ui.form.on('Sales Invoice', {
 			frm.set_value("loyalty_amount", loyalty_amount);
 		}
 	},
+	coverage_percentage: function(frm){
+		if(frm.doc.coverage_percentage || frm.doc.coverage_percentage == 0){
+			frm.set_value("charged_percentage", 100 - frm.doc.coverage_percentage)
+		}
+		
+	},
+	charged_percentage: function(frm){
+		if(frm.doc.charged_percentage || frm.doc.charged_percentage == 0){
+			frm.set_value("coverage_percentage", 100 - frm.doc.charged_percentage)
+		}
+	},
 	insurance_party: function (frm) {
 		if (frm.doc.insurance_party && frm.doc.insurance_party != "") {
 			frappe.call({

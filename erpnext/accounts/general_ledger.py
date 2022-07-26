@@ -17,7 +17,7 @@ from erpnext.accounts.doctype.budget.budget import validate_expense_against_budg
 
 class ClosedAccountingPeriod(frappe.ValidationError): pass
 
-def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
+def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=False, update_outstanding='Yes', from_repost=False):
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
@@ -51,7 +51,7 @@ def validate_accounting_period(gl_map):
 		frappe.throw(_("You cannot create or cancel any accounting entries with in the closed Accounting Period {0}")
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
-def process_gl_map(gl_map, merge_entries=True, precision=None):
+def process_gl_map(gl_map, merge_entries=False, precision=None):
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map, precision)
 	for entry in gl_map:
