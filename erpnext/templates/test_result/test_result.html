@@ -11,6 +11,9 @@
     .width-25{
         width: 25%;
     }
+    .width-33{
+        width: 33%;
+    }
     .width-100{
         width: 100%;
     }
@@ -161,6 +164,7 @@
     <tbody>
         <table>
             {% for report_code, test_results in results.items() %}
+            {% if report_code != 'WS3000' %}
             <tr  >
                 <td class="b-bottom"  {% if loop.index > 1 %}  style="padding-top: 30px" {% endif %}>
                     <table>
@@ -230,13 +234,54 @@
                             {% endfor %}
                         </table>
                         {% if test_result['lab_test_comment'] %}
-                            <span class="red"><strong>Comment: </strong>&nbsp; &nbsp; {{lab_test_comment}}</span>
+                            <span class="red"><strong class="red">Comment: </strong>&nbsp; &nbsp; {{test_result['lab_test_comment']}}</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% endif %}
             {% endfor %}
+            {% endif %}
             {% endfor %}
+            {% if results.get('WS3000') %}
+                <tr >
+                    <td  class="b-bottom center" style="font-weight: bold; font-size: 20px;  width: 100%;">
+                        HEMATOLOGY
+                    </td>
+                </tr>
+                <tr  >
+                    <td class="b-bottom"   style="padding-top: 30px" >
+                        <table>
+                            <tr>
+                                <td class="width-33">
+                                </td>
+                                <td class="width-33">
+                                </td>
+                                <td class="width-33">
+                                    Normal Range( Age and Sex related)
+                                </td>
+                            </tr>
+
+                            {% for test_result in results.get('WS3000') %}
+                                {% if test_result['lab_test_uom'] %}
+                                <tr>
+                                    <td class="width-33">
+                                        {{ test_result['lab_test_name']  }}
+                                    </td>
+                                    <td class="width-33">
+                                        {{'%0.3f'| format(test_result['secondary_uom_result']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                    </td>
+                                    <td class="width-33">
+                                        {%  if test_result['template'][0] %}
+                                            {{test_result['template'][0]['range_text'] or '' }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+            {% endif %}
         </table>
     </tbody>
 </table>

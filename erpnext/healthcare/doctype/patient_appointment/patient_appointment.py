@@ -43,7 +43,8 @@ class PatientAppointment(Document):
 	def after_insert(self):
 		self.update_prescription_details()
 		self.set_payment_details()
-		invoice_appointment(self)
+		if self.mode_of_payment:
+			invoice_appointment(self)
 		self.update_fee_validity()
 		send_confirmation_msg(self)
 

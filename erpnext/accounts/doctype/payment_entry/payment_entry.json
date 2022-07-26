@@ -443,7 +443,7 @@
    "fieldname": "reference_no",
    "fieldtype": "Data",
    "label": "Cheque/Reference No",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
+   "mandatory_depends_on": "//eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
   },
   {
    "fieldname": "column_break_23",
@@ -455,7 +455,7 @@
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "label": "Cheque/Reference Date",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
+   "mandatory_depends_on": "//eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
    "search_index": 1
   },
   {
@@ -730,7 +730,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-13 19:30:06.024112",
+ "modified": "2022-07-23 01:12:31.997895",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

@@ -644,12 +644,13 @@ class PaymentEntry(AccountsController):
 			self.title = self.paid_from + " - " + self.paid_to
 
 	def validate_transaction_reference(self):
-		bank_account = self.paid_to if self.payment_type == "Receive" else self.paid_from
-		bank_account_type = frappe.db.get_value("Account", bank_account, "account_type")
+		return
+		# bank_account = self.paid_to if self.payment_type == "Receive" else self.paid_from
+		# bank_account_type = frappe.db.get_value("Account", bank_account, "account_type")
 
-		if bank_account_type == "Bank":
-			if not self.reference_no or not self.reference_date:
-				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
+		# if bank_account_type == "Bank":
+		# 	if not self.reference_no or not self.reference_date:
+		# 		frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
 	def set_remarks(self):
 		if self.custom_remarks: return

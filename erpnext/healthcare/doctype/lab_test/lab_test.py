@@ -10,6 +10,10 @@ from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from erpnext.healthcare.doctype.patient.patient import validate_invoice_paid
+
+import re
+from .lab_test_print import get_lab_test_result
 
 class LabTest(Document):
 	def validate(self):
@@ -17,12 +21,22 @@ class LabTest(Document):
 			self.set_secondary_uom_result()
 
 	def on_submit(self):
+		self.validate_sample_released()
+		validate_invoice_paid(self.patient, self.sales_invoice)
 		self.validate_result_values()
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
 
 		if not self.sms_sent or self.sms_sent == 0:
 			self.send_result_sms()
+	
+	def validate_sample_released(self):
+		if not self.status == "Released":
+			frappe.throw(_("You didn't release the sample!"))
+	
+	def validate_invoice_paid(self):
+		if frappe.db.get_value("Sales Invoice", self.sales_invoice, "outstanding_amount") != 0:
+			frappe.throw(_("Invoice is not paid"))
 	
 	def send_result_sms(self):
 		send_to_payer = False
@@ -35,18 +49,21 @@ class LabTest(Document):
 				
 		result_msg = frappe.db.get_single_value("Healthcare Settings", "result_sms_message")
 		if not result_msg or result_msg == "":
-			frappe.throw(_("Please setup result sms message in Healthcare Settings."))
+			frappe.msgprint(_("Failed to send sms. Result sms message is empty in Healthcare Settings."))
+			return
 
 		if send_to_payer:
-			receiver_number = frappe.db.get_value("Customer", invoice.insurance_party, "mobile_no")
+			receiver_number = frappe.db.get_value("Customer", invoice.insurance_party, "customer_mobile_no")
 		else:
-			receiver_number = frappe.db.get_value("Customer", invoice.customer, "mobile_no")
+			receiver_number = frappe.db.get_value("Customer", invoice.customer, "customer_mobile_no")
 		if not receiver_number or receiver_number == "":
-			frappe.throw(_("Please setup receiver mobile number."))
+			frappe.msgprint(_("Failed to send sms. Receiver mobile number is empty."))
+			return
 
 		result_url = frappe.db.get_single_value("Healthcare Settings", "result_url")
 		if not result_url or result_url == "":
-			frappe.throw(_("Please setup result url in Healthcare Settings."))
+			frappe.msgprint(_("Failed to send sms. Result url is empty in Healthcare Settings."))
+			return
 
 		if result_url[-1] != "/":
 			result_url += '/'
@@ -55,6 +72,50 @@ class LabTest(Document):
 		result_msg += "\n"  + result_url
 
 		send_sms(msg=result_msg, receiver_list=[receiver_number])
+
+	def before_save(self):
+		for lab_test in self.normal_test_items:
+			if lab_test.control_type == 'Formula':
+				result = self.check_formula_result(lab_test.template)
+				if result:
+					if result[0]:
+						lab_test.result_value = result[0]
+					if result[1]:
+						lab_test.secondary_uom_result = result[1]
+	def get_lab_test_print(self):
+		results = get_lab_test_result(self.patient, False, f"WHERE lt.name='{self.name}'")
+		if len(results) > 0:
+			html = frappe.render_template('templates/test_result/test_result.html', results[0])
+			return html
+		return "Unable to render template"
+	def check_formula_result(self, test_name):
+		try:
+			formula = frappe.db.get_value("Lab Test Template", test_name, ["formula"])
+			if not formula: return
+			#formula = formula[0][0]
+			items = re.findall('\[(.+?)\]', formula)
+			if len(items) == 0: return
+			si_result, conv_result = {}, {}
+			result_si, result_conv= None, None
+			for lab_test in self.normal_test_items:
+				if lab_test.test_symbol and lab_test.test_symbol in items:
+					#result[lab_test.symbol] = {}
+					if lab_test.result_value:
+						si_result[lab_test.test_symbol] = lab_test.result_value
+					if lab_test.secondary_uom_result:
+						conv_result[lab_test.test_symbol] = lab_test.secondary_uom_result
+			if len(si_result.keys()) == len(items):
+				formula_val = formula
+				for res in si_result:
+					formula_val = formula_val.replace(f'[{res}]', str(si_result[res]))
+				result_si = eval(formula_val)
+			if len(conv_result.keys()) == len(items):
+				for res in conv_result:
+					formula = formula.replace(f'[{res}]', str(conv_result[res]))
+				result_conv = eval(formula)
+			return result_si, result_conv
+		except:
+			frappe.msgprint("Couldn't calculate formula result for test: " + test_name)
 
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
@@ -83,7 +144,7 @@ class LabTest(Document):
 
 	def set_secondary_uom_result(self):
 		for item in self.normal_test_items:
-			if item.result_value and item.secondary_uom and item.conversion_factor:
+			if item.result_value and item.control_type != 'Formula' and item.secondary_uom and item.conversion_factor:
 				try:
 					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
 				except Exception:
@@ -106,6 +167,7 @@ class LabTest(Document):
 
 def create_test_from_template(lab_test):
 	templates = lab_test.template if isinstance(lab_test.template, list) else [lab_test.template]
+	sample_created = False
 	for template_name in templates:
 		if template_name.get("template"):
 			template_name = template_name.get("template")
@@ -120,7 +182,8 @@ def create_test_from_template(lab_test):
 		lab_test.result_legend = template.result_legend
 		lab_test.worksheet_instructions = template.worksheet_instructions
 
-		lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice)
+		lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice, sample_created=sample_created)
+		sample_created = True
 		lab_test = load_result_format(lab_test, template, None, None)
 
 @frappe.whitelist()
@@ -179,6 +242,7 @@ def create_lab_test_from_invoice(sales_invoice):
 def create_lab_test_joined(sales_invoice):
 	lab_tests_created = False
 	invoice = frappe.get_doc('Sales Invoice', sales_invoice)
+	lab_test = None
 	if invoice and invoice.patient:
 		patient = frappe.get_doc('Patient', invoice.patient)
 		test_created = False
@@ -271,6 +335,13 @@ def create_normals(template, lab_test, group_template=None):
 	normal.report_code = template.worksheet_report_code
 	if group_template and not  template.worksheet_report_code:
 		normal.report_code = group_template.worksheet_report_code
+
+	normal.control_type = template.control_type
+	
+	if group_template.alias and template.symbol:
+		normal.test_symbol = group_template.alias + "." + template.symbol
+	elif template.alias and template.symbol:
+		normal.test_symbol = template.alias + "." + template.symbol
 
 def create_compounds(template, lab_test, is_group):
 	lab_test.normal_toggle = 1
@@ -413,20 +484,22 @@ def add_template_sample(template, sample_collection):
 		sample_detail.sample_qty = template.sample_qty or 1
 		sample_collection.num_print = int(sample_collection.num_print) + 1
 
-def create_sample_collection(lab_test, template, patient, invoice, depth=1):
+def create_sample_collection(lab_test, template, patient, invoice, depth=1, sample_created=True):
 	if depth < 4 and frappe.get_cached_value('Healthcare Settings', None, 'create_sample_collection_for_lab_test'):
 		sample_collection = None
 		if template.lab_test_template_type == "Grouped":
 			for group_item in template.lab_test_groups:
 				group_template = frappe.get_doc("Lab Test Template", group_item.lab_test_template)
-				lab_test = create_sample_collection(lab_test, group_template, patient, invoice, depth + 1)#create_sample_doc(group_template, patient, invoice, lab_test.company)
+				lab_test = create_sample_collection(lab_test, group_template, patient, invoice, depth + 1, sample_created=sample_created)#create_sample_doc(group_template, patient, invoice, lab_test.company)
+				#sample_created = True
 		else:
 			sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
 		if sample_collection:
 			lab_test.sample = sample_collection.name
 			sample_collection_doc = get_link_to_form('Sample Collection', sample_collection.name)
-			frappe.msgprint(_('Sample Collection {0} has been created').format(sample_collection_doc),
-				title=_('Sample Collection'), indicator='green')
+			if not sample_created:
+				frappe.msgprint(_('Sample Collection {0} has been created').format(sample_collection_doc),
+					title=_('Sample Collection'), indicator='green')
 	return lab_test
 
 def load_result_format(lab_test, template, prescription, invoice, depth=1):

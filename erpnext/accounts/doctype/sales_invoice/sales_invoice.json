@@ -59,7 +59,6 @@
   "insurance_party_child",
   "coverage_percentage",
   "sms_to_payer",
-  "get_items_from_party",
   "column_break_48",
   "currency",
   "conversion_rate",
@@ -70,6 +69,7 @@
   "price_list_currency",
   "plc_conversion_rate",
   "ignore_pricing_rule",
+  "get_items_from_party",
   "sec_warehouse",
   "set_warehouse",
   "column_break_55",
@@ -2066,7 +2066,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.insurance_party != null && doc.insurance_party != \"\"",
+   "depends_on": "eval:doc.selling_price_list != null && doc.selling_price_list != \"\"",
    "fieldname": "get_items_from_party",
    "fieldtype": "Button",
    "label": "Get Items from Party"
@@ -2127,7 +2127,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-14 18:52:07.153537",
+ "modified": "2022-07-25 12:41:08.572604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

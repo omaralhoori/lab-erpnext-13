@@ -804,3 +804,7 @@ def update_patient_email_and_phone_numbers(contact, method):
 @frappe.whitelist()
 def is_embassy():
 	return frappe.local.conf.is_embassy
+
+@frappe.whitelist()
+def publish_user_message(user, msg):
+	frappe.publish_realtime(event='msgprint',message=msg, user=user, doctype="Sample Collection")

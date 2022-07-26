@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.utils import flt
+from erpnext.healthcare.doctype.patient.patient import validate_invoice_paid
 
 
 class SampleCollection(Document):
@@ -21,3 +22,6 @@ class SampleCollection(Document):
 		format_ser = "bar-" + ".########"
 		prg_serial = make_autoname(format_ser, "Sample Collection")
 		self.collection_serial = prg_serial
+
+	def on_submit(self):
+		validate_invoice_paid(self.patient, self.sales_invoice)
