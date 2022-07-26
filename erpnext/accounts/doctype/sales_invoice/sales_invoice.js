@@ -78,7 +78,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if (doc.docstatus == 1 && doc.outstanding_amount != 0
 			&& !(cint(doc.is_return) && doc.return_against)) {
 			cur_frm.add_custom_button(__('Payment'),
-				this.make_payment_entry, __('Create'));
+				this.make_payment_entry);
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
@@ -966,6 +966,8 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	refresh: function (frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code");
+
 		if (frm.doc.docstatus === 0 && !frm.doc.is_return) {
 			frm.add_custom_button(__("Fetch Timesheet"), function () {
 				let d = new frappe.ui.Dialog({

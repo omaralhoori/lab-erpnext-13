@@ -30,6 +30,7 @@
   "inpatient_status",
   "report_preference",
   "mobile",
+  "phone_prefix",
   "phone",
   "email",
   "invite_user",
@@ -202,7 +203,8 @@
    "in_standard_filter": 1,
    "label": "Mobile",
    "no_copy": 1,
-   "options": "Phone"
+   "options": "Phone",
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -215,6 +217,7 @@
    "options": "Email"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "phone",
    "fieldtype": "Data",
    "in_filter": 1,
@@ -507,13 +510,20 @@
    "hidden": 1,
    "label": "QR Code Path",
    "read_only": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "00962",
+   "fieldname": "phone_prefix",
+   "fieldtype": "Data",
+   "label": "Country Code"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-07-06 11:43:09.978773",
+ "modified": "2022-07-26 11:47:00.487852",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

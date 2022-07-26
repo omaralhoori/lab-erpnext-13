@@ -31,6 +31,8 @@ class Patient(Document):
 		self.load_dashboard_info()
 
 	def validate(self):
+		if self.phone_prefix and self.phone:
+			self.mobile = self.phone_prefix + self.phone
 		self.set_full_name()
 
 	def before_insert(self):
