@@ -18,6 +18,7 @@
   "customer_number",
   "customer_type",
   "coverage_percentage",
+  "coverage_type",
   "is_child_customer",
   "parent_customer",
   "customer_mobile_no",
@@ -566,6 +567,12 @@
    "fieldname": "customer_oldinsuranceid",
    "fieldtype": "Data",
    "label": "Customer OldInsuranceID"
+  },
+  {
+   "fieldname": "coverage_type",
+   "fieldtype": "Select",
+   "label": "Coverage Type",
+   "options": "\nCash\nReceivable"
   }
  ],
  "icon": "fa fa-user",
@@ -579,7 +586,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-13 23:32:53.322348",
+ "modified": "2022-07-26 20:46:27.263288",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -16,6 +16,7 @@
   "patient_number",
   "first_name",
   "middle_name",
+  "third_name",
   "last_name",
   "patient_name",
   "sex",
@@ -30,9 +31,11 @@
   "inpatient_status",
   "report_preference",
   "mobile",
-  "phone_prefix",
   "phone",
   "email",
+  "country",
+  "city",
+  "nationality_code",
   "invite_user",
   "user_id",
   "patient_password",
@@ -196,15 +199,16 @@
    "options": "\nEmail\nPrint"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
+   "default": "962",
    "fieldname": "mobile",
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Mobile",
    "no_copy": 1,
-   "options": "Phone",
-   "read_only": 1
+   "options": "Phone"
   },
   {
    "bold": 1,
@@ -217,7 +221,6 @@
    "options": "Email"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "phone",
    "fieldtype": "Data",
    "in_filter": 1,
@@ -378,7 +381,8 @@
    "fieldname": "last_name",
    "fieldtype": "Data",
    "label": "Last Name",
-   "no_copy": 1
+   "no_copy": 1,
+   "reqd": 1
   },
   {
    "fieldname": "first_name",
@@ -389,6 +393,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "middle_name",
    "fieldtype": "Data",
    "label": "Middle Name (optional)",
@@ -513,17 +518,33 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "default": "00962",
-   "fieldname": "phone_prefix",
+   "fieldname": "third_name",
    "fieldtype": "Data",
-   "label": "Country Code"
+   "label": "Third Name"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "nationality_code",
+   "fieldtype": "Select",
+   "label": "Nationality Code",
+   "options": "\nJO\nPH\nGS\nEG\nIQ\nSY\nDZ\nGH\nFR\nUG\nQA\nKW\nSA\nPS\nCA\nES\nLY\nIN\nKZ\nNP\nSO\nAF\nLS\nLB\nKM\nBI\nAL\nAI\nAD\nAS\nAO\nAM\nAW\nAQ\nAG\nUA\nBD\nSE\nTN\nBG\nET\nGB"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-07-26 11:47:00.487852",
+ "modified": "2022-07-26 20:41:56.099745",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

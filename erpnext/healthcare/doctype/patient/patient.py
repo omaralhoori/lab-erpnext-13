@@ -31,8 +31,6 @@ class Patient(Document):
 		self.load_dashboard_info()
 
 	def validate(self):
-		if self.phone_prefix and self.phone:
-			self.mobile = self.phone_prefix + self.phone
 		self.set_full_name()
 
 	def before_insert(self):
@@ -89,7 +87,7 @@ class Patient(Document):
 
 	def set_full_name(self):
 		if self.last_name:
-			self.patient_name = ' '.join(filter(None, [self.first_name, self.last_name]))
+			self.patient_name = ' '.join(filter(None, [self.first_name, self.middle_name , self.third_name ,self.last_name]))
 		else:
 			self.patient_name = self.first_name
 
@@ -264,7 +262,11 @@ def create_customer(doc):
 		'default_currency': doc.default_currency,
 		'default_price_list': doc.default_price_list,
 		'language': doc.language,
-		'customer_mobile_no': doc.mobile
+		'customer_mobile_no': doc.mobile,
+		'country': doc.country,
+		'customer_number': doc.patient_number,
+		'national_id': doc.uid,
+		'gender': doc.sex
 	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	frappe.db.set_value('Patient', doc.name, 'customer', customer.name)
