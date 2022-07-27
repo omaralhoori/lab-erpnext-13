@@ -141,7 +141,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	insurance_party_type:function() {
 		this.frm.set_value("insurance_party",null)
 		this.frm.set_value("coverage_percentage",0)
-		console.log("ccccccccccccccccccccccccccccccccc");
 	},
 
 	//ibrahim
@@ -159,7 +158,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	//ibrahim
-	coverage_percentage: async function(frm) {
+	coverage_percentage: function(frm) {
 		//frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total", "total_discount_provider"]);
 			this.apply_coverage_on_item();
 		
@@ -167,12 +166,27 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	//ibrahim
 	apply_coverage_on_item:function() {
 		var me = this;
-		console.log("discount coveragge------------------", me.frm.doc.coverage_percentage,  me.frm.doc.coverage_type !='Cash');
 		//ibrahim
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
-			frappe.model.set_value(item.doctype, item.name, "discount_percentage", me.frm.doc.coverage_type !='Cash' ? me.frm.doc.coverage_percentage : 0);
-			});
+		if(me.frm.doc.coverage_type !='Cash'){
+			$.each(this.frm.doc["items"] || [], function(i, item) {
+				frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
+				frappe.model.set_value(item.doctype, item.name, "discount_percentage",me.frm.doc.coverage_percentage);
+				});
+		}else{
+			$.each(this.frm.doc["items"] || [], function(i, item) {
+				frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
+				frappe.model.set_value(item.doctype, item.name, "discount_percentage", 0);
+				});
+
+				// $.each(this.frm.doc["items"] || [], function(i, item) {
+				// 	//frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
+				// 	//frappe.model.set_value(item.doctype, item.name, "discount_percentage", 0);
+				// 	item.margin_type = 'Percentage';
+				// 	item.discount_percentage = 0;
+				
+				// });
+				// this.frm.refresh_field("items");
+		}
 	},
 
 	discount_percentage: function(doc, cdt, cdn) {

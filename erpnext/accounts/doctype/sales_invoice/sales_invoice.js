@@ -871,6 +871,22 @@ frappe.ui.form.on('Sales Invoice', {
 			})
 		}
 
+		if(frm.doc.coverage_type !='Cash'){
+			$.each(frm.doc["items"] || [], function(i, item) {
+				frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
+				frappe.model.set_value(item.doctype, item.name, "discount_percentage",frm.doc.coverage_percentage);
+				});
+		}else{
+			$.each(frm.doc["items"] || [], function(i, item) {
+				frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
+				frappe.model.set_value(item.doctype, item.name, "discount_percentage", 0);
+				});
+		}
+	},
+
+	apply_coverage_on_item:function(frm) {
+		//ibrahim
+		
 	},
 	// Healthcare
 	patient: function (frm) {
