@@ -19,6 +19,7 @@
   "customer_type",
   "coverage_percentage",
   "coverage_type",
+  "additional_discount_percentage",
   "is_child_customer",
   "parent_customer",
   "customer_mobile_no",
@@ -573,6 +574,13 @@
    "fieldtype": "Select",
    "label": "Coverage Type",
    "options": "\nCash\nReceivable"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.customer_type)",
+   "fieldname": "additional_discount_percentage",
+   "fieldtype": "Float",
+   "label": "Additional Discount Percentage"
   }
  ],
  "icon": "fa fa-user",
@@ -586,7 +594,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-26 20:46:27.263288",
+ "modified": "2022-07-28 02:28:33.372209",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

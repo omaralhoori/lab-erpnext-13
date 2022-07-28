@@ -869,6 +869,21 @@ frappe.ui.form.on('Sales Invoice', {
 					}
 				}
 			})
+
+			frappe.db.get_value("Customer", frm.doc.insurance_party, "default_price_list").then(result => {
+				if(result.message && result.message.default_price_list){
+					frm.set_value("selling_price_list", result.message.default_price_list)
+				}else{
+					frappe.db.get_single_value("Selling Settings", "default_insurance_price_list").then(default_pl => {
+						if(default_pl){
+							frm.set_value("selling_price_list", default_pl)
+						}else{
+							frm.set_value("selling_price_list", "")
+						}
+					})
+					
+				}
+			})
 		}
 
 		if(frm.doc.coverage_type !='Cash'){
@@ -881,6 +896,33 @@ frappe.ui.form.on('Sales Invoice', {
 				frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
 				frappe.model.set_value(item.doctype, item.name, "discount_percentage", 0);
 				});
+		}
+
+		frappe.db.get_value('Customer', frm.doc.insurance_party, ["additional_discount_percentage"]).then(result => {
+			if (result.message){
+				if(result.message.additional_discount_percentage){
+					frm.set_value("additional_discount_percentage", result.message.additional_discount_percentage)
+				}else{
+					frm.set_value("additional_discount_percentage", 0)
+				}
+			}
+		})
+	},
+	insurance_party_child: function(frm){
+		if (frm.doc.insurance_party_child && frm.doc.insurance_party_child != "") {
+			frappe.db.get_value("Customer", frm.doc.insurance_party_child, "default_price_list").then(result => {
+				if(result.message && result.message.default_price_list){
+					frm.set_value("selling_price_list", result.message.default_price_list)
+				}else{
+					frappe.db.get_single_value("Selling Settings", "default_insurance_price_list").then(default_pl => {
+						if(default_pl){
+							frm.set_value("selling_price_list", default_pl)
+						}else{
+							frm.set_value("selling_price_list", "")
+						}
+					})
+				}
+			})
 		}
 	},
 

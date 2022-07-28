@@ -242,7 +242,8 @@ class Patient(Document):
 
 @frappe.whitelist()
 def qrcode_gen(customer_password,docname):
-	codname = customer_password + '_' + docname 
+	patient_number = frappe.db.get_value("Patient", docname, "patient_number")
+	codname = customer_password + '_' + patient_number 
 
 	nyear= frappe.utils.now_datetime().strftime('%Y')
 	nmonth= frappe.utils.now_datetime().strftime('%m')

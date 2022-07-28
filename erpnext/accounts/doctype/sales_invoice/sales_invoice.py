@@ -88,7 +88,7 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def calculate_grand_total(self):
-		self.grand_total = self.total + self.total_discount_provider
+		self.grand_total += self.total_discount_provider
 
 	def validate(self):
 		super(SalesInvoice, self).validate()

@@ -702,7 +702,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if  (me.frm.doc.coverage_percentage != 0  && item.discount_updated < 3){
 				frappe.model.set_value(cdt, cdn,  "discount_updated", item.discount_updated + 1);
 				frappe.model.set_value(cdt, cdn,  "margin_type", 'Percentage');
-				console.log("discount items------------------", me.frm.doc.coverage_percentage, me.frm.doc.coverage_type);
 				frappe.model.set_value(cdt, cdn,  "discount_percentage", me.frm.doc.coverage_type !='Cash' ? me.frm.doc.coverage_percentage:0 );
 				
 			}

@@ -623,7 +623,6 @@
    "width": "50%"
   },
   {
-   "fetch_from": "insurance_party.default_price_list",
    "fieldname": "selling_price_list",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -2143,7 +2142,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-26 18:10:29.478115",
+ "modified": "2022-07-28 04:27:07.670521",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

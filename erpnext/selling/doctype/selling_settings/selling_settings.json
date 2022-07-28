@@ -18,6 +18,7 @@
   "close_opportunity_after_days",
   "item_price_settings_section",
   "selling_price_list",
+  "default_insurance_price_list",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
   "column_break_15",
@@ -29,7 +30,6 @@
   "so_required",
   "dn_required",
   "sales_update_frequency",
-  "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "hide_tax_id"
@@ -193,6 +193,12 @@
    "fieldname": "sales_transactions_settings_section",
    "fieldtype": "Section Break",
    "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "default_insurance_price_list",
+   "fieldtype": "Link",
+   "label": "Default Insurance Price List",
+   "options": "Price List"
   }
  ],
  "icon": "fa fa-cog",
@@ -200,7 +206,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-14 22:05:06.139820",
+ "modified": "2022-07-28 04:09:52.553838",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
