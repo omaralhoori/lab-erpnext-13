@@ -232,14 +232,14 @@
    "label": "Full Name",
    "no_copy": 1,
    "read_only": 1,
-   "search_index": 1
+   "unique": 1
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "HLC-PRAC-.YYYY.-",
+   "options": "PRAC-.YYYY.-",
    "report_hide": 1,
    "set_only_once": 1
   },
@@ -282,7 +282,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2021-08-24 10:42:08.513054",
+ "modified": "2022-07-29 08:31:54.622824",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",

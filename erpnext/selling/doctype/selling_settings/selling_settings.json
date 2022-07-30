@@ -9,8 +9,11 @@
   "customer_defaults_section",
   "cust_master_name",
   "customer_group",
+  "default_patient_group",
   "column_break_4",
   "territory",
+  "default_payer_group",
+  "default_insurance_group",
   "crm_settings_section",
   "campaign_naming_by",
   "default_valid_till",
@@ -199,6 +202,27 @@
    "fieldtype": "Link",
    "label": "Default Insurance Price List",
    "options": "Price List"
+  },
+  {
+   "fieldname": "default_patient_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Patient Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "default_payer_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Payer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "default_insurance_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Insurance Group",
+   "options": "Customer Group"
   }
  ],
  "icon": "fa fa-cog",
@@ -206,7 +230,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-07-28 04:09:52.553838",
+ "modified": "2022-07-28 20:07:51.402697",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
