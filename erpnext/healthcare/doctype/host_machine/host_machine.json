@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-07-29 05:51:42.316425",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "machine_name",
+  "machine_code",
+  "column_break_3",
+  "branch",
+  "status",
+  "section_break_6",
+  "ip_address",
+  "port_no",
+  "column_break_9",
+  "can_send",
+  "can_receive",
+  "check_status",
+  "section_break_13",
+  "machine_tests"
+ ],
+ "fields": [
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "label": "Machine Name"
+  },
+  {
+   "fieldname": "machine_code",
+   "fieldtype": "Data",
+   "label": "Machine Code"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Company"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nDisabled"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "label": "IP Address"
+  },
+  {
+   "default": "0",
+   "fieldname": "port_no",
+   "fieldtype": "Int",
+   "label": "Port No"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "can_send",
+   "fieldtype": "Check",
+   "label": "Can Send"
+  },
+  {
+   "default": "0",
+   "fieldname": "can_receive",
+   "fieldtype": "Check",
+   "label": "Can Receive"
+  },
+  {
+   "default": "0",
+   "fieldname": "check_status",
+   "fieldtype": "Check",
+   "label": "Check Status"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "machine_tests",
+   "fieldtype": "Table",
+   "label": "Machine Tests",
+   "options": "Host Machine Test"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-07-29 05:51:42.316425",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Host Machine",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

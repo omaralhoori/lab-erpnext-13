@@ -337,7 +337,11 @@ def create_normals(template, lab_test, group_template=None):
 		normal.report_code = group_template.worksheet_report_code
 
 	normal.control_type = template.control_type
-	
+	test_code = group_template.code or template.code
+	if test_code and test_code != "":
+		host_code = frappe.db.get_value("Host Machine Test", {'code': test_code}, ['host_code'])
+		if host_code:
+			normal.host_code=host_code
 	if group_template.alias and template.symbol:
 		normal.test_symbol = group_template.alias + "." + template.symbol
 	elif template.alias and template.symbol:
@@ -595,14 +599,28 @@ def get_lab_test_prescribed(patient):
 				and lp.lab_test_created=0
 		''', (patient))
 
+from erpnext.healthcare.socket_communication import send_msg_order
+
 @frappe.whitelist()
-def get_receive_sample(sample):
+def get_receive_sample(sample, test_name=None):
 
 	sample_docstatus = frappe.db.get_value("Sample Collection",{"name": sample}, "docstatus")
 
 	if str(sample_docstatus) == '0':
 		frappe.throw(_("Sample not collected / not submitted. {0}").format(sample), title=_("Sample Collection"))
 	
+	if test_name:
+		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code"])
+		tests = list(set([code['host_code'] for code in tests]))
+		lab_test = frappe.get_doc("Lab Test", test_name)
+		patient = frappe.get_doc("Patient", lab_test.patient)
+		if not patient: frappe.throw("Patient not defiend")
+		dob = "19710101"
+		if patient.dob: dob = str(patient.dob).replace("-", "")
+		gender = "M" if patient.sex == "Male" else "F"
+		sample = frappe.get_doc("Sample Collection", sample)
+		#sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
+		print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
 	return str(sample_docstatus)
 
 @frappe.whitelist()
@@ -634,3 +652,10 @@ def get_reject_sample(docname):
 		frappe.throw(_("Sample not released."), title=_("Sample Reject"))
 	
 	return sample_status
+
+import json
+@frappe.whitelist(allow_guest=True)
+def receive_results():
+	results = json.loads(frappe.request.data)
+	print("results received---------------------------------------------")
+	print(len(results))
