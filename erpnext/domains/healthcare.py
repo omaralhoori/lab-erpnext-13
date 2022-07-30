@@ -37,7 +37,11 @@ data = {
 			},
 			{
 				'fieldname': 'ref_practitioner', 'label': 'Referring Practitioner', 'fieldtype': 'Link', 'options': 'Healthcare Practitioner',
-				'insert_after': 'customer'
+				'insert_after': 'patient_name'
+			},
+			{
+				'fieldname': 'practitioner_name', 'label': 'Practitioner Name', 'fieldtype': 'Data', 'fetch_from': 'ref_practitioner.practitioner_name','read_only': 1,
+				'insert_after': 'patient_name'
 			}
 		],
 		'Sales Invoice Item': [

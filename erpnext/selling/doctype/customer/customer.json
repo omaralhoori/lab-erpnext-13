@@ -13,43 +13,33 @@
   "basic_info",
   "naming_series",
   "salutation",
+  "customer_type",
   "customer_name",
   "gender",
-  "customer_number",
-  "customer_type",
   "coverage_percentage",
   "coverage_type",
   "additional_discount_percentage",
   "is_child_customer",
   "parent_customer",
   "customer_mobile_no",
-  "national_id",
   "country",
-  "pan",
-  "lead_name",
-  "opportunity_name",
+  "national_id",
   "image",
   "column_break0",
-  "account_manager",
+  "customer_number",
   "customer_group",
   "territory",
   "tax_id",
-  "tax_withholding_category",
-  "default_bank_account",
-  "tax_category",
-  "so_required",
-  "dn_required",
   "disabled",
-  "is_internal_customer",
   "represents_company",
   "customer_oldid",
   "customer_oldinsuranceid",
   "allowed_to_transact_section",
   "companies",
   "currency_and_price_list",
-  "default_currency",
-  "column_break_14",
   "default_price_list",
+  "column_break_14",
+  "default_currency",
   "address_contacts",
   "address_html",
   "website",
@@ -82,7 +72,18 @@
   "default_commission_rate",
   "sales_team_section",
   "sales_team",
-  "customer_pos_id"
+  "customer_pos_id",
+  "hidden_fields_section",
+  "account_manager",
+  "pan",
+  "lead_name",
+  "opportunity_name",
+  "tax_withholding_category",
+  "default_bank_account",
+  "tax_category",
+  "so_required",
+  "dn_required",
+  "is_internal_customer"
  ],
  "fields": [
   {
@@ -140,6 +141,7 @@
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
@@ -169,8 +171,10 @@
   {
    "fieldname": "account_manager",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account Manager",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "customer_group",
@@ -204,6 +208,7 @@
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -217,6 +222,7 @@
    "default": "0",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Internal Customer"
   },
   {
@@ -272,6 +278,7 @@
    "options": "Language"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
@@ -304,6 +311,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "description": "Select, to make the customer searchable with these fields",
    "fieldname": "primary_address_and_contact_detail",
    "fieldtype": "Section Break",
@@ -362,6 +370,7 @@
    "collapsible": 1,
    "fieldname": "credit_limit_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Credit Limit and Payment Terms"
   },
   {
@@ -375,6 +384,7 @@
    "collapsible_depends_on": "customer_details",
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
@@ -413,6 +423,7 @@
    "collapsible": 1,
    "fieldname": "column_break_38",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Loyalty Points"
   },
   {
@@ -434,6 +445,7 @@
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Partner and Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group"
@@ -459,6 +471,7 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "sales_team_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Team"
   },
   {
@@ -489,12 +502,14 @@
    "default": "0",
    "fieldname": "so_required",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Sales Invoice Creation Without Sales Order"
   },
   {
    "default": "0",
    "fieldname": "dn_required",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Sales Invoice Creation Without Delivery Note"
   },
   {
@@ -505,6 +520,7 @@
   {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
   },
@@ -517,8 +533,9 @@
    "print_hide": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "default": "0",
-   "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.customer_type)",
+   "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\",\"Insurance Company Parties\"], doc.customer_type)",
    "fieldname": "coverage_percentage",
    "fieldtype": "Float",
    "label": "Coverage Percentage"
@@ -531,19 +548,23 @@
   {
    "fieldname": "customer_oldid",
    "fieldtype": "Data",
-   "label": "Customer OldID"
+   "label": "Customer OldID",
+   "read_only": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "customer_mobile_no",
    "fieldtype": "Data",
    "label": "Customer Mobile No"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "national_id",
    "fieldtype": "Data",
    "label": "National ID"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
@@ -567,20 +588,30 @@
   {
    "fieldname": "customer_oldinsuranceid",
    "fieldtype": "Data",
-   "label": "Customer OldInsuranceID"
+   "label": "Customer OldInsuranceID",
+   "read_only": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "coverage_type",
    "fieldtype": "Select",
    "label": "Coverage Type",
    "options": "\nCash\nReceivable"
   },
   {
+   "allow_in_quick_entry": 1,
    "default": "0",
-   "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.customer_type)",
+   "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\",\"Insurance Company Parties\"], doc.customer_type)",
    "fieldname": "additional_discount_percentage",
    "fieldtype": "Float",
    "label": "Additional Discount Percentage"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "hidden_fields_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden Fields"
   }
  ],
  "icon": "fa fa-user",
@@ -594,7 +625,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-28 02:28:33.372209",
+ "modified": "2022-07-29 06:50:23.255919",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -433,6 +433,10 @@ class SalesInvoice(SellingController):
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
 
+		#ibrahim
+		#if not self.additional_discount_account:
+		#	self.additional_discount_account = frappe.db.get_value("Company", self.company, "default_discount_account", cache=True)
+
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company)
 			self.party_account_currency = frappe.db.get_value("Account", self.debit_to, "account_currency", cache=True)

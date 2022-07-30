@@ -93,7 +93,7 @@ class Patient(Document):
 
 	def set_missing_customer_details(self):
 		if not self.customer_group:
-			self.customer_group = frappe.db.get_single_value('Selling Settings', 'customer_group') or get_root_of('Customer Group')
+			self.customer_group = frappe.db.get_single_value('Selling Settings', 'default_patient_group') or get_root_of('Customer Group')
 		if not self.territory:
 			self.territory = frappe.db.get_single_value('Selling Settings', 'territory') or get_root_of('Territory')
 		if not self.default_price_list:
@@ -165,7 +165,7 @@ class Patient(Document):
 
 	@frappe.whitelist()
 	def invoice_patient_registration(self):
-		if frappe.db.get_single_value('Healthcare Settings', 'registration_fee'):
+		if frappe.db.get_single_value('Healthcare Settings', 'collect_registration_fee'):
 			company = frappe.defaults.get_user_default('company')
 			if not company:
 				company = frappe.db.get_single_value('Global Defaults', 'default_company')

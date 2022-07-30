@@ -11,34 +11,40 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "basic_info",
   "naming_series",
+  "patient_name",
+  "column_break_3",
   "patient_number",
+  "column_break_5",
+  "status",
+  "section_break_4",
+  "basic_info",
   "first_name",
   "middle_name",
   "third_name",
   "last_name",
-  "patient_name",
   "sex",
-  "blood_group",
+  "image",
+  "column_break_13",
   "dob",
   "age_html",
-  "image",
-  "column_break_14",
-  "status",
+  "mobile",
   "uid",
+  "country",
+  "city",
+  "column_break_14",
+  "nationality_code",
+  "blood_group",
   "inpatient_record",
   "inpatient_status",
   "report_preference",
-  "mobile",
   "phone",
   "email",
-  "country",
-  "city",
-  "nationality_code",
-  "invite_user",
-  "user_id",
   "patient_password",
+  "old_system_data_section",
+  "file_no",
+  "column_break_33",
+  "member_id",
   "address_contacts",
   "address_html",
   "column_break_22",
@@ -47,7 +53,9 @@
   "fingerprints",
   "customer_details_section",
   "customer",
+  "invite_user",
   "customer_group",
+  "user_id",
   "territory",
   "column_break_24",
   "default_currency",
@@ -105,6 +113,7 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "HLC-PAT-.YYYY.-",
    "print_hide": 1,
@@ -538,13 +547,51 @@
    "fieldtype": "Select",
    "label": "Nationality Code",
    "options": "\nJO\nPH\nGS\nEG\nIQ\nSY\nDZ\nGH\nFR\nUG\nQA\nKW\nSA\nPS\nCA\nES\nLY\nIN\nKZ\nNP\nSO\nAF\nLS\nLB\nKM\nBI\nAL\nAI\nAD\nAS\nAO\nAM\nAW\nAQ\nAG\nUA\nBD\nSE\nTN\nBG\nET\nGB"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "old_system_data_section",
+   "fieldtype": "Section Break",
+   "label": "Old System Data"
+  },
+  {
+   "fieldname": "file_no",
+   "fieldtype": "Data",
+   "label": "File No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "member_id",
+   "fieldtype": "Data",
+   "label": "Member ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-07-26 20:41:56.099745",
+ "modified": "2022-07-29 07:54:39.953911",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
