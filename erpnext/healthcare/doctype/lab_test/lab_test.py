@@ -619,7 +619,7 @@ def get_receive_sample(sample, test_name=None):
 		if patient.dob: dob = str(patient.dob).replace("-", "")
 		gender = "M" if patient.sex == "Male" else "F"
 		sample = frappe.get_doc("Sample Collection", sample)
-		sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
+		sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
 		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
 	return str(sample_docstatus)
 
@@ -655,19 +655,37 @@ def get_reject_sample(docname):
 
 import json
 @frappe.whitelist(allow_guest=True)
-def receive_results():
+def receive_infinty_results():
 	lab_tests = json.loads(frappe.request.data)
 	print("results received---------------------------------------------")
 	print(len(lab_tests))
 	for lab_test in lab_tests:
 		results = lab_test['results']
 		for test in results:
-			query = """ UPDATE `tabNormal Test Result` as ntr 
-				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
-				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-				INNER JOIN `tabPatient` as p ON p.name=lt.patient
-				SET ntr.secondary_uom_result='{result}'
-				WHERE sc.collection_serial LIKE '%{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}'
-								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
-			frappe.db.sql(query)
+			if test.isnumeric():
+				query = """ UPDATE `tabNormal Test Result` as ntr 
+					INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+					INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+					INNER JOIN `tabPatient` as p ON p.name=lt.patient
+					SET ntr.result_value='{result}'
+					WHERE sc.collection_serial='bar-{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}'
+									""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
+				frappe.db.sql(query)
+	frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def receive_sysmex_results():
+	lab_tests = json.loads(frappe.request.data)
+	print("results received---------------------------------------------")
+	for lab_test in lab_tests:
+		results = lab_test['results']
+		for test in results:
+			if test.isnumeric():
+				query = """ UPDATE `tabNormal Test Result` as ntr 
+					INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+					INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+					SET ntr.result_value='{result}'
+					WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
+									""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
+				frappe.db.sql(query)
 	frappe.db.commit()

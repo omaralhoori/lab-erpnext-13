@@ -193,12 +193,12 @@
                                 </td>
                                 <td class="width-25">
                                     {% if test_result['si_unit_name']  %}
-                                        {{ test_result['result_value'] or '' }} &nbsp; &nbsp; {{ test_result['si_unit_name'] or '' }}
+                                        {{ test_result['secondary_uom_result'] or '' }} &nbsp; &nbsp; {{ test_result['si_unit_name'] or '' }}
                                     {% endif %}
                                 </td>
                                 <td class="width-25">
                                     {% if test_result['lab_test_uom'] %}
-                                    {{'%0.3f'| format(test_result['secondary_uom_result']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                    {{'%0.3f'| format(test_result['result_value']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -268,7 +268,7 @@
                                         {{ test_result['lab_test_name']  }}
                                     </td>
                                     <td class="width-33">
-                                        {{'%0.3f'| format(test_result['secondary_uom_result']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                        {{'%0.3f'| format(test_result['result_value']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
                                     </td>
                                     <td class="width-33">
                                         {%  if test_result['template'][0] %}
