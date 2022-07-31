@@ -548,10 +548,10 @@ class Item(Document):
 		"""Get defaults from Item Group"""
 		if self.item_defaults or not self.item_group:
 			return
-
+		#ibrahim
 		item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
 			['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
-			'expense_account','selling_cost_center','income_account'], as_dict = 1)
+			'expense_account','selling_cost_center','income_account','default_discount_account'], as_dict = 1)
 		if item_defaults:
 			for item in item_defaults:
 				self.append('item_defaults', {
@@ -562,7 +562,8 @@ class Item(Document):
 					'default_supplier': item.default_supplier,
 					'expense_account': item.expense_account,
 					'selling_cost_center': item.selling_cost_center,
-					'income_account': item.income_account
+					'income_account': item.income_account,
+					'discount_account': item.default_discount_account
 				})
 		else:
 			defaults = frappe.defaults.get_defaults() or {}
