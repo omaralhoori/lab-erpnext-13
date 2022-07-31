@@ -187,7 +187,11 @@ var get_receive_sample = function (frm) {
 	if (frm.doc.sample) {
 		frappe.call({
 			method: 'erpnext.healthcare.doctype.lab_test.lab_test.get_receive_sample',
-			args: { sample: frm.doc.sample },
+			args: { 
+				sample: frm.doc.sample,
+				test_name: frm.doc.name 
+			
+			},
 			callback: function (r) {
 				if (r.message != '0') { // draft
 					status_update(2, frm);

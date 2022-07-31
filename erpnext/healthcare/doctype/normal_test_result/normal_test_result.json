@@ -25,7 +25,8 @@
   "require_result_value",
   "control_type",
   "test_symbol",
-  "report_code"
+  "report_code",
+  "host_code"
  ],
  "fields": [
   {
@@ -189,11 +190,16 @@
    "fieldname": "control_type",
    "fieldtype": "Data",
    "label": "Control Type"
+  },
+  {
+   "fieldname": "host_code",
+   "fieldtype": "Data",
+   "label": "Host Code"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-07-21 02:29:50.739208",
+ "modified": "2022-07-29 11:53:07.166970",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Result",
