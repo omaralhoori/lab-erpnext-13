@@ -559,6 +559,10 @@ cur_frm.cscript.expense_account = function (doc, cdt, cdn) {
 	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "expense_account");
 }
 
+cur_frm.cscript.discount_account = function (doc, cdt, cdn) {
+	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "discount_account");
+}
+
 cur_frm.cscript.cost_center = function (doc, cdt, cdn) {
 	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
 }
@@ -842,6 +846,33 @@ frappe.ui.form.on('Sales Invoice', {
 	charged_percentage: function(frm){
 		if(frm.doc.charged_percentage || frm.doc.charged_percentage == 0){
 			frm.set_value("coverage_percentage", 100 - frm.doc.charged_percentage)
+		}
+	},
+	insurance_party_type: function (frm) {
+		if (frm.doc.insurance_party_type == "Insurance Company" ) {
+			frappe.db.get_single_value("Selling Settings", "default_insurance_price_list").then(default_pl => {
+				if(default_pl){
+					frm.set_value("selling_price_list", default_pl)
+				}else{
+					frm.set_value("selling_price_list", "")
+				}
+			})
+		}else if (frm.doc.insurance_party_type == "Payer" ) {
+			frappe.db.get_single_value("Selling Settings", "selling_price_list").then(default_pl => {
+				if(default_pl){
+					frm.set_value("selling_price_list", default_pl)
+				}else{
+					frm.set_value("selling_price_list", "")
+				}
+			})
+		}else{
+			frappe.db.get_single_value("Selling Settings", "selling_price_list").then(default_pl => {
+				if(default_pl){
+					frm.set_value("selling_price_list", default_pl)
+				}else{
+					frm.set_value("selling_price_list", "")
+				}
+			})
 		}
 	},
 	insurance_party: function (frm) {

@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:machine_name",
+ "creation": "2022-07-31 09:28:25.492306",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "machine_type",
+  "machine_name",
+  "ip_address",
+  "port_no",
+  "can_send",
+  "can_receive",
+  "check_status",
+  "baud_rate",
+  "data_bits",
+  "stop_bits",
+  "hardware_control",
+  "user_name",
+  "password",
+  "enumerate_id",
+  "is_connect",
+  "old_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "machine_type",
+   "fieldtype": "Link",
+   "label": "Machine Type",
+   "options": "Machine Type"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "machine_type.machine_name",
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "label": "Machine Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "port_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Port No",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "IP Address",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "can_send",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Can Send",
+   "options": "Yes\nNo"
+  },
+  {
+   "columns": 1,
+   "fieldname": "can_receive",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Can Receive",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "check_status",
+   "fieldtype": "Select",
+   "label": "Check Status",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "baud_rate",
+   "fieldtype": "Data",
+   "label": "Baud Rate"
+  },
+  {
+   "fieldname": "data_bits",
+   "fieldtype": "Data",
+   "label": "Data Bits"
+  },
+  {
+   "fieldname": "stop_bits",
+   "fieldtype": "Data",
+   "label": "Stop Bits"
+  },
+  {
+   "fieldname": "hardware_control",
+   "fieldtype": "Data",
+   "label": "Hardware Control"
+  },
+  {
+   "fieldname": "user_name",
+   "fieldtype": "Data",
+   "label": "User Name"
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "label": "Password"
+  },
+  {
+   "columns": 1,
+   "fieldname": "enumerate_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Enumerate ID"
+  },
+  {
+   "fieldname": "is_connect",
+   "fieldtype": "Select",
+   "label": "Is Connect",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "old_id",
+   "fieldtype": "Data",
+   "label": "Old ID",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-07-31 09:42:08.855013",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Machine Setup",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
