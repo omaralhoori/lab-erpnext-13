@@ -190,13 +190,12 @@
    "fieldname": "collection_serial",
    "fieldtype": "Data",
    "label": "Collection Series",
-   "read_only": 1,
    "unique": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-07 11:19:42.670818",
+ "modified": "2022-07-30 15:27:22.648437",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
