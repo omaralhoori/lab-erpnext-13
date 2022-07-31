@@ -337,11 +337,20 @@ def create_normals(template, lab_test, group_template=None):
 		normal.report_code = group_template.worksheet_report_code
 
 	normal.control_type = template.control_type
-	test_code = group_template.code or template.code
-	if test_code and test_code != "":
-		host_code = frappe.db.get_value("Host Machine Test", {'code': test_code}, ['host_code'])
-		if host_code:
+	test_code = None
+	
+	if group_template:
+		test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": group_template.name}, ["parent", "host_code"])
+		if not test_code:
+			test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": template.name}, ["parent", "host_code"])
+	else:
+		test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": template.name}, ["parent", "host_code"])
+
+	if test_code:
+		machine_name,host_code = test_code
+		if host_code and machine_name:
 			normal.host_code=host_code
+			normal.host_name=machine_name
 	if group_template.alias and template.symbol:
 		normal.test_symbol = group_template.alias + "." + template.symbol
 	elif template.alias and template.symbol:
@@ -619,7 +628,7 @@ def get_receive_sample(sample, test_name=None):
 		if patient.dob: dob = str(patient.dob).replace("-", "")
 		gender = "M" if patient.sex == "Male" else "F"
 		sample = frappe.get_doc("Sample Collection", sample)
-		sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
+		#sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
 		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
 	return str(sample_docstatus)
 
