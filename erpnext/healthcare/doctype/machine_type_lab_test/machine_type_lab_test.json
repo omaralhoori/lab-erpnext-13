@@ -34,9 +34,10 @@
    "options": "Machine Type Lab Test Template"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-31 09:49:18.565072",
+ "modified": "2022-07-31 13:11:55.439855",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Machine Type Lab Test",
