@@ -88,7 +88,8 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def calculate_grand_total(self):
-		self.grand_total += self.total_discount_provider
+		#self.grand_total += self.total_discount_provider
+		self.grand_total = self.grand_total
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
@@ -885,7 +886,9 @@ class SalesInvoice(SellingController):
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 		if grand_total and not self.is_internal_transfer():
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total -= self.total_discount_provider
+			#if self.insurance_party :
+			#	grand_total -= self.total_discount_provider
+
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
 			gl_entries.append(
@@ -906,25 +909,26 @@ class SalesInvoice(SellingController):
 		)
 	#ibrahim
 	def make_insurance_party_gl_entry(self, gl_entries):
-		if self.total_discount_provider > 0:
-			# frappe.msgprint("asdas")
-			# frappe.msgprint(self.insurance_party)
-			# frappe.msgprint(self.debit_to)
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.debit_to,
-					"party_type": "Customer",
-					"party": self.insurance_party,
-					"due_date": self.due_date,
-					"against": self.against_income_account,
-					"debit": self.total_discount_provider,
-					"debit_in_account_currency": self.total_discount_provider,
-					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center,
-					"project": self.project
-				}, self.party_account_currency, item=self)
-			)
+		if self.insurance_party :
+			if self.total_discount_provider > 0:
+				# frappe.msgprint("asdas")
+				# frappe.msgprint(self.insurance_party)
+				# frappe.msgprint(self.debit_to)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.insurance_party,
+						"due_date": self.due_date,
+						"against": self.against_income_account,
+						"debit": self.total_discount_provider,
+						"debit_in_account_currency": self.total_discount_provider,
+						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
+						"against_voucher_type": self.doctype,
+						"cost_center": self.cost_center,
+						"project": self.project
+					}, self.party_account_currency, item=self)
+				)
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
