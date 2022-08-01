@@ -159,10 +159,10 @@ def getCheckSumValue(frame):
 
 
 def send_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_code):
-    res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
-    if not res:
-        frappe.throw("Host Machine not defined")
-    ip_address, port_no =  res#"10.123.4.12", 9093 #
+    # res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
+    # if not res:
+    #     frappe.throw("Host Machine not defined")
+    ip_address, port_no =  "10.123.4.12", 9091 #
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         #try:
         s.connect((ip_address, port_no))

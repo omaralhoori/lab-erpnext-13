@@ -183,7 +183,7 @@
                 </td>
             </tr>
             {% for test_result in test_results %}
-                {% if test_result['lab_test_uom'] or test_result['si_unit_name'] %}
+                {% if (test_result['lab_test_uom'] or test_result['si_unit_name']) and (test_result['secondary_uom_result'] or 0 > 0 or test_result['result_value'] or 0> 0) %}
                 <tr >
                     <td class="b-bottom" style="padding: 5px">
                         <table>
@@ -262,7 +262,7 @@
                             </tr>
 
                             {% for test_result in results.get('WS3000') %}
-                                {% if test_result['lab_test_uom'] %}
+                                {% if test_result['lab_test_uom'] and test_result['result_value'] or 0> 0 %}
                                 <tr>
                                     <td class="width-33">
                                         {{ test_result['lab_test_name']  }}

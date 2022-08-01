@@ -31,7 +31,7 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
             ON ltt.name=ntr.template
             LEFT JOIN `tabLab Test UOM` as ltu1
             ON ltu1.name=ntr.lab_test_uom
-            LEFT JOIN `tabLab Test UOM` as ltu2 lab_test_uom
+            LEFT JOIN `tabLab Test UOM` as ltu2
             ON ltu2.name=ntr.secondary_uom
             WHERE ntr.parent='{test_name}' AND ntr.parenttype='Lab Test'
         """.format(test_name=test["test_name"]), as_dict=True)
