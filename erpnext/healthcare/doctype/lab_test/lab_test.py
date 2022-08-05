@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
+from frappe.database import query
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 
@@ -319,12 +320,17 @@ def create_normals(template, lab_test, group_template=None):
 	lab_test.normal_toggle = 1
 	normal = lab_test.append('normal_test_items')
 	normal.lab_test_name = template.lab_test_name
-	normal.lab_test_uom = template.lab_test_uom
-	if not template.lab_test_uom and group_template:
-		normal.lab_test_uom = group_template.lab_test_uom
-	normal.secondary_uom = template.secondary_uom
+
+	# UOM CHANGE
+	normal.lab_test_uom = template.secondary_uom
 	if not template.secondary_uom and group_template:
-		normal.secondary_uom = group_template.secondary_uom
+		normal.lab_test_uom = group_template.secondary_uom
+	
+	normal.secondary_uom = template.lab_test_uom
+	if not template.lab_test_uom and group_template:
+		normal.secondary_uom = group_template.lab_test_uom
+	
+
 	normal.conversion_factor = template.conversion_factor
 	if not template.conversion_factor and group_template:
 		normal.conversion_factor = group_template.conversion_factor
@@ -337,11 +343,29 @@ def create_normals(template, lab_test, group_template=None):
 		normal.report_code = group_template.worksheet_report_code
 
 	normal.control_type = template.control_type
-	test_code = group_template.code or template.code
-	if test_code and test_code != "":
-		host_code = frappe.db.get_value("Host Machine Test", {'code': test_code}, ['host_code'])
-		if host_code:
+	test_code = None
+	query = """
+		SELECT mtt.parent, mtt.host_code FROM `tabMachine Type Lab Test Template` AS mtt
+		INNER JOIN `tabMachine Type` AS mt
+		ON mt.name=mtt.parent
+		WHERE mt.disable=0 AND mtt.lab_test_template='{template}'
+		"""
+	if group_template:
+		test_code = frappe.db.sql(query.format(template=group_template.name), as_dict=True)
+		#test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": group_template.name}, ["parent", "host_code"])
+		if len(test_code) == 0:
+			test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
+	else:
+		test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
+	print("888888888888888888888888888888888888888")
+	print(template.name)
+	print(test_code)
+	if len(test_code) > 0:
+		
+		machine_name,host_code = test_code[0]['parent'], test_code[0]['host_code']
+		if host_code and machine_name:
 			normal.host_code=host_code
+			normal.host_name=machine_name
 	if group_template.alias and template.symbol:
 		normal.test_symbol = group_template.alias + "." + template.symbol
 	elif template.alias and template.symbol:
@@ -429,14 +453,14 @@ def create_sample_doc(template, patient, invoice, company = None):
 			if template.lab_test_template_type == "Single":
 				create_template_sample(template, sample_collection)
 			elif template.lab_test_template_type == "Multiline":
-				create_multiple_sample(template, sample_collection)
+				create_multiple_sample(template, sample_collection, add=True)
 			elif template.lab_test_template_type == "Grouped":
 				for group_item in template.lab_test_groups:
 					group_template = frappe.get_doc("Lab Test Template", group_item.lab_test_template)
 					if group_template.lab_test_template_type == "Single":
 						create_template_sample(group_template, sample_collection)
 					elif group_template.lab_test_template_type == "Multiline":
-						create_multiple_sample(group_template, sample_collection)
+						create_multiple_sample(group_template, sample_collection, add=True)
 
 			sample_collection.company = company
 			sample_collection.sales_invoice = invoice
@@ -472,15 +496,16 @@ def create_template_sample(template, sample_collection):
 
 def add_template_sample(template, sample_collection):
 	template_found = False
-	for sample_detail in sample_collection.sample_collection_detail:
-		if template.sample == sample_detail.sample:
-			qty = template.sample_qty or 1
-			quantity = int(sample_detail.sample_qty) + int(qty)
-			sample_detail.sample_qty = quantity
-			sample_detail.num_print = int(sample_detail.num_print or 1) + 1
-			sample_collection.num_print = int(sample_collection.num_print or 1) + 1
-			template_found = True
-			break
+	if sample_collection.get("sample_collection_detail"):
+		for sample_detail in sample_collection.sample_collection_detail:
+			if template.sample == sample_detail.sample:
+				qty = template.sample_qty or 1
+				quantity = int(sample_detail.sample_qty) + int(qty)
+				sample_detail.sample_qty = quantity
+				sample_detail.num_print = int(sample_detail.num_print or 1) + 1
+				sample_collection.num_print = int(sample_collection.num_print or 1) + 1
+				template_found = True
+				break
 	if not template_found:
 		sample_detail = sample_collection.append("sample_collection_detail")
 		sample_detail.sample = template.sample
@@ -610,17 +635,19 @@ def get_receive_sample(sample, test_name=None):
 		frappe.throw(_("Sample not collected / not submitted. {0}").format(sample), title=_("Sample Collection"))
 	
 	if test_name:
-		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code"])
-		tests = list(set([code['host_code'] for code in tests]))
-		lab_test = frappe.get_doc("Lab Test", test_name)
-		patient = frappe.get_doc("Patient", lab_test.patient)
-		if not patient: frappe.throw("Patient not defiend")
-		dob = "19710101"
-		if patient.dob: dob = str(patient.dob).replace("-", "")
-		gender = "M" if patient.sex == "Male" else "F"
-		sample = frappe.get_doc("Sample Collection", sample)
-		#sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
-		print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
+		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name"])
+		tests = list(set([code['host_code'] for code in tests if code['host_name'] == "Inifinty" ]))
+		if len(tests) > 0:
+			lab_test = frappe.get_doc("Lab Test", test_name)
+			patient = frappe.get_doc("Patient", lab_test.patient)
+			if not patient: frappe.throw("Patient not defiend")
+			dob = "19710101"
+			if patient.dob: dob = str(patient.dob).replace("-", "")
+			gender = "M" if patient.sex == "Male" else "F"
+			sample = frappe.get_doc("Sample Collection", sample)
+			print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
+			sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
+		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
 	return str(sample_docstatus)
 
 @frappe.whitelist()
@@ -655,7 +682,37 @@ def get_reject_sample(docname):
 
 import json
 @frappe.whitelist(allow_guest=True)
-def receive_results():
-	results = json.loads(frappe.request.data)
+def receive_infinty_results():
+	lab_tests = json.loads(frappe.request.data)
 	print("results received---------------------------------------------")
-	print(len(results))
+	print(len(lab_tests))
+	for lab_test in lab_tests:
+		results = lab_test['results']
+		for test in results:
+			if test['result'].isnumeric():
+				query = """ UPDATE `tabNormal Test Result` as ntr 
+					INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+					INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+					INNER JOIN `tabPatient` as p ON p.name=lt.patient
+					SET ntr.result_value='{result}'
+					WHERE sc.collection_serial='bar-{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}'
+									""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
+				frappe.db.sql(query)
+	frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def receive_sysmex_results():
+	lab_tests = json.loads(frappe.request.data)
+	print("results received---------------------------------------------")
+	for lab_test in lab_tests:
+		results = lab_test['results']
+		for test in results:
+			#if test['result'].isnumeric():
+			query = """ UPDATE `tabNormal Test Result` as ntr 
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				SET ntr.result_value='{result}'
+				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
+								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
+			frappe.db.sql(query)
+	frappe.db.commit()

@@ -183,7 +183,7 @@
                 </td>
             </tr>
             {% for test_result in test_results %}
-                {% if test_result['lab_test_uom'] or test_result['si_unit_name'] %}
+                {% if (test_result['lab_test_uom'] or test_result['si_unit_name']) and (test_result['secondary_uom_result'] or 0 > 0 or test_result['result_value'] or 0> 0) %}
                 <tr >
                     <td class="b-bottom" style="padding: 5px">
                         <table>
@@ -193,12 +193,12 @@
                                 </td>
                                 <td class="width-25">
                                     {% if test_result['si_unit_name']  %}
-                                        {{ test_result['result_value'] or '' }} &nbsp; &nbsp; {{ test_result['si_unit_name'] or '' }}
+                                        {{ test_result['secondary_uom_result'] or '' }} &nbsp; &nbsp; {{ test_result['si_unit_name'] or '' }}
                                     {% endif %}
                                 </td>
                                 <td class="width-25">
                                     {% if test_result['lab_test_uom'] %}
-                                    {{'%0.3f'| format(test_result['secondary_uom_result']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                    {{'%0.3f'| format(test_result['result_value']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -262,13 +262,13 @@
                             </tr>
 
                             {% for test_result in results.get('WS3000') %}
-                                {% if test_result['lab_test_uom'] %}
+                                {% if test_result['lab_test_uom'] and test_result['result_value'] or 0> 0 %}
                                 <tr>
                                     <td class="width-33">
                                         {{ test_result['lab_test_name']  }}
                                     </td>
                                     <td class="width-33">
-                                        {{'%0.3f'| format(test_result['secondary_uom_result']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                        {{'%0.3f'| format(test_result['result_value']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
                                     </td>
                                     <td class="width-33">
                                         {%  if test_result['template'][0] %}

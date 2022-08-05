@@ -159,25 +159,65 @@ def getCheckSumValue(frame):
 
 
 def send_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_code):
-    res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
-    if not res:
-        frappe.throw("Host Machine not defined")
-    ip_address, port_no = res
+    # res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
+    # if not res:
+    #     frappe.throw("Host Machine not defined")
+    ip_address, port_no =  "10.123.4.12", 9091 #
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         #try:
         s.connect((ip_address, port_no))
-        s.sendall(tcode("ENQ"))
-        msg = prepare_infinty_msg(file_no, dob, gender, sample_id, sample_date, tests)
+        s.send(tcode("ENQ"))
+        data = s.recv(1024)
+        print("data recv:" , data)
+        tests_joined = "\\".join(list(map(map_test_code, tests)))
+        msg = get_msg(file_no, dob, gender, sample_id, sample_date, tests_joined)
         s.sendall(msg)
+        data = s.recv(1024)
+        print("data recv:" , data)
+        data = s.recv(1024)
+        print("data recv:" , data)
+        data = s.recv(1024)
+        print("data recv:" , data)
         s.sendall(tcode("EOT"))
         recv_msg = s.recv(1024)
         if recv_msg == tcode('ACK'):
             frappe.msgprint("Order received")
+            print("order received")
             return True
         else:
             frappe.throw("Unable to receive order")
+            print("Unable to send order")
         # except:
         #     frappe.throw("Enable to connect to machine")
+
+def get_msg(file_no,dob, gender,sample_id, sample_date, tests):
+    msg = """H|\\^&|||ASTM-Host|||||PSM||P||18991230000000""".encode()
+
+    msg = tcode("STX") + b"1" + msg + tcode("CR") + tcode("ETX")
+
+    checksum = getCheckSumValue(msg.decode())
+    #print(msg.decode())
+    msg += checksum.encode()
+    msg += tcode("CR") + tcode("LF")
+
+    msg2 = tcode("STX") + f'2P|1||{file_no}||||{dob}|{gender}||||||||||||||||||||||||'.encode() + tcode("CR") + tcode("ETX")
+
+    checksum = getCheckSumValue(msg2.decode())
+    msg2 += checksum.encode()
+    msg2 += tcode("CR") + tcode("LF")
+
+    msg3 = tcode("STX") + f'3O|1|{sample_id}||{tests}||{sample_date}|{sample_date}||||A||||||||||||||||O'.encode() + tcode("CR") + tcode("ETX")
+    checksum = getCheckSumValue(msg3.decode())
+    msg3 += checksum.encode()
+    msg3 += tcode("CR") + tcode("LF")
+
+    msg4 = tcode("STX") + b'4L|1|F' + tcode("CR") + tcode("ETX")
+    checksum = getCheckSumValue(msg4.decode())
+    msg4 += checksum.encode()
+    msg4 += tcode("CR") + tcode("LF")
+
+    msg = msg + msg2 + msg3 + msg4
+    return msg
 
 def prepare_infinty_msg(file_no, dob, gender, sample_id, sample_date, tests):
     msg = """H|\\^&|||ASTM-Host|||||PSM||P||18991230000000"""
