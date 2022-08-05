@@ -301,7 +301,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"warehouse": warehouse,
 		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults),
 		"expense_account": expense_account or get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults) ,
-		"discount_account": None or get_default_discount_account(args, item_defaults),
+		"discount_account": None or get_default_discount_account(args, item_defaults,item_group_defaults),#ibrahim
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
@@ -604,9 +604,10 @@ def get_default_expense_account(args, item, item_group, brand):
 		or item_group.get("expense_account")
 		or brand.get("expense_account")
 		or args.expense_account)
-
-def get_default_discount_account(args, item):
+# ibrahim
+def get_default_discount_account(args, item , item_group):
 	return (item.get("default_discount_account")
+		or item_group.get("default_discount_account")
 		or args.discount_account)
 
 def get_default_deferred_account(args, item, fieldname=None):

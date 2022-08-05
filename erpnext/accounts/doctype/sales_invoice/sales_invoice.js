@@ -28,7 +28,38 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					if (response) me.frm.set_value("debit_to", response.message);
 				},
 			});
+			//ibrahim
+			if (this.frm.doc.insurance_party_type){
+				if (this.frm.doc.insurance_party){
+					frappe.call({
+						method:
+							"erpnext.accounts.party.get_party_account",
+						args: {
+							party_type: 'Customer',
+							party: this.frm.doc.insurance_party,
+							company: this.frm.doc.company
+						},
+						callback: (response) => {
+							if (response) me.frm.set_value("insurancepayer_account", response.message);
+						},
+					});
+				}
+			}
 		}
+		// ibrahim
+		frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting").then(enable_discount => {
+			if(enable_discount){
+				frappe.db.get_value("Company", this.frm.doc.company, "default_discount_account").then(result => {
+					if(result.message && result.message.default_discount_account){
+						me.frm.set_value("additional_discount_account", result.message.default_discount_account)
+					}else{
+						me.frm.set_value("additional_discount_account", "")
+					}
+				})
+			}else{
+				me.frm.set_value("additional_discount_account", "")
+			}
+		})
 	},
 
 	onload: function () {
@@ -340,6 +371,27 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 	},
 
+	// ibrahim
+	insurancepayer_account: function () {
+		var me = this;
+		if (this.frm.doc.insurancepayer_account) {
+			me.frm.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Account",
+					fieldname: "account_currency",
+					filters: { name: me.frm.doc.insurancepayer_account },
+				},
+				callback: function (r, rt) {
+					if (r.message) {
+						me.frm.set_value("payer_account_currency", r.message.account_currency);
+						me.set_dynamic_labels();
+					}
+				}
+			});
+		}
+	},
+
 	allocated_amount: function () {
 		this.calculate_total_advance();
 		this.frm.refresh_fields();
@@ -568,6 +620,17 @@ cur_frm.cscript.cost_center = function (doc, cdt, cdn) {
 }
 
 cur_frm.set_query("debit_to", function (doc) {
+	return {
+		filters: {
+			'account_type': 'Receivable',
+			'is_group': 0,
+			'company': doc.company
+		}
+	}
+});
+
+//ibrahim
+cur_frm.set_query("insurancepayer_account", function (doc) {
 	return {
 		filters: {
 			'account_type': 'Receivable',
@@ -848,7 +911,35 @@ frappe.ui.form.on('Sales Invoice', {
 			frm.set_value("coverage_percentage", 100 - frm.doc.charged_percentage)
 		}
 	},
+
+	//ibrahim
+	discount_amount: function(frm) {
+		if (frm.doc.discount_amount >= 0){
+			$.each(frm.doc["items"] || [], function(i, item) {
+				if ((!item.qty) && frm.doc.is_return) {
+					item.contract_discount = flt(item.rate * item.qty  * (frm.doc.additional_discount_percentage/100) * -1, precision("contract_discount", item));
+					if (item.discount_amount == 0){
+						item.contract_discount = 0
+						item.base_contract_discount = 0
+					}
+				
+				} else {
+					
+					item.contract_discount = flt(item.rate * item.qty * (frm.doc.additional_discount_percentage/100), precision("contract_discount", item));
+					if (item.discount_amount == 0){
+						item.contract_discount = 0
+						item.base_contract_discount = 0
+					}
+			}
+				//frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
+				});
+		}
+
+	},
+
 	insurance_party_type: function (frm) {
+
+
 		if (frm.doc.insurance_party_type == "Insurance Company" ) {
 			frappe.db.get_single_value("Selling Settings", "default_insurance_price_list").then(default_pl => {
 				if(default_pl){
@@ -866,6 +957,15 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			})
 		}else{
+			frm.set_value("additional_discount_percentage", 0)
+			frm.set_value("discount_amount", 0)
+			frm.set_value("base_discount_amount", 0)
+			frm.set_value("insurance_party", "")
+			frm.set_value("insurance_party_child", "")
+			frm.set_value("coverage_percentage", 0)
+			frm.set_value("charged_percentage", 0)
+			frm.set_value("coverage_type", "")
+
 			frappe.db.get_single_value("Selling Settings", "selling_price_list").then(default_pl => {
 				if(default_pl){
 					frm.set_value("selling_price_list", default_pl)
@@ -876,6 +976,21 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 	insurance_party: function (frm) {
+		//ibrahim
+		if (frm.doc.insurance_party){
+			frappe.call({
+				method:	"erpnext.accounts.party.get_party_account",
+				args: {
+					party_type: 'Customer',
+					party: frm.doc.insurance_party,
+					company: frm.doc.company
+				},
+				callback: function (res) {
+					if (res.message) frm.set_value("insurancepayer_account", res.message);
+				},
+			});
+		}
+
 		if (frm.doc.insurance_party && frm.doc.insurance_party != "") {
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.is_customer_parent",
