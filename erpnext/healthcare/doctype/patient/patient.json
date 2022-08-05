@@ -130,7 +130,7 @@
    "label": "Full Name",
    "no_copy": 1,
    "read_only": 1,
-   "search_index": 1
+   "unique": 1
   },
   {
    "fieldname": "sex",
@@ -516,6 +516,7 @@
    "fieldtype": "Data",
    "label": "Patient Number",
    "read_only": 1,
+   "reqd": 1,
    "unique": 1
   },
   {
@@ -591,7 +592,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-07-29 07:54:39.953911",
+ "modified": "2022-08-01 18:09:31.277597",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

@@ -52,6 +52,8 @@
   "sample_qty",
   "column_break_33",
   "sample_details",
+  "lab_test_attribute_section",
+  "lab_test_attribute",
   "medical_coding_section",
   "medical_code",
   "medical_code_standard",
@@ -732,10 +734,21 @@
    "fieldname": "medical_service_id",
    "fieldtype": "Data",
    "label": "Medical Service ID"
+  },
+  {
+   "fieldname": "lab_test_attribute_section",
+   "fieldtype": "Section Break",
+   "label": "Lab Test Attribute"
+  },
+  {
+   "fieldname": "lab_test_attribute",
+   "fieldtype": "Table",
+   "label": "Lab Test Attribute",
+   "options": "Lab Test Template Attribute"
   }
  ],
  "links": [],
- "modified": "2022-07-10 08:15:41.449784",
+ "modified": "2022-08-05 09:46:24.041521",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

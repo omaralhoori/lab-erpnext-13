@@ -691,8 +691,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item", "POS Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Purchase Receipt Item"]), cdt)
 			this.apply_pricing_rule_on_item(item);
 		else
-			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-				precision("rate", item));
+			//console.log('1111111111111111')
+			//ibrahim
+			//item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),precision("rate", item));
+			item.rate = flt(item.price_list_rate ,precision("rate", item));
 
 
 		//ibrahim && omar
@@ -1308,12 +1310,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	change_form_labels: function(company_currency) {
 		var me = this;
 
+		// ibrahim
 		this.frm.set_currency_labels(["base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
 			"base_paid_amount", "base_write_off_amount", "base_change_amount", "base_operating_cost",
 			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost",
-			"base_rounding_adjustment"], company_currency);
+			"base_rounding_adjustment","base_total_patient","base_total_discount_provider"], company_currency);
 
 		this.frm.set_currency_labels(["total", "net_total", "total_taxes_and_charges", "discount_amount",
 			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted",
@@ -1337,7 +1340,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_total_taxes_and_charges", "base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount",
 			"base_paid_amount", "base_write_off_amount", "base_operating_cost", "base_raw_material_cost",
-			"base_total_cost", "base_scrap_material_cost", "base_rounding_adjustment"],
+			"base_total_cost", "base_scrap_material_cost", "base_rounding_adjustment","base_total_patient","base_total_discount_provider"],
 		this.frm.doc.currency != company_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],

@@ -9,6 +9,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	apply_pricing_rule_on_item: function(item) {
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
+		// ibrahim
+		let item_patient_rate = item.rate;
+
 		if (in_list(["Sales Order", "Quotation"], item.parenttype) && item.blanket_order_rate) {
 			effective_item_rate = item.blanket_order_rate;
 		}
@@ -21,17 +24,38 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 
 		item_rate = flt(item.rate_with_margin , precision("rate", item));
+		//ibrahim 
+		item_patient_rate = item_rate;
+
+		// ibrahim
+		if (in_list(["Sales Invoice"], item.parenttype)) {
+			if (this.frm.doc.coverage_type == 'Cash'){
+				item.discount_percentage = 0.0;
+				item.discount_amount = 0.0;
+			}
+		}
 
 		if (item.discount_percentage) {
 			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
 		}
 
-		if (item.discount_amount) {
-			item_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
-			item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
-		}
+		// ibrahim 
+		if (in_list(["Sales Invoice"], item.parenttype) ) {
+			if (item.discount_amount) {
+				//item_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
+				item_patient_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
+				item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
+			}
+		}else{
+			if (item.discount_amount) {
+				item_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
+				item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
+			}
+		}		
 
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
+		//ibrahim 
+		frappe.model.set_value(item.doctype, item.name, "patient_rate", item_patient_rate);
 	},
 
 	calculate_taxes_and_totals: function(update_paid_amount) {
@@ -107,21 +131,45 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_item_values: function() {
 		let me = this;
 		if (!this.discount_amount_applied) {
+			
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.round_floats_in(item);
 				item.net_rate = item.rate;
-
+				// ibrahim	
 				if ((!item.qty) && me.frm.doc.is_return) {
 					item.amount = flt(item.rate * -1, precision("amount", item));
+					item.patient_share = flt(item.patient_rate * -1, precision("patient_share", item));
+					item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
+
+					if (me.frm.doc.additional_discount_percentage>=0){
+						item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) * -1, precision("contract_discount", item));
+						item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
+						if (item.discount_amount == 0){
+							item.contract_discount = 0
+							item.base_contract_discount = 0
+						}
+					}
 				} else {
 					item.amount = flt(item.rate * item.qty, precision("amount", item));
+					item.patient_share = flt(item.patient_rate * item.qty, precision("patient_share", item));
+					item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
+					
+					if (me.frm.doc.additional_discount_percentage>=0){
+						item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) , precision("contract_discount", item));
+						item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
+						if (item.discount_amount == 0){
+							item.contract_discount = 0
+							item.base_contract_discount = 0
+						}
+					}
 				}
 
 				item.net_amount = item.amount;
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
 
-				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
+				me.set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "amount", "contract_discount", "patient_share", "net_rate", "net_amount"]);
+				
 			});
 		}
 	},
@@ -256,6 +304,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_net_total: function() {
 		var me = this;
 		this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = this.frm.doc.total_discount_provider = 0.0;
+		this.frm.doc.base_total_discount_provider = this.frm.doc.total_patient = this.frm.doc.base_total_patient = 0.0;
+		this.frm.doc.discount_amount = this.frm.doc.base_discount_amount = 0.0;
+
 		//ibrahim
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total += item.amount;
@@ -264,9 +315,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 			me.frm.doc.total_discount_provider += item.discount_amount;
+			me.frm.doc.base_total_discount_provider += item.discount_amount;
+			me.frm.doc.total_patient += item.patient_share;
+			me.frm.doc.base_total_patient += item.base_patient_share;
+			me.frm.doc.discount_amount += item.contract_discount;
+			me.frm.doc.base_discount_amount += item.base_contract_discount;
 			});
 
-		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total", "total_discount_provider"]);
+		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total", "total_discount_provider", "base_total_discount_provider", "total_patient", "base_total_patient"]);
 	},
 
 	add_taxes_from_item_tax_template: function(item_tax_map) {
@@ -624,8 +680,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if (total_for_discount_amount) {
 				$.each(this.frm.doc["items"] || [], function(i, item) {
 					distributed_amount = flt(me.frm.doc.discount_amount) * item.net_amount / total_for_discount_amount;
-					item.net_amount = flt(item.net_amount - distributed_amount,
-						precision("base_amount", item));
+					//ibrahim
+					item.net_amount = flt(item.net_amount ,	precision("base_amount", item));
+					//item.net_amount = flt(item.net_amount - distributed_amount,	precision("base_amount", item));
 					net_total += item.net_amount;
 
 					// discount amount rounding loss adjustment if no taxes
@@ -633,8 +690,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							&& i == (me.frm.doc.items || []).length - 1) {
 						var discount_amount_loss = flt(me.frm.doc.net_total - net_total
 							- me.frm.doc.discount_amount, precision("net_total"));
-						item.net_amount = flt(item.net_amount + discount_amount_loss,
-							precision("net_amount", item));
+						item.net_amount = flt(item.net_amount + discount_amount_loss,precision("net_amount", item));
 					}
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -728,14 +784,21 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				let total_amount_for_payment = (this.frm.doc.redeem_loyalty_points && this.frm.doc.loyalty_amount)
 					? flt(total_amount_to_pay - this.frm.doc.loyalty_amount, precision("base_grand_total"))
 					: total_amount_to_pay;
-				this.set_default_payment(total_amount_for_payment, update_paid_amount);
+				//ibrahim
+				//this.set_default_payment(total_amount_for_payment, update_paid_amount);
+				this.set_default_payment(this.frm.doc.total_patient, update_paid_amount);
 				this.calculate_paid_amount();
 			}
 			this.calculate_change_amount();
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
+				
+				//ibrahim
+				//this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
+				//flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
+				
+				this.frm.doc.outstanding_amount =  flt(this.frm.doc.total_patient - flt(paid_amount)  +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 		}
 	},

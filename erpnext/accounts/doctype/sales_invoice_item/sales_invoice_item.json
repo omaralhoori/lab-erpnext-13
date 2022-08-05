@@ -29,6 +29,18 @@
   "section_break_17",
   "price_list_rate",
   "base_price_list_rate",
+  "section_break1",
+  "patient_rate",
+  "rate",
+  "amount",
+  "item_tax_template",
+  "col_break3",
+  "base_patient_rate",
+  "base_rate",
+  "base_amount",
+  "pricing_rules",
+  "stock_uom_rate",
+  "is_free_item",
   "discount_and_margin",
   "margin_type",
   "margin_rate_or_amount",
@@ -37,17 +49,16 @@
   "discount_percentage",
   "discount_amount",
   "base_rate_with_margin",
-  "section_break1",
-  "rate",
-  "amount",
-  "item_tax_template",
-  "col_break3",
-  "base_rate",
-  "base_amount",
-  "pricing_rules",
-  "stock_uom_rate",
-  "is_free_item",
   "section_break_21",
+  "patient_share",
+  "base_patient_share",
+  "section_break_44",
+  "contract_discount",
+  "base_contract_discount",
+  "section_break_47",
+  "net_credit_amount",
+  "base_net_credit_amount",
+  "section_break_50",
   "net_rate",
   "net_amount",
   "column_break_24",
@@ -277,19 +288,19 @@
    "fieldname": "discount_percentage",
    "fieldtype": "Percent",
    "in_list_view": 1,
-   "label": "Discount (%) on Price List Rate with Margin",
+   "label": "Discount (%)",
    "oldfieldname": "adj_rate",
    "oldfieldtype": "Float",
    "precision": "2",
    "print_hide": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "depends_on": "price_list_rate",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Discount Amount",
+   "label": "Discount Amt",
    "options": "currency"
   },
   {
@@ -307,10 +318,8 @@
   },
   {
    "bold": 1,
-   "columns": 2,
    "fieldname": "rate",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Rate",
    "oldfieldname": "export_rate",
    "oldfieldtype": "Currency",
@@ -318,11 +327,11 @@
    "reqd": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Amount",
+   "label": "Full Charge",
    "oldfieldname": "export_amount",
    "oldfieldtype": "Currency",
    "options": "currency",
@@ -347,7 +356,7 @@
   {
    "fieldname": "base_amount",
    "fieldtype": "Currency",
-   "label": "Amount (Company Currency)",
+   "label": "Full Charge (Company Currency)",
    "oldfieldname": "amount",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -841,12 +850,86 @@
    "hidden": 1,
    "label": "Discount Updated",
    "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "patient_share",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Patient Share",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_patient_share",
+   "fieldtype": "Currency",
+   "label": "Patient Share (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_44",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "contract_discount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Contract Discount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_contract_discount",
+   "fieldtype": "Currency",
+   "label": "Contract Discount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_47",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "net_credit_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Credit Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "base_net_credit_amount",
+   "fieldtype": "Currency",
+   "label": "Net Credit Amount (Company Currency)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "section_break_50",
+   "fieldtype": "Section Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "patient_rate",
+   "fieldtype": "Currency",
+   "label": "Patient Rate",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_patient_rate",
+   "fieldtype": "Currency",
+   "label": "Patient Rate (Company Currency)",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-06 19:26:04.567952",
+ "modified": "2022-08-02 13:31:37.925178",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
