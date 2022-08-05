@@ -1,7 +1,10 @@
 from ipaddress import ip_address
 import socket, errno
+from time import sleep
 
 import frappe
+import requests
+import re, json
 
 def start_socket():
     print( "------------------------------------------------------------------")
@@ -157,12 +160,13 @@ def getCheckSumValue(frame):
     
     return "0" + upper if len(upper) == 1   else upper
 
-
+import time
 def send_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_code):
     # res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
     # if not res:
     #     frappe.throw("Host Machine not defined")
-    ip_address, port_no =  "10.123.4.12", 9091 #
+    ip_address, port_no = "127.0.0.1", 9990 # "10.123.4.12", 9091 #
+    print("Order receivig")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         #try:
         s.connect((ip_address, port_no))
@@ -172,15 +176,19 @@ def send_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_cod
         tests_joined = "\\".join(list(map(map_test_code, tests)))
         msg = get_msg(file_no, dob, gender, sample_id, sample_date, tests_joined)
         s.sendall(msg)
-        data = s.recv(1024)
-        print("data recv:" , data)
-        data = s.recv(1024)
-        print("data recv:" , data)
-        data = s.recv(1024)
-        print("data recv:" , data)
+        # data = s.recv(1024)
+        # print("data recv:" , data)
+        # data = s.recv(1024)
+        # print("data recv:" , data)
+        # data = s.recv(1024)
+        # print("data recv:" , data)
         s.sendall(tcode("EOT"))
-        recv_msg = s.recv(1024)
-        if recv_msg == tcode('ACK'):
+        #recv_msg = s.recv(1024)
+        #time.sleep(1)
+        recv_msg=data
+        s.shutdown(socket.SHUT_RDWR)
+        s.close()
+        if recv_msg.endswith(tcode('ACK')) :#== tcode('ACK'):
             frappe.msgprint("Order received")
             print("order received")
             return True
@@ -251,3 +259,198 @@ def prepare_infinty_msg(file_no, dob, gender, sample_id, sample_date, tests):
     msg = msg + msg2 + msg3 + msg4
     print(msg)
     return msg
+
+#-----------------------------------Listeners---------------------------------
+
+def patient_info_infinty(result, p):
+    p_start = result.find(f"P|{p}|")
+    if p_start < 0 : return False
+    p_end=result.find("||||",p_start)
+    if p_end < 0: return False
+    patient_data = result[p_start + 4: p_end].split("|")
+    if len(patient_data) < 2: return False
+    n_p_start = result.find(f"P|{p+1}|")
+    return patient_data[0], patient_data[1], p_end,n_p_start
+
+def results_info_infinty(result, p_end, n_p_start):
+    res_no = 1
+    results = []
+    while True:
+        if n_p_start > 0:
+            r_start = result.find(f"R|{res_no}|",p_end, n_p_start)
+        else: r_start = result.find(f"R|{res_no}|",p_end)
+        if r_start < 0: break
+        r_end = result.find("|||",r_start)
+        if r_end < 0: break
+        result_data = result[r_start + 4: r_end].split("|")
+        if len(result_data) < 2: break
+       
+        res = {"code": result_data[-2].split("^")[-1], "result": result_data[-1]}
+        results.append(res)
+        res_no += 1
+        if res_no == 200: return []
+    return results
+
+def get_patient_results_infinty(res_msg):
+    res_msg = re.sub(b'\x17..\r\n\x02', b'', res_msg)
+    res_msg = res_msg.decode()
+    p = 1
+    results = []
+    while True:
+        res = patient_info_infinty(res_msg, p)
+        if not res or res[2] < 0: break
+        test_reuslts = results_info_infinty(res_msg, res[2], res[3])
+        p += 1
+        if len(test_reuslts) == 0: continue
+        results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
+        if p == 300:
+            return []
+    return results
+
+def start_infinty_listener(ip_address, port):
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind((ip_address, port))
+                print("listening")
+                s.listen()
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    msg = b""
+                    while True:
+                        data = conn.recv(63000)
+                        print("data received-------------------------------------------------------")
+                        print(data)
+                        if not data:
+                            break
+                        msg += data
+                        if data.endswith(chr(4).encode()):                    
+                            results = get_patient_results_infinty(msg)
+                            requests.post("http://127.0.0.1:8001/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(results))
+                            msg = b""
+                        conn.sendall(chr(6).encode())
+        except socket.error:
+            print("Socket cannot connect")
+            sleep(5)
+            continue
+
+#------------------------infinty orders-------------------
+def start_infinty_order_listener(ip_address, port, local_ip, local_port):
+    # res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
+    # if not res:
+    #     frappe.throw("Host Machine not defined")
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                print(f"Connecting client to {ip_address}:{port}---------------------------")
+                try:
+                    s.connect((ip_address, port))
+                    print(f"Connected")
+                    print(f"Binding server to {local_ip}:{local_port}---------------------------")
+                    while True:
+                        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as rcv_s:
+                            try:
+                                rcv_s.bind((local_ip, local_port))
+                                rcv_s.listen()
+                                print("listening to inner socket")
+                                conn, addr = rcv_s.accept()
+                                with conn:
+                                    print(f"Connected inner by {addr}")
+                                    msg = b''
+                                    while True:
+                                        print("Data receiving")
+                                        data = conn.recv(63000)
+                                        print("Data Received-----------------------------------------------")
+                                        msg += data
+                                        conn.sendall(chr(6).encode())
+                                        print(msg)
+                                        if msg.endswith(tcode("EOT")):
+                                            print("data sent-------------------")
+                                            s.sendall(msg)
+                                            msg = b''
+                                        if not data:
+                                            break
+                            except:
+                                print('Unable to connect inner socket')
+                            finally:
+                                rcv_s.shutdown(socket.SHUT_RDWR)
+                                rcv_s.close()
+                except socket.error:
+                    print('Unable to connect')
+                    time.sleep(2)
+                    pass
+        except:
+            continue
+
+#--------------------------------sysmex------------------------
+def get_sysmex_order(res_msg, o):
+    o_start = res_msg.find(f"O|{o}|")
+    if o_start < 0: return False
+    o_second_start =  res_msg.find(f"O|{o+1}|")
+    o_end = res_msg.find("^B|", o_start)
+    if o_end < 0 : return False
+    order = res_msg[o_start:o_end ].split("^")[-1].strip()
+    return order, o_end, o_second_start
+
+def get_sysmex_results(res_msg, order_start, second_order):
+    r = 1
+    results = []
+    while True:
+        if second_order > 0:
+            r_start = res_msg.find(f"R|{r}|", order_start, second_order)
+        else:
+            r_start = res_msg.find(f"R|{r}|", order_start)
+        if r_start < 0: break
+        result_code = res_msg[r_start: r_start + 30].split("|")
+        r += 1
+        if len(result_code) < 4: continue
+        code = result_code[2].split("^")[4]
+        result = result_code[3]
+        results.append({"code": code, "result": result})
+        
+    return results
+
+def parse_sysmex_msg(res_msg):
+    o = 1
+    res_msg = res_msg.decode()
+    parsed_results = []
+    while True:
+        order_info = get_sysmex_order(res_msg, o)
+        if not order_info: break
+        order, o_end, o_second_start = order_info
+        results = get_sysmex_results(res_msg,o_end,o_second_start)
+        o += 1
+        if len(results) == 0: continue
+        parsed_results.append({"order_id": order, "results": results })
+    return parsed_results
+
+def start_sysmex_listener(ip_address, port):
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind((ip_address, port))
+                s.listen()
+                print("listening")
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    msg = b""
+                    while True:
+                        data = conn.recv(63000)
+                        print("Data Received-----------------------------------------------")
+                        msg += data
+                        if not data:
+                            break
+                        if msg.endswith(b'L|1|N\r'):
+                            results = parse_sysmex_msg(msg)
+                            msg = b''
+                            print(results)
+                            if len(results) > 0:
+                                requests.post("http://127.0.0.1:8001/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
+
+                        conn.sendall(chr(6).encode())
+            except socket.error:
+                print("Socket cannot connect")
+                sleep(5)
+                continue

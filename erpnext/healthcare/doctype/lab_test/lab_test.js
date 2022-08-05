@@ -8,6 +8,129 @@ cur_frm.cscript.custom_refresh = function (doc) {
 	cur_frm.toggle_display('sb_normal', doc.normal_toggle);
 };
 
+const create_tests_result_type = (childTest)=>{
+	var result_type = undefined;
+	if (["Numeric", "Formula", "Ratio"].includes(childTest['control_type'])){
+		result_type = `<label>
+		Conv Result
+	</label>
+	<input class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
+	<label>
+		SI Result
+	</label>
+	<input class="test-input-control" disabled name="${childTest['name']}" value="${childTest['secondary_uom_result'] || ""}"/>
+`
+	}
+	else if (["Drop Down List"].includes(childTest['control_type'])){
+		result_type = `
+		<label>
+			Select Result
+		</label>
+		<select class="test-input-control freetext-select">
+			<option></option>
+			<option>First option</option>
+			<option> Second Option</option>
+	</select>
+		<label>
+		Result
+		</label>
+	<input class="input test-input-control" disabled name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
+
+	
+		`
+	}
+	else if (["Free Text"].includes(childTest['control_type'])){
+		result_type = `
+		<label>
+		Result
+		</label>
+	<input class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
+
+	<label>Default Option</label>
+	<select class="test-input-control freetext-select">
+			<option></option>
+			<option>First option</option>
+			<option> Second Option</option>
+	</select>
+		`
+	}else if (["Upload File"].includes(childTest['control_type'])){
+		result_type = `
+		<label>
+		Upload Result File
+		</label>
+		
+		<div class="upload-btn" name="${childTest['name']}" value="${childTest['result_value'] || ''}"></div>
+		`
+		
+	}
+
+	return result_type;
+}
+
+const format_tests_html = (tests) => {
+	var html = ""
+
+	for (var testTemplate in tests){
+		var child_tests_html = "";
+		for (var childTest of tests[testTemplate]){
+			var result_type = undefined;
+			result_type = create_tests_result_type(childTest)
+			if (result_type){
+				child_tests_html += `
+				<div class="child-test-container">
+					<label> <strong>${childTest['lab_test_name']} </strong></label>
+					<div class="test_result_container">
+					${result_type}
+					</div>
+				</div>
+			`;
+			}
+			
+		}
+		
+		html += `
+		<div class="test-container">
+			<h4>${testTemplate}</h4>
+			<div class="child-tests">
+			${child_tests_html}
+			</div>
+		</div>`
+	}
+	return html
+}
+const setup_input_listeners = () => {
+	$('.child-tests .input').change(function(value) {
+		//console.log($(this).attr('name'), $(this).val());
+		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "result_value", $(this).val());
+	})
+	$('.child-tests .freetext-select').change(function(value) {
+		//console.log($(this).attr('name'), $(this).val());
+		$(this).parent().find(".input").val($(this).val())
+		frappe.model.set_value('Normal Test Result',$(this).parent().find(".input").attr('name'), "result_value", $(this).val());
+	})
+	$('.child-tests .upload-btn').each(function(){
+		let me = this;
+		let input = frappe.ui.form.make_control({
+			df: {
+				"fieldtype": "Attach",
+				"label": "Item",
+				"all_private": false,
+				"all_public": true,
+				"fieldname": "file_url",
+				onchange: function () {
+					frappe.model.set_value('Normal Test Result',$(me).attr('name'), "result_value", this.value);
+				}
+			},
+			"all_private": false,
+				"all_public": true,
+			parent: this//$('.child-tests .upload-btn'),
+		});
+		input.set_value($(this).attr("value"))
+	input.make_input()
+	})
+	
+	
+}
 frappe.ui.form.on('Lab Test', {
 	setup: function (frm) {
 		frm.get_field('normal_test_items').grid.editable_fields = [
@@ -23,6 +146,24 @@ frappe.ui.form.on('Lab Test', {
 		];
 	},
 	refresh: function (frm) {
+		if (!frm.is_new()){
+			frm.add_custom_button(__('Print'), function(){
+				//let url = `/printview?doctype=Lab%20Test&name=${frm.doc.name}&trigger_print=1&format=Lab%20Test%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`;
+				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}`
+				window. open(url, '_blank')
+			})
+			var tests = {};
+			
+			cur_frm.doc.normal_test_items.forEach(item => {
+				if (! tests[item['report_code']]) {
+					tests[item['report_code']] = [];
+				}
+				tests[item['report_code']].push(item);
+			})
+			$(frm.fields_dict.lab_test_html.wrapper).html(format_tests_html(tests))
+			setup_input_listeners();
+
+		}
 		if (!frm.is_new() && frm.doc.docstatus != 1){
 			frm.add_custom_button(__('Send patient permitting message'), function() {
 				let d = new frappe.ui.Dialog({

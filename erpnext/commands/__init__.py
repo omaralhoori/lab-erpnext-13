@@ -46,6 +46,51 @@ def make_demo(context, site, domain='Manufacturing', days=100,
 			from erpnext.demo import demo
 			demo.make(domain, days)
 
+
+@click.command("start-infinty-results")
+@click.option("--ip", default="10.123.4.150")
+@click.option("--port", default=9090)
+@click.option("--back", is_flag=True, default=True)
+@pass_context
+def start_infinty_results(
+	context, ip="10.123.4.150",port=9090, back=True
+):
+	"Start Test Command"
+	from erpnext.healthcare.socket_communication import start_infinty_listener
+	print(f"Starting Infinty results server on {ip}:{port}")
+	start_infinty_listener(ip, int(port))
+
+@click.command("start-infinty-orders")
+@click.option("--ip", default="10.123.4.12")
+@click.option("--port", default=9091)
+@click.option("--local-ip", "local_ip", default="127.0.0.1")
+@click.option("--local-port","local_port", default=9990)
+@click.option("--back", is_flag=True, default=True)
+@pass_context
+def start_infinty_orders(
+	context, ip="10.123.4.12",port=9091,local_ip="127.0.0.1", local_port=9990, back=True
+):
+	"Start Test Command"
+	from erpnext.healthcare.socket_communication import start_infinty_order_listener
+	print(f"Starting Infinty order client on {ip}:{port}")
+	start_infinty_order_listener(ip, int(port), local_ip, int(local_port))
+
+
+@click.command("start-sysmex-results")
+@click.option("--ip", default="10.123.4.150")
+@click.option("--port", default=9094)
+@click.option("--back", is_flag=True, default=True)
+@pass_context
+def start_sysmex_results(
+	context, ip="10.123.4.150",port=9094, back=True
+):
+	"Start Test Command"
+	from erpnext.healthcare.socket_communication import start_sysmex_listener
+	print(f"Starting Infinty results server on {ip}:{port}")
+	start_sysmex_listener(ip, int(port))
+
+
+
 commands = [
-	make_demo
+	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders
 ]
