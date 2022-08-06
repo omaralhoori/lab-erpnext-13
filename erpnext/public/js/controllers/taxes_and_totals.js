@@ -661,8 +661,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	set_discount_amount: function() {
 		if(this.frm.doc.additional_discount_percentage) {
-			this.frm.doc.discount_amount = flt(flt(this.frm.doc[frappe.scrub(this.frm.doc.apply_discount_on)])
-				* this.frm.doc.additional_discount_percentage / 100, precision("discount_amount"));
+			//ibrahim
+			this.frm.doc.discount_amount = flt(this.frm.doc.discount_amount, precision("discount_amount"));
+			//this.frm.doc.discount_amount = flt(flt(this.frm.doc[frappe.scrub(this.frm.doc.apply_discount_on)])
+			//	* this.frm.doc.additional_discount_percentage / 100, precision("discount_amount"));
 		}
 	},
 

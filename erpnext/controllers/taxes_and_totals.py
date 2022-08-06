@@ -499,8 +499,10 @@ class calculate_taxes_and_totals(object):
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:
-			self.doc.discount_amount = flt(flt(self.doc.get(scrub(self.doc.apply_discount_on)))
-				* self.doc.additional_discount_percentage / 100, self.doc.precision("discount_amount"))
+			#ibrahim
+			None
+			#self.doc.discount_amount = flt(flt(self.doc.get(scrub(self.doc.apply_discount_on)))
+			#	* self.doc.additional_discount_percentage / 100, self.doc.precision("discount_amount"))
 
 	def apply_discount_amount(self):
 		if self.doc.discount_amount:

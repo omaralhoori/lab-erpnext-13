@@ -1106,7 +1106,8 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Contract Discount Percentage",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "discount_amount",
@@ -2179,7 +2180,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-06 11:54:00.448306",
+ "modified": "2022-08-06 19:50:57.838185",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
