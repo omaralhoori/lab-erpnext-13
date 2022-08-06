@@ -213,7 +213,9 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 
 	if against_voucher_type == "Sales Invoice":
 		party_account = frappe.db.get_value(against_voucher_type, against_voucher, "debit_to")
-		account_condition = "and account in ({0}, {1})".format(frappe.db.escape(account), frappe.db.escape(party_account))
+		#ibrahim
+		payer_account = frappe.db.get_value(against_voucher_type, against_voucher, "insurancepayer_account")
+		account_condition = "and account in ({0}, {1}, {2})".format(frappe.db.escape(account), frappe.db.escape(party_account), frappe.db.escape(party_account))
 	else:
 		account_condition = " and account = {0}".format(frappe.db.escape(account))
 

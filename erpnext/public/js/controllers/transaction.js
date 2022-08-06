@@ -79,7 +79,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			if(frm.doc.additional_discount_percentage && frm.doc.discount_amount) {
 				// Reset discount amount and net / grand total
-				frm.doc.discount_amount = 0;
+				//frm.doc.discount_amount = 0;
 				frm.cscript.calculate_taxes_and_totals();
 			}
 

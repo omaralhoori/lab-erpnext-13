@@ -882,7 +882,7 @@ class SalesInvoice(SellingController):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
-		if grand_total and not self.is_internal_transfer():
+		if grand_total and not self.is_internal_transfer() or self.total_discount_provider:
 			# Didnot use base_grand_total to book rounding loss gle
 			#if self.insurance_party :
 			#	grand_total -= self.total_discount_provider
@@ -923,8 +923,6 @@ class SalesInvoice(SellingController):
 							"debit": base_total_discount_provider_in_company_currency if self.payer_account_currency==self.company_currency else self.total_discount_provider,
 							"debit_in_account_currency": base_total_discount_provider_in_company_currency , #if self.party_account_currency==self.company_currency else total_discount_provider,
 									# grand_total_in_company_currency if self.party_account_currency==self.company_currency else grand_total,
-							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-							"against_voucher_type": self.doctype,
 							"cost_center": self.cost_center,
 							"project": self.project
 						}, self.payer_account_currency, item=self)
@@ -938,8 +936,6 @@ class SalesInvoice(SellingController):
 							"against": self.insurancepayer_account,
 							"debit": self.discount_amount,
 							"debit_in_account_currency": base_discount_amount_in_company_currency if additional_discount_account_currency==self.company_currency else self.discount_amount,
-							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-							"against_voucher_type": self.doctype,
 							"cost_center": self.cost_center,
 							"project": self.project
 						}, additional_discount_account_currency, item=self)
@@ -953,8 +949,6 @@ class SalesInvoice(SellingController):
 							"against": self.additional_discount_account,
 							"credit": self.discount_amount,
 							"credit_in_account_currency": base_discount_amount_in_company_currency if self.party_account_currency==self.company_currency else self.discount_amount,
-							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-							"against_voucher_type": self.doctype,
 							"cost_center": self.cost_center,
 							"project": self.project
 						}, self.payer_account_currency, item=self)
@@ -1031,32 +1025,43 @@ class SalesInvoice(SellingController):
 
 						account_currency = get_account_currency(income_account)
 						discount_currency = get_account_currency(item.discount_account)
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": income_account,
-								"against": self.customer,
-								"credit": flt(base_amount, item.precision("base_net_amount")),
-								"credit_in_account_currency": (flt(base_amount, item.precision("base_net_amount"))
-									if account_currency==self.company_currency
-									else flt(amount, item.precision("net_amount"))),
-								"cost_center": item.cost_center,
-								"project": item.project or self.project
-							}, account_currency, item=item)
-						)
+						#ibrahim
+						if base_amount > 0:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": income_account,
+									"against": self.customer,
+									"credit": flt(base_amount, item.precision("base_net_amount")),
+									"credit_in_account_currency": (flt(base_amount, item.precision("base_net_amount"))
+										if account_currency==self.company_currency
+										else flt(amount, item.precision("net_amount"))),
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
 						#ibrahim
 						if not self.insurance_party :
 							if item.discount_amount > 0:
 								gl_entries.append(
 									self.get_gl_dict({
-										"account": self.discount_account,
+										"account": item.discount_account,
 										"against": income_account,
+										"debit": item.discount_amount,
+										"debit_in_account_currency": item.discount_amount,
+										"cost_center": item.cost_center,
+										"project": item.project or self.project
+									}, account_currency, item=item)
+								)
+								gl_entries.append(
+									self.get_gl_dict({
+										"account": income_account,
+										"against": item.discount_account,
 										"credit": item.discount_amount,
 										"credit_in_account_currency": item.discount_amount,
 										"cost_center": item.cost_center,
 										"project": item.project or self.project
 									}, account_currency, item=item)
 								)
-
 						#if self.insurance_party and self.coverage_percentage > 0:
 						#	if item.discount_amount > 0:
 						#		gl_entries.append(

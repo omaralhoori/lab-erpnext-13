@@ -350,6 +350,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "company.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -2178,7 +2179,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-04 19:55:11.534612",
+ "modified": "2022-08-06 11:54:00.448306",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "NRG-.#",
  "creation": "2022-07-05 23:22:17.822410",
@@ -144,7 +145,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-06 22:46:57.609928",
+ "modified": "2022-08-05 20:05:58.136334",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Range",

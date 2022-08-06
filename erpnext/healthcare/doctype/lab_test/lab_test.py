@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.database import query
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 

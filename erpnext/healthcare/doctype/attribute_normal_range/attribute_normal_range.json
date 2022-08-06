@@ -11,7 +11,9 @@
   "gender",
   "criteria_text",
   "range_text",
-  "si_range_text"
+  "si_range_text",
+  "effective_date",
+  "expiry_date"
  ],
  "fields": [
   {
@@ -69,12 +71,26 @@
    "in_list_view": 1,
    "label": "SI Range Text",
    "read_only": 1
+  },
+  {
+   "fetch_from": "normal_range_id.effective_date",
+   "fieldname": "effective_date",
+   "fieldtype": "Date",
+   "label": "Effective Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "normal_range_id.expiry_date",
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-11 21:16:55.089319",
+ "modified": "2022-08-05 19:56:54.913468",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Attribute Normal Range",

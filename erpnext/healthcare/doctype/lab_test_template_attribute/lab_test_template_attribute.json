@@ -21,14 +21,14 @@
   {
    "columns": 2,
    "fieldname": "form_attribute_name",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Form Attribute Name"
   },
   {
    "columns": 2,
    "fieldname": "form_attribute_description",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Form Attribute Description"
   },
@@ -90,7 +90,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-08-05 09:44:29.064080",
+ "modified": "2022-08-05 11:13:17.830621",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template Attribute",
