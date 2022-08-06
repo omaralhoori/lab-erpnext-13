@@ -112,7 +112,8 @@
   "form_id",
   "form_name",
   "medical_test_id",
-  "medical_service_id"
+  "medical_service_id",
+  "attribute_options"
  ],
  "fields": [
   {
@@ -745,10 +746,16 @@
    "fieldtype": "Table",
    "label": "Lab Test Attribute",
    "options": "Lab Test Template Attribute"
+  },
+  {
+   "fieldname": "attribute_options",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Attribute Options"
   }
  ],
  "links": [],
- "modified": "2022-08-05 09:46:24.041521",
+ "modified": "2022-08-06 01:19:10.894865",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

@@ -3,7 +3,7 @@ import pdfkit
 import tempfile
 import os
 
-from erpnext.healthcare.doctype.lab_test.lab_test_print import get_lab_test_result
+from erpnext.healthcare.doctype.lab_test.lab_test_print import get_lab_test_result, user_test_result
 
 no_cache = 1
 
@@ -18,22 +18,27 @@ def get_context(context):
         return print_error_message("usercode is not correct")
     
     patient_password, patient_name = usercode[0], usercode[1]
-
-    if not frappe.db.get_value("Patient", {"name": patient_name, "patient_password": patient_password}, "name"):
+    patient = frappe.db.get_value("Patient", {"patient_number": patient_name, "patient_password": patient_password}, "name")
+    if not patient:
         return print_error_message("Patient name or password is not correct")
 
     show_all_results = frappe.db.get_single_value("Healthcare Settings", "show_all_results")
-
-    test_results = get_lab_test_result(patient_name, show_all_results or False)
-    if len(test_results) == 0:
-        return print_error_message("No test found")
-    elif len(test_results) == 1:
-        html = frappe.render_template('templates/test_result/test_result.html', test_results[0])
-
-    
+    lab_test = frappe.db.get_value("Lab Test", {"patient": patient}, ["name"])
+    print(lab_test)
+    html = user_test_result(lab_test)
     return {
         "body": html
     }
+    # test_results = get_lab_test_result(patient, show_all_results or False)
+    # if len(test_results) == 0:
+    #     return print_error_message("No test found")
+    # elif len(test_results) == 1:
+    #     html = frappe.render_template('templates/test_result/test_result.html', test_results[0])
+
+    
+    # return {
+    #     "body": html
+    # }
 
 
 @frappe.whitelist(allow_guest=True)

@@ -37,7 +37,7 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
             ON ltu1.name=ntr.lab_test_uom
             LEFT JOIN `tabLab Test UOM` as ltu2
             ON ltu2.name=ntr.secondary_uom
-            WHERE ntr.parent='{test_name}' AND ntr.parenttype='Lab Test'
+            WHERE ntr.parent='{test_name}' AND ntr.parenttype='Lab Test' AND ntr.status IN ('Finalized', 'Released')
         """.format(test_name=test["test_name"]), as_dict=True)
 
         results = {}
@@ -56,11 +56,11 @@ def map_test_report_code(test_results):
 
 def get_normal_ranges(lab_test_template):
     return frappe.db.sql("""
-    SELECT anr.range_type, anr.gender, anr.criteria_text, anr.range_text, anr.si_range_text, 
+    SELECT nr.range_type, nr.gender, nr.criteria_text, nr.range_text, nr.si_range_text, 
     nr.age_range, nr.from_age, nr.from_age_period, nr.to_age, nr.to_age_period
     FROM `tabAttribute Normal Range` as anr
     INNER JOIN `tabNormal Range` as nr ON nr.name = anr.normal_range_id
-    WHERE anr.parent='{lab_test_template}' AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge'
+    WHERE anr.parent='{lab_test_template}' AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (nr.effective_date IS NULL OR now() >nr.effective_date) AND (nr.expiry_date IS NULL OR now() < nr.expiry_date)
     """.format(lab_test_template=lab_test_template), as_dict=True)
 
 def filter_range_by_gender(range, patient):
@@ -132,6 +132,28 @@ def filter_ranges(ranges, patient):
 
 import pdfkit
 @frappe.whitelist(allow_guest=True)
+def user_test_result(lab_test, get_html=True):
+    # f = open("test-print.html", "r")
+    # html  = f.read()
+    # f.close()
+    test_doc = frappe.get_doc("Lab Test", lab_test)
+    if not test_doc:
+        frappe.throw("Lab Test not found")
+    html = get_print_html_base()
+    header = get_print_header(test_doc)
+    tbody = get_print_tbody(test_doc, header, True)
+    body = get_print_body(header, tbody)
+    html = html.format(body=body,style=get_print_style())
+
+    if get_html:
+        return html
+    options = {"--margin-top" : "40mm", "--margin-bottom": "20mm", "quiet":""}
+    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
+    frappe.local.response.type = "pdf"
+
+
+@frappe.whitelist()
 def lab_test_result(lab_test):
     # f = open("test-print.html", "r")
     # html  = f.read()
@@ -205,24 +227,24 @@ def get_print_body(header, tbody):
     </table>
     """
 
-def get_print_tbody(test_doc, header):
+def get_print_tbody(test_doc, header, only_finalized=False):
     body = ""
-    chemistry_tests = get_chemistry_tests(test_doc)
+    chemistry_tests = get_chemistry_tests(test_doc, only_finalized)
     if len(chemistry_tests) > 0:
         chemistry_table = format_chemistry_tests(chemistry_tests, header)
         body += chemistry_table
-    hematology_tests = get_hematology_tests(test_doc)
+    hematology_tests = get_hematology_tests(test_doc, only_finalized)
     if len(hematology_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_hematology_tests(hematology_tests, header)
-    routine_tests = get_routine_tests(test_doc)
+    routine_tests = get_routine_tests(test_doc, only_finalized)
     if len(routine_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_routine_tests(routine_tests, header)
     return body
 
-def get_routine_tests(test_doc):
-    tests = get_tests_by_item_group(test_doc.name, "Routine")
+def get_routine_tests(test_doc, only_finalized=False):
+    tests = get_tests_by_item_group(test_doc.name, "Routine", only_finalized)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -284,8 +306,8 @@ def format_routine_page_tests(tests, header, test_name):
     </table>"""
     return html
 
-def get_hematology_tests(test_doc):
-    tests = get_tests_by_item_group(test_doc.name, "Hematology")
+def get_hematology_tests(test_doc, only_finalized=False):
+    tests = get_tests_by_item_group(test_doc.name, "Hematology", only_finalized)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -341,8 +363,8 @@ def format_hematology_tests(tests, header):
     </table>"""
     return html
 
-def get_chemistry_tests(test_doc):
-    tests = get_tests_by_item_group(test_doc.name, "Chemistry")
+def get_chemistry_tests(test_doc, only_finalized=False):
+    tests = get_tests_by_item_group(test_doc.name, "Chemistry", only_finalized)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -421,7 +443,9 @@ def format_chemistry_tests(tests, header=""):
     </table>"""
     return html
 
-def get_tests_by_item_group(test_name, item_group):
+def get_tests_by_item_group(test_name, item_group, only_finalized=False):
+    where_stmt = " lt.status IN ('Finalized', 'Released')"
+    if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     return frappe.db.sql("""
         SELECT  
         lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, tltt.order,
@@ -436,8 +460,8 @@ def get_tests_by_item_group(test_name, item_group):
         LEFT JOIN `tabLab Test UOM` as stu
         ON stu.name=lt.secondary_uom
 
-        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}"
-        """.format(test_name=test_name, item_group=item_group), as_dict=True)
+        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt}
+        """.format(test_name=test_name, item_group=item_group, where_stmt=where_stmt), as_dict=True)
 
 def get_print_html_base():
     return """
@@ -513,3 +537,4 @@ def get_print_style():
     }
         </style>
     """
+

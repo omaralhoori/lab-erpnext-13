@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.database import query
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 
@@ -628,7 +627,7 @@ def get_lab_test_prescribed(patient):
 				and lp.lab_test_created=0
 		''', (patient))
 
-from erpnext.healthcare.socket_communication import send_msg_order
+from erpnext.healthcare.socket_communication import send_infinty_msg_order
 
 @frappe.whitelist()
 def get_receive_sample(sample, test_name=None):
@@ -639,21 +638,44 @@ def get_receive_sample(sample, test_name=None):
 		frappe.throw(_("Sample not collected / not submitted. {0}").format(sample), title=_("Sample Collection"))
 	
 	if test_name:
-		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name"])
-		tests = list(set([code['host_code'] for code in tests if code['host_name'] == "Inifinty" ]))
-		print(tests)
-		if len(tests) > 0:
-			lab_test = frappe.get_doc("Lab Test", test_name)
-			patient = frappe.get_doc("Patient", lab_test.patient)
-			if not patient: frappe.throw("Patient not defiend")
-			dob = "19710101"
-			if patient.dob: dob = str(patient.dob).replace("-", "")
-			gender = "M" if patient.sex == "Male" else "F"
-			sample = frappe.get_doc("Sample Collection", sample)
-			print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
-			sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
+		send_received_msg_order(sample, test_name)
+	# 	tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name"])
+	# 	tests = list(set([code['host_code'] for code in tests if code['host_name'] == "Inifinty" ]))
+	# 	print(tests)
+	# 	if len(tests) > 0:
+	# 		lab_test = frappe.get_doc("Lab Test", test_name)
+	# 		patient = frappe.get_doc("Patient", lab_test.patient)
+	# 		if not patient: frappe.throw("Patient not defiend")
+	# 		dob = "19710101"
+	# 		if patient.dob: dob = str(patient.dob).replace("-", "")
+	# 		gender = "M" if patient.sex == "Male" else "F"
+	# 		sample = frappe.get_doc("Sample Collection", sample)
+	# 		print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
+	# 		sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
 		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
 	return str(sample_docstatus)
+def send_received_msg_order(sample, test_name):
+	sent = False
+	if frappe.get_cached_value("Healthcare Settings",None, "send_test_order"):
+		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name"])
+		infinty_tests = list(set([code['host_code'] for code in tests if (code['host_name'] == "Inifinty" and  code['host_code'] and code['host_code'] != "") ]))
+		print(infinty_tests)
+		if len(infinty_tests) > 0:
+			sent = send_infinty_msg_with_patient(test_name, sample, infinty_tests)
+		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
+	return sent
+
+def send_infinty_msg_with_patient(test_name,sample, infinty_tests):
+	lab_test = frappe.get_doc("Lab Test", test_name)
+	patient = frappe.get_doc("Patient", lab_test.patient)
+	if not patient: frappe.throw("Patient not defiend")
+	dob = "19710101"
+	if patient.dob: dob = str(patient.dob).replace("-", "")
+	gender = "M" if patient.sex == "Male" else "F"
+	sample = frappe.get_doc("Sample Collection", sample)
+	print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), infinty_tests, 107)
+	sent = send_infinty_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), infinty_tests, 107)
+	return sent
 
 @frappe.whitelist()
 def get_release_sample(doclab,docname):
@@ -726,3 +748,46 @@ def receive_sysmex_results():
 								""".format(set_stmt = set_stmt, result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
 			frappe.db.sql(query)
 	frappe.db.commit()
+
+@frappe.whitelist()
+def get_test_attribute_options(lab_test):
+	return frappe.db.sql("""
+	SELECT tntr.template, tltt.attribute_options  FROM `tabLab Test Template` tltt
+		INNER JOIN `tabNormal Test Result` tntr
+		ON tntr.template = tltt.name
+		WHERE tntr.parent="{lab_test}" AND tltt.control_type IN ('Free Text', 'Drop Down List')
+	""".format(lab_test=lab_test), as_dict=True)
+
+
+@frappe.whitelist()
+def apply_test_button_action(action, tests, test_name, sample):
+	where_stmt = ""
+	if action == "Received":
+		where_stmt = "(status is NULL or status not in ('Released', 'Finalized'))"
+	elif action == "Released":
+		where_stmt = "status='Received'"
+	elif action == 'Finalized':
+		where_stmt = "status='Released'"
+	elif action == 'Rejected':
+		where_stmt = "status='Released'"
+	else: frappe.throw("Undefined action: " + action)
+	print(where_stmt)
+	print(tests)
+	tests = json.loads(tests)
+	tests = [f"'{s}'" for s in tests]
+	query= """
+	UPDATE `tabNormal Test Result` SET status='{action}'
+	WHERE name in ({tests}) AND {where_stmt}
+	""".format(action=action, tests=",".join(tests), where_stmt=where_stmt)
+
+	frappe.db.sql(query)
+	frappe.db.commit()
+
+	if action == "Received":
+		infinty_tests = frappe.db.sql("""
+			SELECT host_code FROM `tabNormal Test Result`
+			WHERE name in ({tests}) AND status='Received' AND host_name='Inifinty'
+		""".format(tests=",".join(tests)), as_dict=True)
+		infinty_tests = list(set([test['host_code'] for test in infinty_tests if test['host_code'] and test['host_code'] !=""]))
+		if len(infinty_tests) > 0:
+			send_infinty_msg_with_patient(test_name, sample, infinty_tests)

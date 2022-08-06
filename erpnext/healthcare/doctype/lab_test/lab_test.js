@@ -8,13 +8,13 @@ cur_frm.cscript.custom_refresh = function (doc) {
 	cur_frm.toggle_display('sb_normal', doc.normal_toggle);
 };
 
-const create_tests_result_type = (childTest)=>{
+const create_tests_result_type =  (childTest, options) => {
 	var result_type = undefined;
 	if (["Numeric", "Formula", "Ratio"].includes(childTest['control_type'])){
 		result_type = `<label>
 		Conv Result
 	</label>
-	<input class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
+	<input ${disable_input(childTest['status'])}  class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
 	<label>
 		SI Result
 	</label>
@@ -22,14 +22,22 @@ const create_tests_result_type = (childTest)=>{
 `
 	}
 	else if (["Drop Down List"].includes(childTest['control_type'])){
+		
+		// var attributes_list = await frappe.db.get_list("Lab Test Template Attribute", {filters: {"parent": childTest['template']}, fields: ["form_attribute_description"]})
+		// var attributes = attributes_list.map((attr) => {
+		// 	return `
+		// 	<option>${attr['form_attribute_description']}</option>
+		// 	`;
+		// })
+		// var attributes_list = await frappe.db.get_value("Lab Test Template", childTest['template'],  ["attribute_options"])
+		// var attributes = attributes_list['attribute_options']
 		result_type = `
 		<label>
 			Select Result
 		</label>
-		<select class="test-input-control freetext-select">
+		<select ${disable_input(childTest['status'])}  class="test-input-control freetext-select">
 			<option></option>
-			<option>First option</option>
-			<option> Second Option</option>
+			${options}
 	</select>
 		<label>
 		Result
@@ -40,17 +48,18 @@ const create_tests_result_type = (childTest)=>{
 		`
 	}
 	else if (["Free Text"].includes(childTest['control_type'])){
+		// var attributes_list = await frappe.db.get_value("Lab Test Template", childTest['template'],  ["attribute_options"])
+		// var attributes = attributes_list['attribute_options']
 		result_type = `
 		<label>
 		Result
 		</label>
-	<input class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
+	<input ${disable_input(childTest['status'])}  class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
 
 	<label>Default Option</label>
-	<select class="test-input-control freetext-select">
+	<select ${disable_input(childTest['status'])} class="test-input-control freetext-select">
 			<option></option>
-			<option>First option</option>
-			<option> Second Option</option>
+			${options}
 	</select>
 		`
 	}else if (["Upload File"].includes(childTest['control_type'])){
@@ -59,28 +68,49 @@ const create_tests_result_type = (childTest)=>{
 		Upload Result File
 		</label>
 		
-		<div class="upload-btn" name="${childTest['name']}" value="${childTest['result_value'] || ''}"></div>
+		<div  ${disable_input(childTest['status'])}  class="upload-btn" name="${childTest['name']}" value="${childTest['result_value'] || ''}"></div>
 		`
 		
 	}
 
 	return result_type;
 }
-
-const format_tests_html = (tests) => {
-	var html = ""
-
+const disable_input = (status) => {
+	return status == "Rejected" || status == "Finalized" ? 'disabled' : ''; 
+}
+const format_tests_html = (tests, attr_options) => {
+	var html = "";
+	if (frappe.user.has_role('LabTest Approver')){
+		html = `<div> 
+	<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
+	<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
+	</div>`
+	}else{
+		html = `<div> 
+		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
+		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+		</div>`
+	}
+	html = html = `<div> 
+	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
+	<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+	<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
+	<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
+	</div>`
+	var options = attr_options.reduce((obj, item) => (obj[item.template] = item.attribute_options, obj) ,{});
 	for (var testTemplate in tests){
 		var child_tests_html = "";
 		for (var childTest of tests[testTemplate]){
 			var result_type = undefined;
-			result_type = create_tests_result_type(childTest)
+			result_type = create_tests_result_type(childTest, options[childTest['template']])
 			if (result_type){
 				child_tests_html += `
-				<div class="child-test-container">
+				<div class="child-test-container ${childTest['status']}">
 					<label> <strong>${childTest['lab_test_name']} </strong></label>
 					<div class="test_result_container">
 					${result_type}
+					<input type="checkbox" value="${childTest['name']}" class="result-checkbox" />
+					${childTest['status'] || ""}
 					</div>
 				</div>
 			`;
@@ -98,7 +128,7 @@ const format_tests_html = (tests) => {
 	}
 	return html
 }
-const setup_input_listeners = () => {
+const setup_input_listeners = (frm) => {
 	$('.child-tests .input').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
 		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "result_value", $(this).val());
@@ -114,22 +144,51 @@ const setup_input_listeners = () => {
 			df: {
 				"fieldtype": "Attach",
 				"label": "Item",
-				"all_private": false,
-				"all_public": true,
 				"fieldname": "file_url",
 				onchange: function () {
 					frappe.model.set_value('Normal Test Result',$(me).attr('name'), "result_value", this.value);
 				}
 			},
-			"all_private": false,
-				"all_public": true,
 			parent: this//$('.child-tests .upload-btn'),
 		});
 		input.set_value($(this).attr("value"))
 	input.make_input()
 	})
+	$('.result-checkbox').change(function() {
+		if ($(".result-checkbox:checked").length > 0)
+			{
+				toggle_test_selected_buttons(true);
+			}
+			else
+			{
+				toggle_test_selected_buttons(false);
+			}
+	});
+
+	$('.test-selected-btn').click(function() {
+		let button = $(this).attr("name");
+		var searchIDs = $(".result-checkbox:checked").map(function(){
+			//frappe.model.set_value('Normal Test Result', $(this).val(), "status", button) ;
+			return $(this).val();
+		  }).get();
+		frappe.call({
+			method: "erpnext.healthcare.doctype.lab_test.lab_test.apply_test_button_action",
+			args: {
+				action: button,
+				tests: searchIDs,
+				sample: frm.doc.sample,
+				test_name: frm.doc.name
+			},
+			callback: () =>
+			{
+				frm.reload_doc();
+			}
+		})
+	})
 	
-	
+}
+const toggle_test_selected_buttons = (value) => {
+	$('.test-selected-btn').prop('disabled', !value);
 }
 frappe.ui.form.on('Lab Test', {
 	setup: function (frm) {
@@ -160,8 +219,16 @@ frappe.ui.form.on('Lab Test', {
 				}
 				tests[item['report_code']].push(item);
 			})
-			$(frm.fields_dict.lab_test_html.wrapper).html(format_tests_html(tests))
-			setup_input_listeners();
+			frappe.call({
+				method: "erpnext.healthcare.doctype.lab_test.lab_test.get_test_attribute_options",
+				args: {
+					lab_test: frm.doc.name
+				},
+			}).then(res => {
+				$(frm.fields_dict.lab_test_html.wrapper).html( format_tests_html(tests, res.message))
+				setup_input_listeners(frm);
+			})
+			
 
 		}
 		if (!frm.is_new() && frm.doc.docstatus != 1){
@@ -203,9 +270,15 @@ frappe.ui.form.on('Lab Test', {
 				get_lab_test_prescribed(frm);
 			});
 		}
-		frm.add_custom_button(__('Reject Sample'), function () {
-			get_rejects_sample(frm);
-		});
+		if (frappe.user.has_role('LabTest Approver')) {
+			frm.add_custom_button(__('Reject Sample'), function () {
+				get_rejects_sample(frm);
+			});
+			frm.add_custom_button(__('Finalize'), function () {
+				get_finalize_test(frm);
+			});
+		}
+		
 
 		frm.add_custom_button(__('Release Sample'), function () {
 			get_release_sample(frm);
@@ -347,24 +420,43 @@ var get_receive_sample = function (frm) {
 //ibrahim
 var get_release_sample = function (frm) {
 	if (frm.doc.status == 'Received' || frm.doc.status == 'Rejected') {
-		frappe.call({
-			method: 'erpnext.healthcare.doctype.lab_test.lab_test.get_release_sample',
-			args: { 
-				doclab: frm.doc,
-				docname: frm.doc.name
-			},
-			callback: function (r) {
-				if (r.message == 'Received' || r.message == 'Rejected') { 
-					status_update(3, frm);
-				}
+		let confirm = false;
+		for(var item in  frm.doc.normal_test_items){
+			if(!item.result_value){
+				confirm = true;
+				break;
 			}
-		});
+		}
+		if (confirm){
+			frappe.confirm('Not all test results have been entered. Are you sure you want to proceed?',
+					() => {
+						release_sample(frm);
+					}, () => {
+						// action to perform if No is selected
+					})
+		}else{
+			release_sample(frm)
+		}
+		
 	}
 	else {
 		frappe.msgprint(__('Sample not received or rejected'));
 	}
 };
-
+const release_sample = function (frm){
+	frappe.call({
+		method: 'erpnext.healthcare.doctype.lab_test.lab_test.get_release_sample',
+		args: { 
+			doclab: frm.doc,
+			docname: frm.doc.name
+		},
+		callback: function (r) {
+			if (r.message == 'Received' || r.message == 'Rejected') { 
+				status_update(3, frm);
+			}
+		}
+	});
+}
 //ibrahim
 var get_rejects_sample = function (frm) {
 	if (frm.doc.status == 'Released'  ) {
@@ -384,6 +476,10 @@ var get_rejects_sample = function (frm) {
 		frappe.msgprint(__('Sample not released'));
 	}
 };
+
+var get_finalize_test = function(frm) {
+	
+}
 
 
 var show_lab_tests = function (frm, lab_test_list) {

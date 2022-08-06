@@ -26,6 +26,8 @@ class LabTestTemplate(Document):
 
 	def on_update(self):
 		# If change_in_item update Item and Price List
+		options = ["<option>" + item.form_attribute_description + "</option>" for item in self.lab_test_attribute]
+		self.db_set("attribute_options", "".join(options))
 		if self.change_in_item and self.is_billable and self.item:
 			self.update_item()
 			item_price = self.item_price_exists()

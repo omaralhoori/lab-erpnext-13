@@ -35,6 +35,8 @@
   "lab_test_result_settings_section",
   "result_url",
   "show_all_results",
+  "send_test_order",
+  "use_branch_code",
   "column_break_30",
   "result_sms_message",
   "sb_in_ac",
@@ -406,11 +408,25 @@
    "fieldname": "result_sms_message",
    "fieldtype": "Small Text",
    "label": "Result SMS Message"
+  },
+  {
+   "default": "1",
+   "description": "Enabling this will send test order to machines when sample is collected.",
+   "fieldname": "send_test_order",
+   "fieldtype": "Check",
+   "label": "Send Test Order"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this will add branch code to sample barcode.",
+   "fieldname": "use_branch_code",
+   "fieldtype": "Check",
+   "label": "Use Branch Code"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-07-09 01:41:09.458256",
+ "modified": "2022-08-05 22:42:16.872949",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

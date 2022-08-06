@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from erpnext.healthcare.doctype.lab_test.lab_test import send_received_msg_order
 
 import frappe
 from frappe import _
@@ -20,8 +21,17 @@ class SampleCollection(Document):
 	
 	def before_insert(self):
 		format_ser = "bar-" + ".########"
+		if frappe.get_cached_value("Healthcare Settings",None, "use_branch_code"):
+			abbr = frappe.db.get_value("Company", self.company, ["abbr"])
+			if abbr:
+				format_ser = "bar-" + abbr + ".########"
+			
 		prg_serial = make_autoname(format_ser, "Sample Collection")
 		self.collection_serial = prg_serial
 
 	def on_submit(self):
 		validate_invoice_paid(self.patient, self.sales_invoice)
+		test_name = frappe.db.get_value("Lab Test", {"sample": self.name}, ["name"])
+		if test_name:
+			send_received_msg_order(self.name, test_name)
+			frappe.db.set_value("Lab Test", test_name, "status","Received")

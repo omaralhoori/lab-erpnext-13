@@ -26,3 +26,17 @@
     box-shadow: none;
     transition: none;
 }
+
+.freetext-select{
+    width: 300px;
+}
+
+.child-test-container.Rejected .test_result_container{
+    background-color: rgba(255,0,0,0.8);
+    padding: 5px 0;
+}
+
+.child-test-container.Finalized .test_result_container{
+    background-color: rgba(6,218,6,0.8);
+    padding: 5px 0;
+}

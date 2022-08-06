@@ -161,42 +161,44 @@ def getCheckSumValue(frame):
     return "0" + upper if len(upper) == 1   else upper
 
 import time
-def send_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_code):
+def send_infinty_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_code):
     # res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
     # if not res:
     #     frappe.throw("Host Machine not defined")
     ip_address, port_no = "127.0.0.1", 9990 # "10.123.4.12", 9091 #
     print("Order receivig")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        #try:
-        s.connect((ip_address, port_no))
-        s.send(tcode("ENQ"))
-        data = s.recv(1024)
-        print("data recv:" , data)
-        tests_joined = "\\".join(list(map(map_test_code, tests)))
-        msg = get_msg(file_no, dob, gender, sample_id, sample_date, tests_joined)
-        s.sendall(msg)
-        # data = s.recv(1024)
-        # print("data recv:" , data)
-        # data = s.recv(1024)
-        # print("data recv:" , data)
-        # data = s.recv(1024)
-        # print("data recv:" , data)
-        s.sendall(tcode("EOT"))
-        #recv_msg = s.recv(1024)
-        #time.sleep(1)
-        recv_msg=data
-        s.shutdown(socket.SHUT_RDWR)
-        s.close()
-        if recv_msg.endswith(tcode('ACK')) :#== tcode('ACK'):
-            frappe.msgprint("Order received")
-            print("order received")
-            return True
-        else:
-            frappe.throw("Unable to receive order")
-            print("Unable to send order")
-        # except:
-        #     frappe.throw("Enable to connect to machine")
+        try:
+            s.connect((ip_address, port_no))
+            s.send(tcode("ENQ"))
+            data = s.recv(1024)
+            print("data recv:" , data)
+            tests_joined = "\\".join(list(map(map_test_code, tests)))
+            msg = get_msg(file_no, dob, gender, sample_id, sample_date, tests_joined)
+            s.sendall(msg)
+            # data = s.recv(1024)
+            # print("data recv:" , data)
+            # data = s.recv(1024)
+            # print("data recv:" , data)
+            # data = s.recv(1024)
+            # print("data recv:" , data)
+            s.sendall(tcode("EOT"))
+            #recv_msg = s.recv(1024)
+            #time.sleep(1)
+            recv_msg=data
+            s.shutdown(socket.SHUT_RDWR)
+            s.close()
+            if recv_msg.endswith(tcode('ACK')) :#== tcode('ACK'):
+                frappe.msgprint("Order received")
+                print("order received")
+                return True
+            else:
+                frappe.msgprint("Unable to receive order")
+                print("Unable to send order")
+                return False
+        except:
+            frappe.msgprint("Unable to receive order")
+            False
 
 def get_msg(file_no,dob, gender,sample_id, sample_date, tests):
     msg = """H|\\^&|||ASTM-Host|||||PSM||P||18991230000000""".encode()
