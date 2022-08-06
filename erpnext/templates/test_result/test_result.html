@@ -81,208 +81,254 @@
 <body>
 <table>
     <thead>
-        <table>
-            <tr>
-                <td class="center">
-                    <img height="160" src="{{frappe.utils.get_url()}}/files/josante-logo.png" alt="josante_logo">
-                </td>
-            </tr>
-            <tr>
-                <td class="b-bottom">
-                    <table>
+        <tr>
+            <td>
+                <table>
+                    <thead>
                         <tr>
-                            <td class="width-50">
+                            <td class="center">
+                                <img height="160" src="{{frappe.utils.get_url()}}/files/josante-logo.png" alt="josante_logo">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="b-bottom">
                                 <table>
                                     <tr>
-                                        <td>
-                                            Patient Name
+                                        <td class="width-50">
+                                            <table>
+                                                <tr>
+                                                    <td>
+                                                        Patient Name
+                                                    </td>
+                                                    <td>
+                                                        : <span class="red">{{ patient_name }}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>File No</td>
+                                                    <td>: {{ patient_number }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Visit No. </td>
+                                                    <td>: {{ sales_invoice }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Consultant</td>
+                                                    <td>: {{ practitioner_name or 'outpatient Doctor' }}</td>
+                                                </tr>
+                                            </table>
                                         </td>
-                                        <td>
-                                            : <span class="red">{{ patient_name }}</span>
+                                        <td class="width-50">
+                                            <table>
+                                                <tr><td>
+                                                    Age
+                                                </td>
+                                                <td>
+                                                    : {{ patient_age }}
+                                                </td></tr>
+                                                <tr>
+                                                    <td>Gender</td>
+                                        <td>: {{ patient_gender }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>External No.</td>
+                                                    <td>: </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Sample Date</td>
+                                        <td>: {{ frappe.utils.get_datetime(sample_date).strftime("%d/%m/%Y %r",) }}</td>
+                                                </tr>
+                                            </table>
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td>File No</td>
-                                        <td>: {{ patient_number }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Visit No. </td>
-                                        <td>: {{ sales_invoice }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Consultant</td>
-                                        <td>: {{ practitioner_name or 'outpatient Doctor' }}</td>
+                                        
                                     </tr>
                                 </table>
                             </td>
-                            <td class="width-50">
+                        </tr>
+                        <!-- <tr  >
+                            <td class="b-bottom">
                                 <table>
-                                    <tr><td>
-                                        Age
-                                    </td>
-                                    <td>
-                                        : {{ patient_age }}
-                                    </td></tr>
                                     <tr>
-                                        <td>Gender</td>
-                            <td>: {{ patient_gender }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>External No.</td>
-                                        <td>: </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sample Date</td>
-                            <td>: {{ frappe.utils.get_datetime(sample_date).strftime("%d/%m/%Y %r",) }}</td>
+                                        <td class="width-50">
+                                            Laboratory Result
+                                        </td>
+                                        <td class="width-25">
+                                            SI Units
+                                        </td>
+                                        <td class="width-25">
+                                            Conventional Units 
+                                        </td>
                                     </tr>
                                 </table>
                             </td>
-                            
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <!-- <tr  >
-                <td class="b-bottom">
-                    <table>
-                        <tr>
-                            <td class="width-50">
-                                Laboratory Result
-                            </td>
-                            <td class="width-25">
-                                SI Units
-                            </td>
-                            <td class="width-25">
-                                Conventional Units 
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr> -->
-        </table>
+                        </tr> -->
+                    </thead>
+                </table>
+            </td>
+        </tr>
+        
     </thead>
     <tbody>
-        <table>
-            {% for report_code, test_results in results.items() %}
-            {% if report_code != 'WS3000' %}
-            <tr  >
-                <td class="b-bottom"  {% if loop.index > 1 %}  style="padding-top: 30px" {% endif %}>
-                    <table>
-                        <tr>
-                            <td class="width-50">
-                                Laboratory Result
-                            </td>
-                            <td class="width-25">
-                                SI Units
-                            </td>
-                            <td class="width-25">
-                                Conventional Units 
+        <tr>
+            <td>
+                <table>
+                    {% for report_code, test_results in results.items() %}
+                    {% if report_code != 'WS3000' %}
+                    <tr  >
+                        <td class="b-bottom"  {% if loop.index > 1 %}  style="padding-top: 30px" {% endif %}>
+                            <table>
+                                <tr>
+                                    <td class="width-50">
+                                        Laboratory Result
+                                    </td>
+                                    <td class="width-25">
+                                        SI Units
+                                    </td>
+                                    <td class="width-25">
+                                        Conventional Units 
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% for test_result in test_results %}
+                        {% if (test_result['lab_test_uom'] or test_result['si_unit_name']) and (test_result['secondary_uom_result'] or 0 > 0 or test_result['result_value'] or 0> 0) %}
+                        <tr >
+                            <td class="b-bottom" style="padding: 5px">
+                                <table>
+                                    <tr>
+                                        <td class="width-50" style="padding-bottom: 15px">
+                                            {{ test_result['lab_test_name'] }}
+                                        </td>
+                                        <td class="width-25">
+                                            {% if test_result['si_unit_name']  %}
+                                                {{ test_result['secondary_uom_result'] or '' }} &nbsp; &nbsp; {{ test_result['si_unit_name'] or '' }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="width-25">
+                                            {% if test_result['lab_test_uom'] %}
+                                            {{'%0.3f'| format(test_result['result_value']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% for normal_range in test_result['template'] %}
+                                    {% if loop.index == 1 %} 
+                                        <tr>
+                                            <td>
+                                                {{ test_result['normal_range_label'] or "" }}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}  
+                                        <tr>
+                                            <td style="padding: 10px 0 10px 10px" >
+                                              {{ normal_range['criteria_text'] or '' }} &nbsp;
+                                                <!-- {% if normal_range['range_type'] != 'All' %}
+                                                {{ normal_range['range_type'] or '' }} &nbsp;
+        
+                                                {% endif %}
+                                                {% if normal_range['gender'] != 'All' %}
+                                                {{ normal_range['gender'] or '' }} &nbsp;
+        
+                                                {% endif %} -->
+                                            </td>
+                                            <td>
+                                                {{ normal_range['si_range_text'] or '' }}
+                                            </td>
+                                            <td>
+                                                {{ normal_range['range_text'] or '' }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                                {% if test_result['lab_test_comment'] %}
+                                    <span class="red"><strong class="red">Comment: </strong>&nbsp; &nbsp; {{test_result['lab_test_comment']}}</span>
+                                {% endif %}
                             </td>
                         </tr>
-                    </table>
-                </td>
-            </tr>
-            {% for test_result in test_results %}
-                {% if (test_result['lab_test_uom'] or test_result['si_unit_name']) and (test_result['secondary_uom_result'] or 0 > 0 or test_result['result_value'] or 0> 0) %}
-                <tr >
-                    <td class="b-bottom" style="padding: 5px">
-                        <table>
-                            <tr>
-                                <td class="width-50" style="padding-bottom: 15px">
-                                    {{ test_result['lab_test_name'] }}
-                                </td>
-                                <td class="width-25">
-                                    {% if test_result['si_unit_name']  %}
-                                        {{ test_result['secondary_uom_result'] or '' }} &nbsp; &nbsp; {{ test_result['si_unit_name'] or '' }}
-                                    {% endif %}
-                                </td>
-                                <td class="width-25">
-                                    {% if test_result['lab_test_uom'] %}
-                                    {{'%0.3f'| format(test_result['result_value']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% for normal_range in test_result['template'] %}
-                            {% if loop.index == 1 %} 
-                                <tr>
-                                    <td>
-                                        {{ test_result['normal_range_label'] or "" }}
-                                    </td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            {% endif %}  
-                                <tr>
-                                    <td style="padding: 10px 0 10px 10px" >
-                                      {{ normal_range['criteria_text'] or '' }} &nbsp;
-                                        <!-- {% if normal_range['range_type'] != 'All' %}
-                                        {{ normal_range['range_type'] or '' }} &nbsp;
-
-                                        {% endif %}
-                                        {% if normal_range['gender'] != 'All' %}
-                                        {{ normal_range['gender'] or '' }} &nbsp;
-
-                                        {% endif %} -->
-                                    </td>
-                                    <td>
-                                        {{ normal_range['si_range_text'] or '' }}
-                                    </td>
-                                    <td>
-                                        {{ normal_range['range_text'] or '' }}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                        {% if test_result['lab_test_comment'] %}
-                            <span class="red"><strong class="red">Comment: </strong>&nbsp; &nbsp; {{test_result['lab_test_comment']}}</span>
                         {% endif %}
-                    </td>
-                </tr>
-                {% endif %}
-            {% endfor %}
-            {% endif %}
-            {% endfor %}
-            {% if results.get('WS3000') %}
-                <tr >
-                    <td  class="b-bottom center" style="font-weight: bold; font-size: 20px;  width: 100%;">
-                        HEMATOLOGY
-                    </td>
-                </tr>
-                <tr  >
-                    <td class="b-bottom"   style="padding-top: 30px" >
-                        <table>
-                            <tr>
-                                <td class="width-33">
-                                </td>
-                                <td class="width-33">
-                                </td>
-                                <td class="width-33">
-                                    Normal Range( Age and Sex related)
-                                </td>
-                            </tr>
-
-                            {% for test_result in results.get('WS3000') %}
-                                {% if test_result['lab_test_uom'] and test_result['result_value'] or 0> 0 %}
-                                <tr>
-                                    <td class="width-33">
-                                        {{ test_result['lab_test_name']  }}
-                                    </td>
-                                    <td class="width-33">
-                                        {{'%0.3f'| format(test_result['result_value']|float) or '' }} &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
-                                    </td>
-                                    <td class="width-33">
-                                        {%  if test_result['template'][0] %}
-                                            {{test_result['template'][0]['range_text'] or '' }}
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                    {% if results.get('WS3000') %}
+                        <tr >
+                            <td  class="b-bottom center" style="font-weight: bold; font-size: 20px;  width: 100%;">
+                                HEMATOLOGY
+                            </td>
+                        </tr>
+                        <tr  >
+                            <td class="b-bottom"   style="padding-top: 30px" >
+                                <table>
+                                    <tr>
+                                        <td class="width-33">
+                                        </td>
+                                        <td class="width-33">
+                                        </td>
+                                        <td class="width-33">
+                                            Normal Range( Age and Sex related)
+                                        </td>
+                                    </tr>
+        
+                                    {% for test_result in results.get('WS3000') %}
+                                        {% if test_result['lab_test_uom'] and( test_result['result_value'] or 0> 0 )and test_result['lab_test_name'] != 'Leukocytes' and  not test_result['result_percentage']   %}
+                                        <tr>
+                                            <td class="width-33">
+                                                {{ test_result['lab_test_name']  }}
+                                            </td>
+                                            <td class="width-33">
+                                               {% if test_result['result_percentage'] %} <strong>{{test_result['result_percentage']}}</strong> &nbsp; &nbsp; % &nbsp; &nbsp;{% endif %} <strong>{{'%0.3f'| format(test_result['result_value']|float) or '' }}</strong> &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                            </td>
+                                            <td class="width-33">
+                                                {%  if test_result['template'][0] %}
+                                                    {{test_result['template'][0]['range_text'] or '' }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
                                         {% endif %}
-                                    </td>
-                                </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </table>
-                    </td>
-                </tr>
-            {% endif %}
-        </table>
+                                    {% endfor %}
+        
+                                    {% for test_result in results.get('WS3000') %}
+                                        {% if test_result['lab_test_uom'] and (test_result['result_value'] or 0 > 0 )and test_result['lab_test_name'] == 'Leukocytes' %}
+                                        <tr style="border-top: 1px solid; border-bottom: 1px solid;">
+                                            <td class="width-33">
+                                                {{ test_result['lab_test_name']  }}
+                                            </td>
+                                            <td class="width-33">
+                                               {% if test_result['result_percentage'] %} <strong>{{test_result['result_percentage']}}</strong> &nbsp; &nbsp; % &nbsp; &nbsp;{% endif %} <strong>{{'%0.3f'| format(test_result['result_value']|float) or '' }}</strong> &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                            </td>
+                                            <td class="width-33">
+                                                {%  if test_result['template'][0] %}
+                                                    {{test_result['template'][0]['range_text'] or '' }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for test_result in results.get('WS3000') %}
+                                        {% if test_result['lab_test_uom'] and (test_result['result_value'] or 0 > 0 )and test_result['lab_test_name'] != 'Leukocytes' and test_result['result_percentage']  %}
+                                        <tr >
+                                            <td class="width-33">
+                                                {{ test_result['lab_test_name']  }}
+                                            </td>
+                                            <td class="width-33">
+                                               {% if test_result['result_percentage'] %} <strong>{{test_result['result_percentage']}}</strong> &nbsp; &nbsp; % &nbsp; &nbsp;{% endif %} <strong>{{'%0.3f'| format(test_result['result_value']|float) or '' }}</strong> &nbsp; &nbsp; {{ test_result['lab_test_uom'] or ''}}
+                                            </td>
+                                            <td class="width-33">
+                                                {%  if test_result['template'][0] %}
+                                                    {{test_result['template'][0]['range_text'] or '' }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </table>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </td>
+        </tr>
     </tbody>
 </table>
 

@@ -163,6 +163,9 @@ class LabTest(Document):
 				if not item.result_value and not item.allow_blank and item.require_result_value:
 					frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
 						item.idx, frappe.bold(item.lab_test_particulars)), title=_('Mandatory Results'))
+
+	def get_patient_file(self):
+		return frappe.db.get_value("Patient", self.patient, ["patient_number"])
 	
 
 def create_test_from_template(lab_test):
@@ -337,10 +340,11 @@ def create_normals(template, lab_test, group_template=None):
 	normal.require_result_value = 1
 	normal.allow_blank = 0
 	normal.template = template.name
-	normal.report_code = template.worksheet_report_code
-	if group_template and not  template.worksheet_report_code:
-		normal.report_code = group_template.worksheet_report_code
-
+	normal.report_code = template.name
+	if group_template :
+		normal.report_code = group_template.name
+	if group_template.default_comment or template.default_comment:
+		normal.lab_test_comment = group_template.default_comment or template.default_comment
 	normal.control_type = template.control_type
 	test_code = None
 	query = """
@@ -356,9 +360,9 @@ def create_normals(template, lab_test, group_template=None):
 			test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
 	else:
 		test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
-	print("888888888888888888888888888888888888888")
-	print(template.name)
-	print(test_code)
+	# print("888888888888888888888888888888888888888")
+	# print(template.name)
+	# print(test_code)
 	if len(test_code) > 0:
 		
 		machine_name,host_code = test_code[0]['parent'], test_code[0]['host_code']
@@ -627,7 +631,7 @@ from erpnext.healthcare.socket_communication import send_msg_order
 
 @frappe.whitelist()
 def get_receive_sample(sample, test_name=None):
-
+	print("receiving--------------------------------")
 	sample_docstatus = frappe.db.get_value("Sample Collection",{"name": sample}, "docstatus")
 
 	if str(sample_docstatus) == '0':
@@ -636,6 +640,7 @@ def get_receive_sample(sample, test_name=None):
 	if test_name:
 		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name"])
 		tests = list(set([code['host_code'] for code in tests if code['host_name'] == "Inifinty" ]))
+		print(tests)
 		if len(tests) > 0:
 			lab_test = frappe.get_doc("Lab Test", test_name)
 			patient = frappe.get_doc("Patient", lab_test.patient)
@@ -685,18 +690,18 @@ def receive_infinty_results():
 	lab_tests = json.loads(frappe.request.data)
 	print("results received---------------------------------------------")
 	print(len(lab_tests))
+	print(lab_tests)
 	for lab_test in lab_tests:
 		results = lab_test['results']
 		for test in results:
-			if test['result'].isnumeric():
-				query = """ UPDATE `tabNormal Test Result` as ntr 
-					INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
-					INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-					INNER JOIN `tabPatient` as p ON p.name=lt.patient
-					SET ntr.result_value='{result}'
-					WHERE sc.collection_serial='bar-{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}'
-									""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
-				frappe.db.sql(query)
+			query = """ UPDATE `tabNormal Test Result` as ntr 
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				INNER JOIN `tabPatient` as p ON p.name=lt.patient
+				SET ntr.result_value='{result}'
+				WHERE sc.collection_serial='bar-{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}'
+								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
+			frappe.db.sql(query)
 	frappe.db.commit()
 
 @frappe.whitelist(allow_guest=True)
@@ -707,11 +712,16 @@ def receive_sysmex_results():
 		results = lab_test['results']
 		for test in results:
 			#if test['result'].isnumeric():
+			set_stmt = 'ntr.result_value'
+			if test['code'].endswith("%"):
+				set_stmt = 'ntr.result_percentage'
+			elif test['code'].endswith("#"):
+				test['code'] = test['code'][:-1] + "%"
 			query = """ UPDATE `tabNormal Test Result` as ntr 
 				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-				SET ntr.result_value='{result}'
+				SET {set_stmt}='{result}'
 				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
-								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
+								""".format(set_stmt = set_stmt, result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
 			frappe.db.sql(query)
 	frappe.db.commit()

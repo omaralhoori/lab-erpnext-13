@@ -19,6 +19,7 @@
   "inpatient_record",
   "company",
   "invoiced",
+  "num_print",
   "test_templates_section",
   "lab_test_templates",
   "section_break_6",
@@ -27,7 +28,6 @@
   "sample_details",
   "amended_from",
   "sales_invoice",
-  "num_print",
   "collection_serial"
  ],
  "fields": [
@@ -197,7 +197,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-31 13:55:46.968197",
+ "modified": "2022-08-04 06:28:59.628100",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
