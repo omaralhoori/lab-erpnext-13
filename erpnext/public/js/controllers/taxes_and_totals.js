@@ -134,7 +134,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.round_floats_in(item);
-				item.net_rate = item.rate;
+				//ibrahim
+				//item.net_rate = item.rate;
+				item.net_rate = item.patient_rate;
 				// ibrahim	
 				if ((!item.qty) && me.frm.doc.is_return) {
 					item.amount = flt(item.rate * -1, precision("amount", item));
@@ -164,7 +166,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					}
 				}
 
-				item.net_amount = item.amount;
+				//ibrahim
+				//item.net_amount = item.amount;
+				item.net_amount = item.patient_share;
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
 
@@ -690,7 +694,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							&& i == (me.frm.doc.items || []).length - 1) {
 						var discount_amount_loss = flt(me.frm.doc.net_total - net_total
 							- me.frm.doc.discount_amount, precision("net_total"));
-						item.net_amount = flt(item.net_amount + discount_amount_loss,precision("net_amount", item));
+						//ibrahim
+						item.net_amount = flt(item.net_amount ,precision("net_amount", item));
+						//item.net_amount = flt(item.net_amount + discount_amount_loss,precision("net_amount", item));
 					}
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -758,8 +764,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
 
-		if(in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
-			var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+		//ibrahim
+		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)) {
+			var grand_total = this.frm.doc.total_patient; //this.frm.doc.rounded_total || this.frm.doc.grand_total;
 
 			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
 				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
@@ -785,8 +792,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					? flt(total_amount_to_pay - this.frm.doc.loyalty_amount, precision("base_grand_total"))
 					: total_amount_to_pay;
 				//ibrahim
-				//this.set_default_payment(total_amount_for_payment, update_paid_amount);
-				this.set_default_payment(this.frm.doc.total_patient, update_paid_amount);
+				this.set_default_payment(total_amount_for_payment, update_paid_amount);
+				//this.set_default_payment(this.frm.doc.total_patient, update_paid_amount);
 				this.calculate_paid_amount();
 			}
 			this.calculate_change_amount();
@@ -795,33 +802,117 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 				
 				//ibrahim
-				//this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
-				//flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
-				
-				this.frm.doc.outstanding_amount =  flt(this.frm.doc.total_patient - flt(paid_amount)  +
+				this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
+				
+				//this.frm.doc.outstanding_amount =  flt(this.frm.doc.total_patient - flt(paid_amount)  +
+				//flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 		}
+		//ibrahim
+		if(in_list(["Purchase Invoice"], this.frm.doc.doctype)) {
+			var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+
+			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
+				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
+					- this.frm.doc.write_off_amount), precision("grand_total"));
+			} else {
+				var total_amount_to_pay = flt(
+					(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
+						- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+					precision("base_grand_total")
+				);
+			}
+
+			frappe.model.round_floats_in(this.frm.doc, ["paid_amount"]);
+			this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
+
+			if(this.frm.refresh_field){
+				this.frm.refresh_field("paid_amount");
+				this.frm.refresh_field("base_paid_amount");
+			}
+
+			if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)) {
+				let total_amount_for_payment = (this.frm.doc.redeem_loyalty_points && this.frm.doc.loyalty_amount)
+					? flt(total_amount_to_pay - this.frm.doc.loyalty_amount, precision("base_grand_total"))
+					: total_amount_to_pay;
+				this.set_default_payment(total_amount_for_payment, update_paid_amount);
+				this.calculate_paid_amount();
+			}
+			this.calculate_change_amount();
+
+			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
+				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
+
+				this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
+				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
+				
+		}
+
 	},
 
 	set_total_amount_to_default_mop: function() {
-		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+		//ibrahim
+		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)) {
+			var grand_total = this.frm.doc.total_patient; //this.frm.doc.rounded_total || this.frm.doc.grand_total;
 
-		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
-			var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
-				- this.frm.doc.write_off_amount), precision("grand_total"));
-		} else {
-			var total_amount_to_pay = flt(
-				(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
-					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
-				precision("base_grand_total")
-			);
-		}
-		this.frm.doc.payments.find(pay => {
-			if (pay.default) {
-				pay.amount = total_amount_to_pay;
+			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
+				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
+					- this.frm.doc.write_off_amount), precision("grand_total"));
+			} else {
+				var total_amount_to_pay = flt(
+					(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
+						- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+					precision("base_grand_total")
+				);
 			}
-		});
-		this.frm.refresh_fields();
+			this.frm.doc.payments.find(pay => {
+				if (pay.default) {
+					pay.amount = total_amount_to_pay;
+				}
+			});
+			this.frm.refresh_fields();
+	
+		}else if(in_list(["Purchase Invoice"], this.frm.doc.doctype)) {
+			var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+
+			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
+				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
+					- this.frm.doc.write_off_amount), precision("grand_total"));
+			} else {
+				var total_amount_to_pay = flt(
+					(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
+						- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+					precision("base_grand_total")
+				);
+			}
+			this.frm.doc.payments.find(pay => {
+				if (pay.default) {
+					pay.amount = total_amount_to_pay;
+				}
+			});
+			this.frm.refresh_fields();
+	
+		}else {
+			var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+
+			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
+				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
+					- this.frm.doc.write_off_amount), precision("grand_total"));
+			} else {
+				var total_amount_to_pay = flt(
+					(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
+						- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+					precision("base_grand_total")
+				);
+			}
+			this.frm.doc.payments.find(pay => {
+				if (pay.default) {
+					pay.amount = total_amount_to_pay;
+				}
+			});
+			this.frm.refresh_fields();
+	
+		}
 	},
 
 	set_default_payment: function(total_amount_to_pay, update_paid_amount) {
