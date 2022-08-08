@@ -1,7 +1,4 @@
 from __future__ import unicode_literals
-from cgi import test
-from imghdr import tests
-from colorama import Style
 
 import frappe
 from frappe.permissions import get_valid_perms
@@ -140,7 +137,7 @@ def user_test_result(lab_test, get_html=True):
     if not test_doc:
         frappe.throw("Lab Test not found")
     html = get_print_html_base()
-    header = get_print_header(test_doc)
+    header = get_print_header(test_doc, '<img class="img-header" src="/files/josante-logo.png" />')
     tbody = get_print_tbody(test_doc, header, True)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
@@ -171,10 +168,18 @@ def lab_test_result(lab_test):
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
-def get_print_header(test_doc):
+def get_print_header(test_doc, head=None):
     consultant = test_doc.practitioner_name or "Outpatient Doctor"
+    if head:
+        head= f"""
+        <tr>
+            <td colspan="4" style="text-align: center">{head}</td>
+        </tr>
+        """
+    else: head = ""
     return f"""
     <table>
+        {head}
         <tr>
             <td class="width-15">
                  Patient Name
@@ -406,7 +411,7 @@ def format_chemistry_tests(tests, header=""):
                     test_html += """<tr><td>&emsp;Normal Ranges: </td><td></td><td></td></tr>"""
                 test_html += f"""
                     <tr>
-                        <td>&emsp;&emsp;{normal['criteria_text']}</td>
+                        <td>&emsp;&emsp;{normal['criteria_text'] or ''}</td>
                         <td>{si_range or ''}</td>
                         <td>{conv_range or ''}</td>
                     </tr>
@@ -460,8 +465,16 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         LEFT JOIN `tabLab Test UOM` as stu
         ON stu.name=lt.secondary_uom
 
-        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt}
+        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt} AND lt.result_value IS NOT NULL
         """.format(test_name=test_name, item_group=item_group, where_stmt=where_stmt), as_dict=True)
+
+@frappe.whitelist(allow_guest=True)
+def get_test_uploaded_files(lab_test, password):
+    patient = frappe.db.get_value("Lab Test", lab_test, ["patient"])
+    if not patient:
+        frappe.throw("Test not found!")
+    if not frappe.db.exists("Patient", {"name": patient, "password": password}):
+        frappe.throw("Test not found!")
 
 def get_print_html_base():
     return """
@@ -534,6 +547,11 @@ def get_print_style():
         clear:both; 
         page-break-after:always;
         
+    }
+    @media screen {
+        body{
+            padding: 10px 30px;
+        }
     }
         </style>
     """

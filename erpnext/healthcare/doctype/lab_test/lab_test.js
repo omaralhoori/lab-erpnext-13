@@ -80,23 +80,22 @@ const disable_input = (status) => {
 }
 const format_tests_html = (tests, attr_options) => {
 	var html = "";
+	html = `<div> 
+		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
+		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+		<button class='btn select-all-btn btn-primary'>Select All</button>
+		</div>`
 	if (frappe.user.has_role('LabTest Approver')){
-		html = `<div> 
-	<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
-	<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
-	</div>`
-	}else{
 		html = `<div> 
 		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
+		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
+		<button class='btn select-all-btn btn-primary'>Select All</button>
 		</div>`
+		//<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 	}
-	html = html = `<div> 
-	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
-	<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
-	<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
-	<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
-	</div>`
+	
 	var options = attr_options.reduce((obj, item) => (obj[item.template] = item.attribute_options, obj) ,{});
 	for (var testTemplate in tests){
 		var child_tests_html = "";
@@ -184,6 +183,11 @@ const setup_input_listeners = (frm) => {
 				frm.reload_doc();
 			}
 		})
+	})
+
+	$('.select-all-btn').click(function(){
+		$(".result-checkbox").prop('checked', true)
+		toggle_test_selected_buttons(true);
 	})
 	
 }
@@ -367,6 +371,9 @@ var status_update = function (approve, frm) {
 	else if (approve == 4) {
 		status = 'Rejected';
 	}
+	else if (approve == 4) {
+		status = 'Rejected';
+	}
 	else if (approve == 1) {
 		status = 'Approved';
 	}
@@ -478,6 +485,26 @@ var get_rejects_sample = function (frm) {
 };
 
 var get_finalize_test = function(frm) {
+	if (frm.doc.status == 'Released') {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.lab_test.lab_test.get_finalize_sample',
+			args: { 
+				doclab: frm.doc,
+				docname: frm.doc.name
+			},
+			callback: function (r) {
+				if (r.message == 'Released') { 
+					status_update(1, frm);
+				}
+			}
+		});
+		
+	}
+	else {
+		frappe.msgprint(__('Test not released'));
+	}
+
+
 	
 }
 
