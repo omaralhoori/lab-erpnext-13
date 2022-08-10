@@ -108,7 +108,7 @@ const format_tests_html = (tests, attr_options) => {
 					<label> <strong>${childTest['lab_test_name']} </strong></label>
 					<div class="test_result_container">
 					${result_type}
-					<input type="checkbox" value="${childTest['name']}" class="result-checkbox" />
+					<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" />
 					${childTest['status'] || ""}
 					</div>
 				</div>
