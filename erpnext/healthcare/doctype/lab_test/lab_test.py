@@ -105,9 +105,9 @@ class LabTest(Document):
 				if lab_test.test_symbol and lab_test.test_symbol in items:
 					#result[lab_test.symbol] = {}
 					if lab_test.result_value:
-						si_result[lab_test.test_symbol] = lab_test.result_value
+						conv_result[lab_test.test_symbol] = lab_test.result_value
 					if lab_test.secondary_uom_result:
-						conv_result[lab_test.test_symbol] = lab_test.secondary_uom_result
+						si_result[lab_test.test_symbol] = lab_test.secondary_uom_result
 			if len(si_result.keys()) == len(items):
 				formula_val = formula
 				for res in si_result:
@@ -117,7 +117,7 @@ class LabTest(Document):
 				for res in conv_result:
 					formula = formula.replace(f'[{res}]', str(conv_result[res]))
 				result_conv = eval(formula)
-			return result_si, result_conv
+			return  result_conv, result_si
 		except:
 			frappe.msgprint("Couldn't calculate formula result for test: " + test_name)
 
