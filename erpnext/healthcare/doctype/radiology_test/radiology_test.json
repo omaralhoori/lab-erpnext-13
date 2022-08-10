@@ -8,9 +8,11 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "physician",
   "sales_invoice",
   "column_break_3",
   "template",
+  "company",
   "patient_info_section",
   "patient",
   "patient_name",
@@ -110,12 +112,24 @@
    "options": "Radiology Test",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "physician",
+   "fieldtype": "Data",
+   "label": "Referring Physician"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-08 10:40:23.489716",
+ "modified": "2022-08-08 11:00:59.748633",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",

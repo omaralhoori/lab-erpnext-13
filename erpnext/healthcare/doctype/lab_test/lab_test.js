@@ -275,18 +275,34 @@ frappe.ui.form.on('Lab Test', {
 			});
 		}
 		if (frappe.user.has_role('LabTest Approver')) {
-			frm.add_custom_button(__('Reject Sample'), function () {
-				get_rejects_sample(frm);
-			});
-			frm.add_custom_button(__('Finalize'), function () {
-				get_finalize_test(frm);
+			// frm.add_custom_button(__('Reject Sample'), function () {
+			// 	get_rejects_sample(frm);
+			// });
+			// frm.add_custom_button(__('Finalize'), function () {
+			// 	get_finalize_test(frm);
+			// });
+			frm.add_custom_button(__('Send SMS'), function () {
+				frappe.confirm('Are you sure you want to send sms?',
+					() => {
+						frappe.call({
+							method: "erpnext.healthcare.doctype.lab_test.lab_test.send_patient_result_sms",
+							args: {
+								lab_test:frm.doc.name
+							},
+							callback: () => {
+
+							}
+						})
+					}, () => {
+						// action to perform if No is selected
+					})
 			});
 		}
 		
 
-		frm.add_custom_button(__('Release Sample'), function () {
-			get_release_sample(frm);
-		});
+		// frm.add_custom_button(__('Release Sample'), function () {
+		// 	get_release_sample(frm);
+		// });
 
 		frm.add_custom_button(__('Receive Sample'), function () {
 			get_receive_sample(frm);
@@ -303,21 +319,21 @@ frappe.ui.form.on('Lab Test', {
 			}
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.sms_sent === 0 && frm.doc.status !== 'Rejected' ) {
-			frm.add_custom_button(__('Send SMS'), function () {
-				frappe.call({
-					method: 'erpnext.healthcare.doctype.healthcare_settings.healthcare_settings.get_sms_text',
-					args: { doc: frm.doc.name },
-					callback: function (r) {
-						if (!r.exc) {
-							var emailed = r.message.emailed;
-							var printed = r.message.printed;
-							make_dialog(frm, emailed, printed);
-						}
-					}
-				});
-			});
-		}
+		// if (frm.doc.docstatus === 1 && frm.doc.sms_sent === 0 && frm.doc.status !== 'Rejected' ) {
+		// 	frm.add_custom_button(__('Send SMS'), function () {
+		// 		frappe.call({
+		// 			method: 'erpnext.healthcare.doctype.healthcare_settings.healthcare_settings.get_sms_text',
+		// 			args: { doc: frm.doc.name },
+		// 			callback: function (r) {
+		// 				if (!r.exc) {
+		// 					var emailed = r.message.emailed;
+		// 					var printed = r.message.printed;
+		// 					make_dialog(frm, emailed, printed);
+		// 				}
+		// 			}
+		// 		});
+		// 	});
+		// }
 
 	}
 });

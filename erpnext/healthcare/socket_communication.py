@@ -397,7 +397,7 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
                 except socket.error:
                     print('Unable to connect')
                     log_result("infinty_order",'Unable to connect')
-                    time.sleep(2)
+                    time.sleep(10)
                     pass
         except:
             continue
@@ -471,6 +471,7 @@ def start_sysmex_listener(ip_address, port):
                             results = parse_sysmex_msg(msg)
                             msg = b''
                             print(results)
+                            log_result("sysmex", "Result " + json.dumps(results))
                             if len(results) > 0:
                                 requests.post("http://127.0.0.1/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
 

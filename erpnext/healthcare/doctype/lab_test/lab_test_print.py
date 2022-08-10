@@ -246,6 +246,12 @@ def get_print_tbody(test_doc, header, only_finalized=False):
     if len(routine_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_routine_tests(routine_tests, header)
+    uploaded_tests = get_uploaded_tests(test_doc, only_finalized)
+    if len(uploaded_tests) > 0:
+        
+        html = format_uploaded_tests(test_doc,uploaded_tests, header)
+        if len(body) > 0 and len(html) > 0: body += get_break()
+        body +=  html
     return body
 
 def get_routine_tests(test_doc, only_finalized=False):
@@ -377,6 +383,63 @@ def get_chemistry_tests(test_doc, only_finalized=False):
     else: test['template'] = []
     return tests
     
+def get_uploaded_tests(test_doc, only_finalized=False):
+    where_stmt = " lt.status IN ('Finalized', 'Released')"
+    if only_finalized: where_stmt = " lt.status IN ('Finalized')"
+    tests = frappe.db.sql("""
+        SELECT  lt.name as test_id, lt.lab_test_name, lt.result_value , lt.lab_test_comment as comment 
+        FROM `tabNormal Test Result` as lt
+         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND {where_stmt} AND lt.result_value != "" AND lt.result_value IS NOT NULL AND lt.control_type='Upload File'
+    """.format(test_name=test_doc.name, where_stmt=where_stmt), as_dict=True)
+    return tests
+
+
+def format_uploaded_tests(test_doc,tests, header=""):
+    tests_html = ""
+    result_url = frappe.db.get_single_value("Healthcare Settings", "result_url")
+    password = frappe.db.get_value("Patient", test_doc.patient, ["patient_password"])
+    if not result_url or result_url == "": return ""
+    if result_url[-1] != "/": result_url += "/"
+    for test in tests:
+        test_html = f"""
+            <tr>
+                <td class="width-50">
+                    &emsp;{test['lab_test_name']}
+                </td>
+                <td class="width-50"><a  href="{result_url}api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_test_uploaded_files?lab_test={test_doc.name}&password={password}&test_name={test['test_id']}">Download Attachement</a></td>
+            </tr>
+        """
+        if test['comment']:
+            test_html += f"<tr><td colspan='2' class='red'><strong>Comment: </strong>{test['comment']}</td></tr>"
+        test_html += "<tr><td colspan='2'><hr></td></tr>"
+        test_html = "<tr><td><table>" + test_html + "</table></td></tr>"
+        tests_html += test_html
+    html = f"""<table>
+        <thead>
+        <tr>
+            <td>{header}</td>
+        </tr>
+        <tr>
+            <td>
+                 <table>
+                <tr>
+            <th class="width-50">Test Name</th>
+            <th class="width-25">Attachment Link</th>
+            </tr>
+            <tr>
+                <td colspan="2"><hr></td>
+            </tr>
+            </table>
+            </td>
+        </tr>
+           
+        </thead>
+        <tbody>
+           {tests_html}
+        </tbody>
+    </table>"""
+    return html
+
 def format_float_result(result):
     try:
         return "%.2f" % float(result)
@@ -465,16 +528,31 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         LEFT JOIN `tabLab Test UOM` as stu
         ON stu.name=lt.secondary_uom
 
-        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt} AND lt.result_value IS NOT NULL
+        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         """.format(test_name=test_name, item_group=item_group, where_stmt=where_stmt), as_dict=True)
 
 @frappe.whitelist(allow_guest=True)
-def get_test_uploaded_files(lab_test, password):
+def get_test_uploaded_files(lab_test, password, test_name):
     patient = frappe.db.get_value("Lab Test", lab_test, ["patient"])
     if not patient:
         frappe.throw("Test not found!")
-    if not frappe.db.exists("Patient", {"name": patient, "password": password}):
+    if not frappe.db.exists("Patient", {"name": patient, "patient_password": password}):
         frappe.throw("Test not found!")
+    file_link = frappe.db.sql(f"""
+    SELECT tntr.result_value  FROM `tabNormal Test Result` tntr WHERE name="{test_name}" AND parent="{lab_test}" AND tntr.result_value IS NOT NULL AND tntr.result_value != ""
+    """,as_dict=True)
+    if len(file_link) > 0: file_link = file_link[0]['result_value']
+    #frappe.db.get_value("Noraml Test Result", {"name": test_name}, ["result_value"])
+    print(file_link)
+    print(frappe.local.site)
+    file_content = ""
+    sub_dir =  ""  if file_link.startswith("/private") else "/public"
+    with open(frappe.local.site + sub_dir + file_link, "rb") as f:
+        file_content = f.read()
+    #print(file_content)
+    frappe.local.response.filename = file_link.split("/")[-1]
+    frappe.local.response.filecontent = file_content  or ''#get_pdf(html)
+    frappe.local.response.type = "download"#file_link.split(".")[-1]
 
 def get_print_html_base():
     return """

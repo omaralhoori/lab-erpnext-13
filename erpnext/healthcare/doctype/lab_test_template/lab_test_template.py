@@ -24,6 +24,13 @@ class LabTestTemplate(Document):
 		self.validate_conversion_factor()
 		self.enable_disable_item()
 
+	def has_radiology(self):
+		rad_tests = frappe.db.sql("""SELECT count(tltt2.name)  FROM `tabLab Test Group Template` tltgt 
+   		INNER JOIN `tabLab Test Template` tltt ON tltgt.lab_test_template =tltt.name
+   		INNER JOIN `tabLab Test Template` tltt2 ON tltt2.name=tltgt.parent
+   		WHERE tltt.lab_test_group ='Radiology Services' AND tltt2.name='{template_name}'""".format(template_name=self.name))[0][0]
+		return rad_tests > 0
+
 	def on_update(self):
 		# If change_in_item update Item and Price List
 		options = ["<option>" + item.form_attribute_description + "</option>" for item in self.lab_test_attribute]

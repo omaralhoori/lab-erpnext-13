@@ -359,6 +359,17 @@
    "link_to": "Lab Test",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Radiology Test",
+   "link_to": "Radiology Test",
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "",
    "type": "Link"
   },
   {
@@ -369,6 +380,7 @@
    "link_to": "Sample Collection",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "",
    "type": "Link"
   },
   {
@@ -550,7 +562,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-07-24 12:19:16.266448",
+ "modified": "2022-08-08 13:06:12.264531",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
