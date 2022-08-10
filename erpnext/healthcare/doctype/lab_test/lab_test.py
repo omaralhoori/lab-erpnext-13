@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _
+from frappe import _, log
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 
@@ -67,8 +67,12 @@ class LabTest(Document):
 
 		if result_url[-1] != "/":
 			result_url += '/'
-		patient_password = frappe.db.get_value("Patient", invoice.patient, "patient_password")
-		result_url += "test-result?usercode=" + patient_password + "_" + invoice.patient.replace(" ", "%20")
+		patient_info = frappe.db.get_value("Patient", invoice.patient, ["patient_password", "patient_number"])
+		if not patient_info:
+			frappe.msgprint(_("Failed to send sms. Patient information is incomplete."))
+			return
+		patient_password, patient_number = patient_info
+		result_url += "test-result?usercode=" + patient_password + "_" + patient_number.replace(" ", "%20")
 		result_msg += "\n"  + result_url
 
 		send_sms(msg=result_msg, receiver_list=[receiver_number])
@@ -166,7 +170,14 @@ class LabTest(Document):
 
 	def get_patient_file(self):
 		return frappe.db.get_value("Patient", self.patient, ["patient_number"])
-	
+
+@frappe.whitelist()
+def send_patient_result_sms(lab_test):
+	lab_test = frappe.get_doc("Lab Test", lab_test)
+	if not lab_test:
+		frappe.throw("Test not found")
+	lab_test.send_result_sms()
+
 
 def create_test_from_template(lab_test):
 	templates = lab_test.template if isinstance(lab_test.template, list) else [lab_test.template]
@@ -246,22 +257,47 @@ def create_lab_test_joined(sales_invoice):
 	lab_tests_created = False
 	invoice = frappe.get_doc('Sales Invoice', sales_invoice)
 	lab_test = None
+	rad_test = None
 	if invoice and invoice.patient:
 		patient = frappe.get_doc('Patient', invoice.patient)
 		test_created = False
+		rad_created = False
 		for item in invoice.items:
 			template = get_lab_test_template(item.item_code)
 			if template:
-				if not test_created:
-					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company)
-					test_created = True
+				if template.lab_test_group == "Radiology Services":
+					if not rad_created:
+						rad_test = create_rad_test_doc(patient, template, invoice)
+						rad_created = True
+					else:
+						template_row = lab_test.append("template")
+						template_row.template = template.name
+				elif template.lab_test_group == "Lab Test Packages" and template.has_radiology():
+					if not rad_created:
+						rad_test = create_rad_test_doc(patient, template, invoice)
+						rad_created = True
+					else:
+						template_row = lab_test.append("template")
+						template_row.template = template.name
+					if not test_created:
+						lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company)
+						test_created = True
+					else:
+						template_row = lab_test.append("template")
+						template_row.template = template.name
 				else:
-					template_row = lab_test.append("template")
-					template_row.template = template.name
+					if not test_created:
+						lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company)
+						test_created = True
+					else:
+						template_row = lab_test.append("template")
+						template_row.template = template.name
 		if lab_test:
 			lab_test.sales_invoice = sales_invoice
 			lab_test.save(ignore_permissions = True)
 			lab_tests_created = lab_test.name
+		if rad_test:
+			rad_test.save(ignore_permissions = True)
 	return lab_tests_created
 
 
@@ -298,6 +334,17 @@ def get_lab_test_template(item):
 	if template_id:
 		return frappe.get_doc('Lab Test Template', template_id)
 	return False
+
+def create_rad_test_doc(patient, template, invoice):
+	rad_test = frappe.new_doc('Radiology Test')
+	rad_test.patient = patient.name
+	rad_test.patient_age = patient.get_age()
+	rad_test.patient_sex = patient.sex
+	template_row = rad_test.append("template")
+	template_row.template = template.name
+	rad_test.company = invoice.company
+	rad_test.sales_invoice = invoice.name
+	return rad_test
 
 def create_lab_test_doc(invoiced, practitioner, patient, template, company):
 	lab_test = frappe.new_doc('Lab Test')
@@ -506,7 +553,7 @@ def add_template_sample(template, sample_collection):
 				quantity = int(sample_detail.sample_qty) + int(qty)
 				sample_detail.sample_qty = quantity
 				sample_detail.num_print = int(sample_detail.num_print or 1) + 1
-				sample_collection.num_print = int(sample_collection.num_print or 1) + 1
+				# sample_collection.num_print = int(sample_collection.num_print or 1) + 1
 				template_found = True
 				break
 	if not template_found:
@@ -653,6 +700,10 @@ def get_receive_sample(sample, test_name=None):
 	# 		print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
 	# 		sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
 		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
+	frappe.db.sql("""
+				UPDATE `tabNormal Test Result` SET status='Received'
+			WHERE parent='{test_name}' AND status NOT IN ('Released', 'Finalized')
+			""".format(test_name=test_name))
 	return str(sample_docstatus)
 def send_received_msg_order(sample, test_name):
 	sent = False
@@ -687,13 +738,33 @@ def get_release_sample(doclab,docname):
 	if sample_status != 'Received' and sample_status != 'Rejected':
 		frappe.throw(_("Sample not received or rejected."), title=_("Sample Release"))
 	
-	if sam_res.normal_test_items:
-		for item in sam_res.normal_test_items:
-			if not item.result_value and not item.allow_blank and item.require_result_value:
-				sample_status='Draft'
-				frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
-					item.idx, frappe.bold(item.lab_test_name)), title=_('Mandatory Results'))
+	# if sam_res.normal_test_items:
+	# 	for item in sam_res.normal_test_items:
+	# 		if not item.result_value and not item.allow_blank and item.require_result_value:
+	# 			sample_status='Draft'
+	# 			frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
+	# 				item.idx, frappe.bold(item.lab_test_name)), title=_('Mandatory Results'))
+	frappe.db.sql("""
+				UPDATE `tabNormal Test Result` SET status='Released'
+			WHERE parent='{test_name}' AND status='Received'
+			""".format(test_name=docname))
 
+	return sample_status
+
+@frappe.whitelist()
+def get_finalize_sample(doclab,docname):
+
+	sam_res = frappe.get_doc('Lab Test', docname)
+
+	sample_status = frappe.db.get_value("Lab Test",{"name": docname}, "status")
+
+	if sample_status != 'Released':
+		frappe.throw(_("Sample not released."), title=_("Sample Release"))
+	
+	frappe.db.sql("""
+				UPDATE `tabNormal Test Result` SET status='Finalized'
+			WHERE parent='{test_name}' AND status='Released'
+			""".format(test_name=docname))
 
 	return sample_status
 
@@ -704,6 +775,11 @@ def get_reject_sample(docname):
 
 	if sample_status != 'Released' :
 		frappe.throw(_("Sample not released."), title=_("Sample Reject"))
+	
+	frappe.db.sql("""
+				UPDATE `tabNormal Test Result` SET status='Rejected'
+			WHERE parent='{test_name}' AND status='Released'
+			""".format(test_name=docname))
 	
 	return sample_status
 
@@ -726,11 +802,12 @@ def receive_infinty_results():
 								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
 			frappe.db.sql(query)
 	frappe.db.commit()
-
+from erpnext.healthcare.socket_communication import log_result
 @frappe.whitelist(allow_guest=True)
 def receive_sysmex_results():
 	lab_tests = json.loads(frappe.request.data)
 	print("results received---------------------------------------------")
+	log_result("sysmex", "results received--------------------")
 	for lab_test in lab_tests:
 		results = lab_test['results']
 		for test in results:
@@ -746,6 +823,7 @@ def receive_sysmex_results():
 				SET {set_stmt}='{result}'
 				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
 								""".format(set_stmt = set_stmt, result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
+			#log_result("sysmex", query)
 			frappe.db.sql(query)
 	frappe.db.commit()
 
@@ -763,6 +841,8 @@ def get_test_attribute_options(lab_test):
 def apply_test_button_action(action, tests, test_name, sample):
 	where_stmt = ""
 	if action == "Received":
+		if frappe.db.get_value("Sample Collection", sample, ["docstatus"]) != 1:
+			frappe.throw("Sample is not collected")
 		where_stmt = "(status is NULL or status not in ('Released', 'Finalized'))"
 	elif action == "Released":
 		where_stmt = "status='Received'"
@@ -770,9 +850,10 @@ def apply_test_button_action(action, tests, test_name, sample):
 		where_stmt = "status='Released'"
 	elif action == 'Rejected':
 		where_stmt = "status='Released'"
+	elif action == 'definalize':
+		where_stmt = "status='Finalized'"
+		action = 'Released'
 	else: frappe.throw("Undefined action: " + action)
-	print(where_stmt)
-	print(tests)
 	tests = json.loads(tests)
 	tests = [f"'{s}'" for s in tests]
 	query= """

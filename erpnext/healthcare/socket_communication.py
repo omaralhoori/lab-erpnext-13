@@ -315,27 +315,37 @@ def start_infinty_listener(ip_address, port):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.bind((ip_address, port))
                 print("listening")
+                log_result("infinty", "listening")
                 s.listen()
                 conn, addr = s.accept()
                 with conn:
                     print(f"Connected by {addr}")
+                    log_result("infinty",str(addr))
                     msg = b""
                     while True:
                         data = conn.recv(63000)
                         print("data received-------------------------------------------------------")
                         print(data)
+                        log_result("infinty",str(data))
                         if not data:
                             break
                         msg += data
                         if data.endswith(chr(4).encode()):                    
                             results = get_patient_results_infinty(msg)
-                            requests.post("http://127.0.0.1:8001/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(results))
+                            requests.post("http://127.0.0.1/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(results))
                             msg = b""
                         conn.sendall(chr(6).encode())
         except socket.error:
             print("Socket cannot connect")
+            log_result("infinty", "Socket cannot connect")
             sleep(5)
             continue
+
+def log_result(log,msg):
+    with open(log + "-log.txt", "a") as f:
+        f.write(msg + "\n")
+        f.close()
+
 
 #------------------------infinty orders-------------------
 def start_infinty_order_listener(ip_address, port, local_ip, local_port):
@@ -346,24 +356,29 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 print(f"Connecting client to {ip_address}:{port}---------------------------")
+                log_result("infinty_order",f"Connecting client to {ip_address}:{port}---------------------------")
                 try:
                     s.connect((ip_address, port))
                     print(f"Connected")
                     print(f"Binding server to {local_ip}:{local_port}---------------------------")
+                    log_result("infinty_order",f"Binding server to {local_ip}:{local_port}---------------------------")
                     while True:
                         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as rcv_s:
                             try:
                                 rcv_s.bind((local_ip, local_port))
                                 rcv_s.listen()
                                 print("listening to inner socket")
+                                log_result("infinty_order","listening to inner socket")
                                 conn, addr = rcv_s.accept()
                                 with conn:
                                     print(f"Connected inner by {addr}")
+                                    log_result("infinty_order",f"Connected inner by {addr}")
                                     msg = b''
                                     while True:
                                         print("Data receiving")
                                         data = conn.recv(63000)
                                         print("Data Received-----------------------------------------------")
+                                        log_result("infinty_order","Data Received-----------------------------------------------")
                                         msg += data
                                         conn.sendall(chr(6).encode())
                                         print(msg)
@@ -375,12 +390,14 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
                                             break
                             except:
                                 print('Unable to connect inner socket')
+                                log_result("infinty_order",'Unable to connect inner socket')
                             finally:
                                 rcv_s.shutdown(socket.SHUT_RDWR)
                                 rcv_s.close()
                 except socket.error:
                     print('Unable to connect')
-                    time.sleep(2)
+                    log_result("infinty_order",'Unable to connect')
+                    time.sleep(10)
                     pass
         except:
             continue
@@ -434,13 +451,19 @@ def start_sysmex_listener(ip_address, port):
                 s.bind((ip_address, port))
                 s.listen()
                 print("listening")
+                log_result("sysmex", "listening")
+
                 conn, addr = s.accept()
                 with conn:
                     print(f"Connected by {addr}")
+                    log_result("sysmex", "Connected by " + str(addr))
+
                     msg = b""
                     while True:
                         data = conn.recv(63000)
                         print("Data Received-----------------------------------------------")
+                        log_result("sysmex", "data received---------------------")
+                        log_result("sysmex",str(data))
                         msg += data
                         if not data:
                             break
@@ -448,11 +471,13 @@ def start_sysmex_listener(ip_address, port):
                             results = parse_sysmex_msg(msg)
                             msg = b''
                             print(results)
+                            log_result("sysmex", "Result " + json.dumps(results))
                             if len(results) > 0:
-                                requests.post("http://127.0.0.1:8001/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
+                                requests.post("http://127.0.0.1/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
 
                         conn.sendall(chr(6).encode())
             except socket.error:
                 print("Socket cannot connect")
+                log_result("sysmex", "Socket cannot connect to:" + ip_address +":" + str(port))
                 sleep(5)
                 continue

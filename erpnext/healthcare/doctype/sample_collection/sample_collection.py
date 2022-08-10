@@ -24,7 +24,7 @@ class SampleCollection(Document):
 		if frappe.get_cached_value("Healthcare Settings",None, "use_branch_code"):
 			abbr = frappe.db.get_value("Company", self.company, ["abbr"])
 			if abbr:
-				format_ser = "bar-" + abbr + ".########"
+				format_ser = "bar-" + abbr + ".######"
 			
 		prg_serial = make_autoname(format_ser, "Sample Collection")
 		self.collection_serial = prg_serial
@@ -35,3 +35,7 @@ class SampleCollection(Document):
 		if test_name:
 			send_received_msg_order(self.name, test_name)
 			frappe.db.set_value("Lab Test", test_name, "status","Received")
+			frappe.db.sql("""
+				UPDATE `tabNormal Test Result` SET status='Received'
+			WHERE parent='{test_name}'
+			""".format(test_name=test_name))

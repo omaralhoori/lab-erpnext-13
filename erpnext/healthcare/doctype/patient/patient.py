@@ -52,7 +52,8 @@ class Patient(Document):
 			self.patient_password = random.randrange(1234567, 9876543)
 
 	def generate_qrcode(self):
-		self.create_random_password()
+		if not self.patient_password:
+			self.create_random_password()
 		qrcode_gen(str(self.patient_password), self.name)
 		frappe.db.commit()
 
@@ -238,7 +239,11 @@ class Patient(Document):
 
 		contact.flags.skip_patient_update = True
 		contact.save(ignore_permissions=True)
-
+@frappe.whitelist()
+def generate_patient_qrcode(patient_name):
+	patinet = frappe.get_doc("Patient", patient_name)
+	if patinet:
+		patinet.generate_qrcode()
 
 @frappe.whitelist()
 def qrcode_gen(customer_password,docname):

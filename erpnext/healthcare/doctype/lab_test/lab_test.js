@@ -80,23 +80,22 @@ const disable_input = (status) => {
 }
 const format_tests_html = (tests, attr_options) => {
 	var html = "";
+	html = `<div> 
+		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
+		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+		<button class='btn select-all-btn btn-primary'>Select All</button>
+		</div>`
 	if (frappe.user.has_role('LabTest Approver')){
-		html = `<div> 
-	<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
-	<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
-	</div>`
-	}else{
 		html = `<div> 
 		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
+		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
+		<button class='btn select-all-btn btn-primary'>Select All</button>
 		</div>`
+		//<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 	}
-	html = html = `<div> 
-	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
-	<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
-	<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
-	<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
-	</div>`
+	
 	var options = attr_options.reduce((obj, item) => (obj[item.template] = item.attribute_options, obj) ,{});
 	for (var testTemplate in tests){
 		var child_tests_html = "";
@@ -185,6 +184,11 @@ const setup_input_listeners = (frm) => {
 			}
 		})
 	})
+
+	$('.select-all-btn').click(function(){
+		$(".result-checkbox").prop('checked', true)
+		toggle_test_selected_buttons(true);
+	})
 	
 }
 const toggle_test_selected_buttons = (value) => {
@@ -271,18 +275,34 @@ frappe.ui.form.on('Lab Test', {
 			});
 		}
 		if (frappe.user.has_role('LabTest Approver')) {
-			frm.add_custom_button(__('Reject Sample'), function () {
-				get_rejects_sample(frm);
-			});
-			frm.add_custom_button(__('Finalize'), function () {
-				get_finalize_test(frm);
+			// frm.add_custom_button(__('Reject Sample'), function () {
+			// 	get_rejects_sample(frm);
+			// });
+			// frm.add_custom_button(__('Finalize'), function () {
+			// 	get_finalize_test(frm);
+			// });
+			frm.add_custom_button(__('Send SMS'), function () {
+				frappe.confirm('Are you sure you want to send sms?',
+					() => {
+						frappe.call({
+							method: "erpnext.healthcare.doctype.lab_test.lab_test.send_patient_result_sms",
+							args: {
+								lab_test:frm.doc.name
+							},
+							callback: () => {
+
+							}
+						})
+					}, () => {
+						// action to perform if No is selected
+					})
 			});
 		}
 		
 
-		frm.add_custom_button(__('Release Sample'), function () {
-			get_release_sample(frm);
-		});
+		// frm.add_custom_button(__('Release Sample'), function () {
+		// 	get_release_sample(frm);
+		// });
 
 		frm.add_custom_button(__('Receive Sample'), function () {
 			get_receive_sample(frm);
@@ -299,21 +319,21 @@ frappe.ui.form.on('Lab Test', {
 			}
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.sms_sent === 0 && frm.doc.status !== 'Rejected' ) {
-			frm.add_custom_button(__('Send SMS'), function () {
-				frappe.call({
-					method: 'erpnext.healthcare.doctype.healthcare_settings.healthcare_settings.get_sms_text',
-					args: { doc: frm.doc.name },
-					callback: function (r) {
-						if (!r.exc) {
-							var emailed = r.message.emailed;
-							var printed = r.message.printed;
-							make_dialog(frm, emailed, printed);
-						}
-					}
-				});
-			});
-		}
+		// if (frm.doc.docstatus === 1 && frm.doc.sms_sent === 0 && frm.doc.status !== 'Rejected' ) {
+		// 	frm.add_custom_button(__('Send SMS'), function () {
+		// 		frappe.call({
+		// 			method: 'erpnext.healthcare.doctype.healthcare_settings.healthcare_settings.get_sms_text',
+		// 			args: { doc: frm.doc.name },
+		// 			callback: function (r) {
+		// 				if (!r.exc) {
+		// 					var emailed = r.message.emailed;
+		// 					var printed = r.message.printed;
+		// 					make_dialog(frm, emailed, printed);
+		// 				}
+		// 			}
+		// 		});
+		// 	});
+		// }
 
 	}
 });
@@ -363,6 +383,9 @@ var status_update = function (approve, frm) {
 	}
 	else if (approve == 3) {
 		status = 'Released';
+	}
+	else if (approve == 4) {
+		status = 'Rejected';
 	}
 	else if (approve == 4) {
 		status = 'Rejected';
@@ -478,6 +501,26 @@ var get_rejects_sample = function (frm) {
 };
 
 var get_finalize_test = function(frm) {
+	if (frm.doc.status == 'Released') {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.lab_test.lab_test.get_finalize_sample',
+			args: { 
+				doclab: frm.doc,
+				docname: frm.doc.name
+			},
+			callback: function (r) {
+				if (r.message == 'Released') { 
+					status_update(1, frm);
+				}
+			}
+		});
+		
+	}
+	else {
+		frappe.msgprint(__('Test not released'));
+	}
+
+
 	
 }
 

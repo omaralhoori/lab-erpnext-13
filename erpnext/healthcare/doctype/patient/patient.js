@@ -18,6 +18,19 @@ frappe.ui.form.on('Patient', {
 		} else {
 			erpnext.toggle_naming_series();
 		}
+		if (!frm.is_new()){
+			frm.add_custom_button(__('Generate QR Code'), function () {
+				frappe.call({
+					method: "erpnext.healthcare.doctype.patient.patient.generate_patient_qrcode",
+					args: {
+						patient_name: frm.doc.name
+					},
+					callback: () => {
+						frappe.msgprint(__("QR Code Generated Successfully"))
+					}
+				})
+			});
+		}
 
 		if (frappe.defaults.get_default('collect_registration_fee') && frm.doc.status == 'Disabled') {
 			frm.add_custom_button(__('Invoice Patient Registration'), function () {
