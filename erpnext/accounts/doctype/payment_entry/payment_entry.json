@@ -15,6 +15,7 @@
   "posting_date",
   "company",
   "mode_of_payment",
+  "card_number",
   "party_section",
   "party_type",
   "party",
@@ -725,12 +726,18 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Paid To Account Type"
+  },
+  {
+   "fieldname": "card_number",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Card Number"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-23 01:12:31.997895",
+ "modified": "2022-08-10 14:28:26.816122",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

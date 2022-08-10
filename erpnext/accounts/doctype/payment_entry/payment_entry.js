@@ -166,6 +166,20 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+
+		if (frm.doc.mode_of_payment ){
+			frappe.db.get_value("Mode of Payment", cur_frm.doc.mode_of_payment , "has_card_number").then(res => {
+				if(res.message.has_card_number){
+					frm.toggle_display("card_number", true)
+				}else{
+					frm.toggle_display("card_number", false)
+				}
+			
+			})}
+			else{
+				frm.toggle_display("card_number", false)
+			}
+			
 	},
 
 	validate_company: (frm) => {
@@ -295,7 +309,18 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		}
 	},
-
+	mode_of_payment: async function(frm) {
+		if (frm.doc.mode_of_payment ){
+			var res = await frappe.db.get_value("Mode of Payment", cur_frm.doc.mode_of_payment , "has_card_number")
+			if(res.message.has_card_number){
+				frm.toggle_display("card_number", true)
+			}else{
+				frm.toggle_display("card_number", false)
+			}
+		}else{
+			frm.toggle_display("card_number", false)
+		}
+	},
 	party_type: function(frm) {
 
 		let party_types = Object.keys(frappe.boot.party_account_types);

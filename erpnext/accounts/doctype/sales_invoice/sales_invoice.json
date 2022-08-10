@@ -52,6 +52,8 @@
   "form_no",
   "column_break2",
   "currency",
+  "additional_item_discount",
+  "apply_item_discount",
   "sec_warehouse",
   "set_warehouse",
   "column_break_55",
@@ -2168,6 +2170,17 @@
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "additional_item_discount",
+   "fieldtype": "Float",
+   "label": "Additional Item Discount",
+   "precision": "2"
+  },
+  {
+   "fieldname": "apply_item_discount",
+   "fieldtype": "Button",
+   "label": "Apply Item Discount"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2180,7 +2193,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-06 19:50:57.838185",
+ "modified": "2022-08-10 14:04:40.467864",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

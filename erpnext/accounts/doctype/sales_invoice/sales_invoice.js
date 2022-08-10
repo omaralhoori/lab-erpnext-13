@@ -867,6 +867,15 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.refresh_fields();
 	},
+	apply_item_discount: function(frm){
+		var selected_items = frm.get_selected()["items"]
+		if (selected_items){
+			var discount = frm.doc.additional_item_discount || 0
+			selected_items.forEach(item => {
+				frappe.model.set_value("Sales Invoice Item", item, "discount_percentage", discount)
+			})
+		}
+	},
 
 	get_loyalty_details: function (frm) {
 		if (frm.doc.customer && frm.doc.redeem_loyalty_points) {

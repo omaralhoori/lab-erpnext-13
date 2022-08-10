@@ -91,6 +91,49 @@ class SalesInvoice(SellingController):
 		#self.grand_total += self.total_discount_provider
 		self.grand_total = self.grand_total
 
+	def get_inner_item_children(self):
+		html = ""
+		for item in self.items:
+			result = self.get_lab_test_template(item.item_code)
+			if not result:
+				html += self.format_test_table(item.item_name, item.amount, item.discount_percentage, item.base_patient_rate)
+			else:
+				for res in result:
+					html += self.format_test_table(res['lab_test_name'], res['test_rate'], item.discount_percentage)
+		
+		return html
+
+	def get_lab_test_template(self, item_code):
+		template = frappe.get_doc("Lab Test Template", {"item": item_code})
+		if not template: return False
+		if not template.is_billable or len(template.lab_test_groups) == 0: return False
+		results = frappe.db.sql("""
+			SELECT tltt2.lab_test_name , IFNULL(tip.price_list_rate, tltt2.lab_test_rate) as test_rate   FROM `tabLab Test Group Template` tltgt 
+			INNER JOIN `tabLab Test Template` tltt2 ON tltt2.name=tltgt.lab_test_template AND tltt2.is_billable=1 
+			LEFT JOIN `tabItem Price` tip ON tip.item_code=tltt2.item AND tip.price_list="{price_list}" 
+			WHERE tltgt.parent="{template_name}";
+		""".format(template_name=template.name,price_list=self.selling_price_list ), as_dict=True)
+		if not results: return False
+		return results
+	
+
+	def format_test_table(self, test_name, price, discount, patient_share=None):
+		if not patient_share:
+			patient_share = float(price) - (float(price) * float(discount) / 100.0) 
+		html = f"""
+			<tr  class="border">
+				<td colspan="6">
+					{test_name}
+				</td>
+				 <td class="center">
+                                    { "%.2f" % price }
+				</td>
+				<td  class="center">
+					{ "%.2f" % patient_share }
+				</td>
+			</tr>
+		"""
+		return html
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.calculate_grand_total()
