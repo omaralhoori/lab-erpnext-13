@@ -902,7 +902,7 @@ class SalesInvoice(SellingController):
 						"due_date": self.due_date,
 						"against": self.against_income_account,
 						"debit": base_total_patient_in_company_currency , # grand_total_in_company_currency ,
-						"debit_in_account_currency": base_total_patient_in_company_currency  if self.party_account_currency==self.company_currency else total_patient,
+						"debit_in_account_currency": base_total_patient_in_company_currency  if self.party_account_currency==self.company_currency else self.total_patient,
 								# grand_total_in_company_currency if self.party_account_currency==self.company_currency else grand_total,
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype,
@@ -1062,6 +1062,18 @@ class SalesInvoice(SellingController):
 										"project": item.project or self.project
 									}, account_currency, item=item)
 								)
+						else:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": income_account,
+									"against": item.discount_account,
+									"credit": item.discount_amount,
+									"credit_in_account_currency": item.discount_amount,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+
 						#if self.insurance_party and self.coverage_percentage > 0:
 						#	if item.discount_amount > 0:
 						#		gl_entries.append(
