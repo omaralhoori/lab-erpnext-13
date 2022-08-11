@@ -144,7 +144,7 @@ def user_test_result(lab_test, get_html=True):
 
     if get_html:
         return html
-    options = {"--margin-top" : "40mm", "--margin-bottom": "20mm", "quiet":""}
+    options = {"--margin-top" : "40mm", "--margin-left" : "0","--margin-right" : "0", "--margin-bottom": "20mm", "quiet":""}
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
@@ -163,7 +163,7 @@ def lab_test_result(lab_test):
     tbody = get_print_tbody(test_doc, header)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
-    options = {"--margin-top" : "40mm", "--margin-bottom": "20mm", "quiet":""}
+    options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "20mm", "quiet":""}
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
@@ -178,50 +178,49 @@ def get_print_header(test_doc, head=None):
         """
     else: head = ""
     return f"""
-    <table>
+    <table class="b-bottom f-s">
         {head}
-        <tr>
-            <td class="width-15">
+        <tr >
+            <td >
                  Patient Name
             </td>
             <td class="width-35">
                 : <span class="red">{ test_doc.patient_name }</span>
             </td>
-            <td class="width-15">Age</td>
+            <td>Age</td>
             <td class="width-35">: {test_doc.patient_age}</td>
         <tr>
          <tr>
-            <td class="width-15">
+            <td >
                  File No.
             </td>
-            <td class="width-35">
+            <td >
                 : { test_doc.get_patient_file() }
             </td>
-            <td class="width-15">Gender</td>
-            <td class="width-35">: {test_doc.patient_sex}</td>
+            <td >Gender</td>
+            <td >: {test_doc.patient_sex}</td>
         <tr>
         <tr>
-            <td class="width-15">
+            <td >
                  Visit No.
             </td>
-            <td class="width-35">
+            <td >
                 : { test_doc.sales_invoice }
             </td>
-            <td class="width-15">External No.</td>
-            <td class="width-35">: </td>
+            <td >Sample Date</td>
+            <td >: {  frappe.utils.get_datetime(test_doc.creation).strftime("%d/%m/%Y %r",)   }</td>
         <tr>
         <tr>
-            <td class="width-15">
+            <td >
                  Consultant
             </td>
-            <td class="width-35">
+            <td >
                 : { consultant }
             </td>
-            <td class="width-15">Sample Date</td>
-            <td class="width-35">: {  frappe.utils.get_datetime(test_doc.creation).strftime("%d/%m/%Y %r",)   }</td>
+            <td ></td>
+            <td ></td>
         <tr>
     </table>
-    <hr / >
     """
 
 def get_print_body(header, tbody):
@@ -330,18 +329,42 @@ def get_hematology_tests(test_doc, only_finalized=False):
 def format_hematology_tests(tests, header):
     tests_html = ""
     tests.sort(key=lambda x: x['order'])
+    diff= 0
     for test in tests:
         if test['conv_result']:
-            test_percentage = '<strong>' + format_float_result(test['result_percentage']) + "</strong> % &emsp;" if test['result_percentage'] else ""
+            result = format_float_result(test['conv_result'])
+            precentage = ""
+            secondary_result = ""
+            test_title = ""
+            if diff == 1:
+                test_title = """
+                    <tr>
+                        <td><table><tr><td class="diff">Differential</td></tr></table></td>
+                    </tr>
+                """
+                diff=2
+            if test['result_percentage']:
+                secondary_result = format_float_result(test['conv_result'], 3)
+                precentage = "%"
+                result = format_float_result(test['result_percentage'], 0)
+            elif diff == 2:
+                result = format_float_result(test['conv_result'], 0)
+            test_class = ""
+            if test['lab_test_name'] == "Leukocytes":
+                test_class = "border-line"
+                diff = 1
             test_html = f"""
-                <tr>
-                <td class="width-33">{test['lab_test_name']}</td>
-                <td class="width-33">{test_percentage}<strong>{format_float_result(test['conv_result'])}</strong>&emsp;{test['conv_uom'] or ''}</td>
-                    <td class="width-33">&emsp;&emsp;{test['template'][0]['range_text'] if test['template'] else ''}</td>
+                <tr >
+                <td class="width-25 hema-test">{test['lab_test_name']}</td>
+                <td class="f-s width-10 fb">{result} </td>
+                <td class="width-5 f-s ">{precentage}</td>
+                <td class="width-10 f-s fb">{secondary_result}</td>
+                <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
+                <td class="f-s width-40">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{test['template'][0]['range_text'] if test['template'] else ''}</td>
 
                 </tr>
             """
-            test_html = "<tr><td><table>" + test_html + "</table></td></tr>"
+            test_html = f"{test_title}<tr><td class='{test_class}'><table>" + test_html + "</table></td></tr>"
             tests_html+= test_html
     html = f"""<table>
         <thead>
@@ -352,16 +375,11 @@ def format_hematology_tests(tests, header):
             <td>
                  <table>
                 <tr>
-            <th colspan="3" class="center"><strong>HEMATOLOGY</strong></th>
+            <td colspan="3" class="center title b-bottom">HEMATOLOGY</td>
 
             </tr>
             <tr>
-                <td colspan="3"><hr></td>
-            </tr>
-            <tr>
-                <td class="width-33" ></td>
-                <td class="width-33"></td>
-                <td class="width-33 ">Normal Range( Age and Sex releated )</td>
+                <td colspan="3" class="f-r f-s">Normal Range( Age and Sex releated)</td>
             </tr>
             </table>
             </td>
@@ -440,9 +458,12 @@ def format_uploaded_tests(test_doc,tests, header=""):
     </table>"""
     return html
 
-def format_float_result(result):
+def format_float_result(result, point=2):
     try:
-        return "%.2f" % float(result)
+        if point != 0:
+            return f"%.{point}f" % float(result)
+        else:
+            return int(float(result))
     except ValueError:
         return result
 
@@ -581,13 +602,22 @@ def get_print_style():
         text-align:left;
     }
     td{
-        padding-bottom: 8px;
+        padding-bottom: 4px;
     }
     .width-50{
         width:50%;
     }
+    .width-5{
+        width:5%;
+    }
     .width-25{
         width: 25%;
+    }
+    .width-20{
+        width: 20%;
+    }
+    .width-45{
+        width: 45%;
     }
     .width-33{
         width: 33%;
@@ -595,8 +625,17 @@ def get_print_style():
     .width-15{
          width: 15%;
     }
+    .width-10{
+         width: 10%;
+    }
     .width-35{
          width: 35%;
+    }
+    .width-30{
+         width: 30%;
+    }
+    .width-40{
+         width: 40%;
     }
     .width-75{
          width: 75%;
@@ -604,11 +643,31 @@ def get_print_style():
     .width-100{
         width: 100%;
     }
+    .fb{
+        font-weight: bold;
+    }
     .red{
         color: red;
     }
     .b-bottom{
         border-bottom: 1px solid;
+    }
+    .f-s{
+         
+            font-family: 'serif';
+            font-size: .9em;
+    }
+    .f-r{
+        text-align: right;
+    }
+    .title{
+        font-size: 24px;
+        padding: 0 !important;
+    }
+    .border-line{
+        border-bottom: 1px solid;
+        border-top: 1px solid;
+        padding: 5px 0 2px 0 !important;
     }
     .center{
         text-align: center;
@@ -630,6 +689,10 @@ def get_print_style():
         body{
             padding: 10px 30px;
         }
+    }
+    .diff{
+        text-decoration: underline;
+    font-weight: bold;
     }
         </style>
     """

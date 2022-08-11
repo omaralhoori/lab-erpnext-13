@@ -829,12 +829,30 @@ def receive_sysmex_results():
 
 @frappe.whitelist()
 def get_test_attribute_options(lab_test):
-	return frappe.db.sql("""
+	options = frappe.db.sql("""
 	SELECT tntr.template, tltt.attribute_options  FROM `tabLab Test Template` tltt
 		INNER JOIN `tabNormal Test Result` tntr
 		ON tntr.template = tltt.name
 		WHERE tntr.parent="{lab_test}" AND tltt.control_type IN ('Free Text', 'Drop Down List')
 	""".format(lab_test=lab_test), as_dict=True)
+
+	units = frappe.db.sql("""
+		SELECT tntr.name,tltu.lab_test_uom as conv_unit, tltu2.si_unit_name as si_unit FROM `tabNormal Test Result` tntr 
+		LEFT JOIN `tabLab Test UOM` tltu ON tltu.name=tntr.lab_test_uom
+		LEFT JOIN `tabLab Test UOM` tltu2 ON tltu2.name=tntr.secondary_uom
+		WHERE tntr.parent="{lab_test}"
+	""".format(lab_test=lab_test),as_dict=True)
+
+	orders = frappe.db.sql(f"""
+		SELECT tmtltt.lab_test_template ,tmtltt.interface_order FROM `tabNormal Test Result` tntr 
+		INNER JOIN `tabMachine Type Lab Test Template` tmtltt ON tmtltt.lab_test_template=tntr.template
+		WHERE tntr.parent="{lab_test}"
+	""", as_dict=True)
+	return {
+		"options": options,
+		"units": units,
+		"orders": orders
+	}
 
 
 @frappe.whitelist()

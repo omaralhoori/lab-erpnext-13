@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:machine_name",
  "creation": "2022-07-31 09:49:03.471970",
@@ -37,7 +38,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-31 13:11:55.439855",
+ "modified": "2022-08-11 12:00:40.200296",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Machine Type Lab Test",
