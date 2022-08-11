@@ -17,6 +17,19 @@ frappe.query_reports["Sales Register"] = {
 			"default": frappe.datetime.get_today()
 		},
 		{
+			"fieldname":"insurance_party",
+			"label": __("Insurance/Payer"),
+			"fieldtype": "Link",
+			"options": "Customer",
+			"get_query": function() {
+				return {
+					"filters": {
+						"customer_type": ["in","Payer,Insurance Company,Insurance Company Parties"],
+					}
+				}
+			}
+		},
+		{
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
@@ -29,42 +42,6 @@ frappe.query_reports["Sales Register"] = {
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
 		},
-		{
-			"fieldname":"mode_of_payment",
-			"label": __("Mode of Payment"),
-			"fieldtype": "Link",
-			"options": "Mode of Payment"
-		},
-		{
-			"fieldname":"owner",
-			"label": __("Owner"),
-			"fieldtype": "Link",
-			"options": "User"
-		},
-		{
-			"fieldname":"cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center"
-		},
-		{
-			"fieldname":"warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse"
-		},
-		{
-			"fieldname":"brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
-		},
-		{
-			"fieldname":"item_group",
-			"label": __("Item Group"),
-			"fieldtype": "Link",
-			"options": "Item Group"
-		}
 	]
 }
 
