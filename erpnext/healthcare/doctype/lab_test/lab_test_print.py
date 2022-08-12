@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from asyncore import write
 
 import frappe
 from frappe.permissions import get_valid_perms
@@ -141,7 +142,6 @@ def user_test_result(lab_test, get_html=True):
     tbody = get_print_tbody(test_doc, header, True)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
-
     if get_html:
         return html
     options = {"--margin-top" : "40mm", "--margin-left" : "0","--margin-right" : "0", "--margin-bottom": "20mm", "quiet":""}
@@ -163,13 +163,47 @@ def lab_test_result(lab_test):
     tbody = get_print_tbody(test_doc, header)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
-    options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "20mm", "quiet":""}
+    footer = get_lab_result_footer(test_doc)
+    options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "30mm", 
+   "--footer-html" : footer,
+    "quiet":""}
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
+def get_lab_result_footer(test_doc):
+    html = f"""
+        <table style="width:90%; margin: 0 auto; border-top: 1px solid;"><tr>
+        <td style="width:20%;">
+        Result Date/Time</td>
+        <td >
+            : { frappe.utils.get_datetime().strftime("%d/%m/%Y %r",)}
+        </td>
+        <td>Lab Director:</td>
+        </tr>
+        <tr>
+            <td>
+                User Name
+            </td>
+            <td colspan="2">
+                : {frappe.utils.get_fullname()}
+            </td
+        </tr>
+        </table>
+    """
+    with open("footer.html", "w") as f:
+        f.write(html)
+    return "footer.html"
+
 def get_print_header(test_doc, head=None):
     consultant = test_doc.practitioner_name or "Outpatient Doctor"
+    payer_name, payer_label = "", ""
+    if test_doc.show_payer_name:
+        payer = frappe.db.get_value("Sales Invoice", test_doc.sales_invoice, ["insurance_party_type", "insurance_party"])
+        if payer and payer[0] == "Payer": 
+            payer_name = payer[1]
+            payer_label = "Payer"
+            
     if head:
         head= f"""
         <tr>
@@ -217,8 +251,8 @@ def get_print_header(test_doc, head=None):
             <td >
                 : { consultant }
             </td>
-            <td ></td>
-            <td ></td>
+            <td >{payer_label}</td>
+            <td >{payer_name}</td>
         <tr>
     </table>
     """
@@ -245,12 +279,13 @@ def get_print_tbody(test_doc, header, only_finalized=False):
     if len(routine_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_routine_tests(routine_tests, header)
-    uploaded_tests = get_uploaded_tests(test_doc, only_finalized)
-    if len(uploaded_tests) > 0:
-        
-        html = format_uploaded_tests(test_doc,uploaded_tests, header)
-        if len(body) > 0 and len(html) > 0: body += get_break()
-        body +=  html
+    if only_finalized:
+        uploaded_tests = get_uploaded_tests(test_doc, only_finalized)
+        if len(uploaded_tests) > 0:
+            
+            html = format_uploaded_tests(test_doc,uploaded_tests, header)
+            if len(body) > 0 and len(html) > 0: body += get_break()
+            body +=  html
     return body
 
 def get_routine_tests(test_doc, only_finalized=False):
@@ -389,11 +424,17 @@ def format_hematology_tests(tests, header):
         <tbody>
            {tests_html}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8">&nbsp;</td>
+            </tr>
+        </tfoot>
     </table>"""
     return html
 
 def get_chemistry_tests(test_doc, only_finalized=False):
     tests = get_tests_by_item_group(test_doc.name, "Chemistry", only_finalized)
+    tests.sort(key=lambda x: x['order'])
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -502,24 +543,20 @@ def format_chemistry_tests(tests, header=""):
                 """
             if test['comment']:
                 test_html += f"<tr><td colspan='3' class='red'><strong>Comment: </strong>{test['comment']}</td></tr>"
-            test_html += "<tr><td colspan='3'><hr></td></tr>"
-            test_html = "<tr><td><table>" + test_html + "</table></td></tr>"
+            test_html = "<tr><td class='b-bottom' style='padding-bottom: 20px;'><table>" + test_html + "</table></td></tr>"
             tests_html += test_html
-    html = f"""<table>
+    html = f"""<table class="f-s">
         <thead>
         <tr>
             <td>{header}</td>
         </tr>
         <tr>
-            <td>
+            <td class="b-bottom">
                  <table>
-                <tr>
+                <tr >
             <th class="width-50">Laboratory Result</th>
             <th class="width-25">SI Units</th>
             <th class="width-25">Conventional Units</th>
-            </tr>
-            <tr>
-                <td colspan="3"><hr></td>
             </tr>
             </table>
             </td>
@@ -535,9 +572,12 @@ def format_chemistry_tests(tests, header=""):
 def get_tests_by_item_group(test_name, item_group, only_finalized=False):
     where_stmt = " lt.status IN ('Finalized', 'Released')"
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
+    order = "tltt.order"
+    if item_group == "Chemistry":
+        order = "ltt.order"
     return frappe.db.sql("""
         SELECT  
-        lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, tltt.order,
+        lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
@@ -550,7 +590,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         ON stu.name=lt.secondary_uom
 
         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
-        """.format(test_name=test_name, item_group=item_group, where_stmt=where_stmt), as_dict=True)
+        """.format(test_name=test_name, order= order, item_group=item_group, where_stmt=where_stmt), as_dict=True)
 
 @frappe.whitelist(allow_guest=True)
 def get_test_uploaded_files(lab_test, password, test_name):
@@ -587,7 +627,7 @@ def get_print_html_base():
         {style}
     </head>
     <body>
-        {body}
+        {body}       
     </body>
     </html>
     """
