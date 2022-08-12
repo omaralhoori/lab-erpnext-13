@@ -293,21 +293,27 @@ def results_info_infinty(result, p_end, n_p_start):
         if res_no == 200: return []
     return results
 
+def is_embassy_order(order):
+    return order[0] == "E"
+
 def get_patient_results_infinty(res_msg):
     res_msg = re.sub(b'\x17..\r\n\x02', b'', res_msg)
     res_msg = res_msg.decode()
     p = 1
-    results = []
+    results, embassy_results = [], []
     while True:
         res = patient_info_infinty(res_msg, p)
         if not res or res[2] < 0: break
         test_reuslts = results_info_infinty(res_msg, res[2], res[3])
         p += 1
         if len(test_reuslts) == 0: continue
-        results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
+        if is_embassy_order(res[0]):
+            embassy_results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
+        else:
+            results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
         if p == 300:
             return []
-    return results
+    return results, embassy_results
 
 def start_infinty_listener(ip_address, port):
     while True:
@@ -331,8 +337,11 @@ def start_infinty_listener(ip_address, port):
                             break
                         msg += data
                         if data.endswith(chr(4).encode()):                    
-                            results = get_patient_results_infinty(msg)
-                            requests.post("http://127.0.0.1/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(results))
+                            results, embassy_results = get_patient_results_infinty(msg)
+                            if len(results) > 0:
+                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(results))
+                            if len(embassy_results) > 0:
+                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(embassy_results))
                             msg = b""
                         conn.sendall(chr(6).encode())
         except socket.error:
@@ -340,6 +349,13 @@ def start_infinty_listener(ip_address, port):
             log_result("infinty", "Socket cannot connect")
             sleep(5)
             continue
+
+def get_url(site):
+    if site == "embassy":
+        return "josante-embassy.erp"
+    elif site == "lab":
+        return "lab.erp"
+    else: return site
 
 def log_result(log,msg):
     with open(log + "-log.txt", "a") as f:
