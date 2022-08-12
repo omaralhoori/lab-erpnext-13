@@ -155,7 +155,8 @@
    "fieldtype": "Date",
    "in_preview": 1,
    "label": "Date of birth",
-   "no_copy": 1
+   "no_copy": 1,
+   "reqd": 1
   },
   {
    "fieldname": "age_html",
@@ -591,7 +592,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-08-09 07:20:54.313278",
+ "modified": "2022-08-12 11:51:02.346520",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

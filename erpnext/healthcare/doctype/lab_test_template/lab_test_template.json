@@ -113,7 +113,8 @@
   "form_name",
   "medical_test_id",
   "medical_service_id",
-  "attribute_options"
+  "attribute_options",
+  "is_microscopy"
  ],
  "fields": [
   {
@@ -752,10 +753,16 @@
    "fieldtype": "Text",
    "hidden": 1,
    "label": "Attribute Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_microscopy",
+   "fieldtype": "Check",
+   "label": "Is Microscopy"
   }
  ],
  "links": [],
- "modified": "2022-08-06 01:19:10.894865",
+ "modified": "2022-08-12 10:01:25.207453",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

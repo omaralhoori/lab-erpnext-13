@@ -187,7 +187,7 @@ def get_lab_result_footer(test_doc):
             </td>
             <td colspan="2">
                 : {frappe.utils.get_fullname()}
-            </td
+            </td>
         </tr>
         </table>
     """
@@ -313,19 +313,54 @@ def format_routine_tests(tests, header):
 def format_routine_page_tests(tests, header, test_name):
     tests_html = ""
     tests.sort(key=lambda x: x['order'])
+    microscopt_tests = ""
+    normal_test, test_count = "", 0
     for test in tests:
         if test['conv_result']:
-            test_percentage = '<strong>' + format_float_result(test['result_percentage']) + "</strong> % &emsp;" if test['result_percentage'] else ""
-            test_html = f"""
-                <tr>
-                <td class="width-25">{test['lab_test_name']}</td>
-                <td class="width-75">{test_percentage}<strong>{format_float_result(test['conv_result'])}</strong>&emsp;{test['conv_uom'] or ''} &emsp;&emsp;{test['template'][0]['range_text'] if test['template'] else ''}</td>
-                </tr>
-            """
-            test_html = "<tr><td><table>" + test_html + "</table></td></tr>"
-            tests_html+= test_html
+            if test['is_microscopy']:
+                test_percentage = '<strong>' + format_float_result(test['result_percentage']) + "</strong> % &emsp;" if test['result_percentage'] else ""
+                test_html = f"""
+                    <tr>
+                    <td class="width-20">{test['lab_test_name']}</td>
+                    <td class="{'width-15' if test['conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['conv_result'])}</strong></td>
+                    <td class="width-10"> {test['conv_uom'] or ''} </td>
+                     <td class="width-50"> {test['template'][0]['range_text'] if test['template'] else ''} </td>
+                    </tr>
+                """
+                test_html = "<tr><td><table>" + test_html + "</table></td></tr>"
+                microscopt_tests += test_html
+            else:
+                test_count += 1
+                normal_test += f"""
+                    <td class="width-20">{test['lab_test_name']}</td>
+                    <td class="width-30"><strong>: {test['conv_result']}</strong></td>
+                """
+                if test_count == 2:
+                    normal_test = "<tr>" + normal_test + "</tr>"
+                    normal_test = "<tr><td><table>" + normal_test + "</table></td></tr>"
+                    tests_html+= normal_test
+                    normal_test = ""
+                    test_count = 0
+    if test_count == 1:
+        normal_test = "<tr>" + normal_test + "<td class='width-20'></td><td class='width-30'></td></tr>"
+        normal_test = "<tr><td><table>" + normal_test + "</table></td></tr>"
+        tests_html+= normal_test
 
-    html = f"""<table>
+    if len(microscopt_tests) > 0:
+        microscopt_tests = f"""  
+        <tr>
+            <td>
+             <table>
+           <tr>
+             <td colspan="4" class="center title b-bottom b-top mt-20">MICROSCOPY</td>
+           </tr>
+           {microscopt_tests}
+
+            </table>
+        </td>
+        </tr>
+        """
+    html = f"""<table class="f-s">
         <thead>
         <tr>
             <td>{header}</td>
@@ -334,11 +369,8 @@ def format_routine_page_tests(tests, header, test_name):
             <td>
                  <table>
                 <tr>
-            <th colspan="4" class="center"><strong>{test_name}</strong></th>
+            <td colspan="4" class="center title b-bottom">{test_name}</td>
 
-            </tr>
-            <tr>
-                <td colspan="4"><hr></td>
             </tr>
             </table>
             </td>
@@ -347,6 +379,7 @@ def format_routine_page_tests(tests, header, test_name):
         </thead>
         <tbody>
            {tests_html}
+           {microscopt_tests}
         </tbody>
     </table>"""
     return html
@@ -578,7 +611,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
     return frappe.db.sql("""
         SELECT  
         lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template
+        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
@@ -734,6 +767,13 @@ def get_print_style():
         text-decoration: underline;
     font-weight: bold;
     }
+    .b-top{
+        border-top: 1px solid;
+    }
+    
+     .mt-20{
+        margin-top: 20px;
+     }
         </style>
     """
 
