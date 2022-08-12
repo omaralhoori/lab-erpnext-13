@@ -9,9 +9,13 @@
 
 .child-test-container {
     margin: 10px 0;
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
 }
 
-.test-input-control{
+
+.test-input-control, .test-comment{
     display: inline-block;
     height: calc(1.5em + 0.75rem + 2px);
     padding: 0.375rem 0.75rem;
@@ -27,6 +31,9 @@
     transition: none;
 }
 
+.test-comment{
+    height: 80px;
+}
 .freetext-select{
     width: 300px;
 }
@@ -43,4 +50,8 @@
 
 .result-checkbox{
     float: right;
+}
+.test_result_container {
+    display: flex;
+    align-items: center;
 }

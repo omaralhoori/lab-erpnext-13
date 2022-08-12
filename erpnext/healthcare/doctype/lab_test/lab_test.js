@@ -113,16 +113,26 @@ const format_tests_html = (tests, attr_options, test_units) => {
 		var child_tests_html = "";
 		for (var childTest of tests[testTemplate]){
 			var result_type = undefined;
+			var commentSection= "";
 			result_type = create_tests_result_type(childTest, options[childTest['template']], units[childTest.name])
 			if (result_type){
+				if (tests[testTemplate] && tests[testTemplate].length == 1){
+					commentSection = `
+						<textarea class="test-comment" placeholder="Comment" name="${childTest.name}">${childTest['lab_test_comment'] || ''}</textarea>
+					`
+				}
 				child_tests_html += `
 				<div class="child-test-container ${childTest['status']}">
-					<label> <strong>${childTest['lab_test_name']} </strong></label>
-					<div class="test_result_container">
-					${result_type}
-					<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" />
-					${childTest['status'] || ""}
-					</div>
+					<span>
+						<label> <strong>${childTest['lab_test_name']} </strong></label>
+						<div class="test_result_container">
+						${result_type}
+						${commentSection}
+						
+						</div>
+					</span>
+					<span><label>${childTest['status'] || ""} </label>&nbsp;<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" /></span>
+					
 				</div>
 			`;
 			}
@@ -154,6 +164,10 @@ const setup_input_listeners = (frm) => {
 	$('.child-tests .input').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
 		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "result_value", $(this).val());
+	})
+	$('.child-tests .test-comment').change(function(value) {
+		//console.log($(this).attr('name'), $(this).val());
+		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "lab_test_comment", $(this).val());
 	})
 	$('.child-tests .percentage-input').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
