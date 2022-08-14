@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:attribute_code",
+ "creation": "2022-08-13 09:26:14.754213",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "attribute_code",
+  "attribute_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "attribute_code",
+   "fieldtype": "Data",
+   "label": "Attribute Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "attribute_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Attribute Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-08-13 09:26:35.892943",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Embassy Report Attribute",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

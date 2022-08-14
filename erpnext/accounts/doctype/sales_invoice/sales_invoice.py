@@ -1160,13 +1160,15 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def get_qrcode(self):
+		if frappe.local.conf.is_embassy: return ""
 		code_path = ""
 		patient = frappe.get_doc("Patient", self.patient)
 		if patient:
 			if not patient.qrcode_path or patient.qrcode_path == "":
 				patient.generate_qrcode()
 			code_path = patient.qrcode_path
-		return code_path
+
+		return f'<img class="qr-code" src="{code_path}" />'
 
 	def get_asset(self, item):
 		if item.get('asset'):

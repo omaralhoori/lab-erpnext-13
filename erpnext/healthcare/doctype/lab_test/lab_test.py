@@ -27,7 +27,7 @@ class LabTest(Document):
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
 
-		if not self.sms_sent or self.sms_sent == 0:
+		if not frappe.local.conf.is_embassy and (not self.sms_sent or self.sms_sent == 0):
 			self.send_result_sms()
 	
 	def validate_sample_released(self):
@@ -853,6 +853,22 @@ def get_test_attribute_options(lab_test):
 		"units": units,
 		"orders": orders
 	}
+
+@frappe.whitelist()
+def get_lab_test_form_tests(lab_test):
+	return frappe.db.sql(f"""
+	SELECT tntr.name, tntr.template, tntr.report_code as parent_template, tltt.attribute_options, tntr.result_percentage,  tntr.control_type, 
+		tltu.lab_test_uom as conv_unit, tltu2.si_unit_name as si_unit, tntr.lab_test_comment, tntr.status, tntr.lab_test_name, tntr.result_value,
+		tntr.host_code, tntr.secondary_uom_result
+		FROM `tabNormal Test Result` tntr 
+		INNER JOIN `tabLab Test Template` tltt ON tntr.template=tltt.name
+		LEFT JOIN `tabLab Test Template` tltt2 ON tntr.report_code=tltt2.name
+		LEFT JOIN `tabLab Test UOM` tltu ON tltu.name=tntr.lab_test_uom
+		LEFT JOIN `tabLab Test UOM` tltu2 ON tltu2.name=tntr.secondary_uom
+		WHERE tntr.parent="{lab_test}"
+		ORDER BY ISNULL(tltt2.printing_order), ISNULL(tltt.printing_order), cast(tltt2.printing_order as unsigned), cast(tltt.printing_order as unsigned)
+		;
+	""", as_dict=True)
 
 
 @frappe.whitelist()

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embassy Report</title>
+    <style>
+        body{
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+        .content{
+            width: 26cm;
+            margin: 0 auto;
+            position: relative;
+        }
+        .outer-frame{
+            border: 1px solid;
+        }
+        .title{
+            font-weight: bold;
+            font-size: 6mm;
+            text-align: center;
+        }
+        .patient-section{
+            border-bottom: 1px solid;
+            height: 250px;
+        }
+        .info-title{
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+        
+        }
+        .patient-section > div {
+            /* display: inline-block; */
+            float: left;
+        }
+        .photo-container{
+            border-right: 1px solid;
+            width: 30%  ;
+            height: 100%;
+        }
+        .photo{
+            width: 75%;
+            margin: 0 auto;
+            height: 100%;
+            border-left: 1px solid;
+            border-right: 1px solid;
+        }
+        .ml-30{
+            margin-left: 15mm;
+            word-wrap: break-word;
+        }
+        .dots{
+            word-wrap: break-word;
+            width: 90%;
+        }
+        .history-content{
+            margin: 10px 5px 5px 5px;
+        }
+        .history-section{
+            border-bottom: 1px solid;
+        }
+        .width-50{
+            width: 50%;
+        }
+        .width-25{
+            width: 25%;
+        }
+        .width-30{
+            width: 30%;
+        }
+        .width-20{
+            width: 20%;
+        }
+        th, td{
+            border: 1px solid;
+            margin: 0;
+            text-align: left;
+            padding: 2px;
+        }
+        thead td{
+            border: none;
+            text-align: center;
+            font-weight: 600;
+        }
+        table{
+             width: 100%;
+             border-spacing: 0;
+        }
+        .patient-info{
+            width: 65%;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="title">
+            ROYAL EMBASSY OF KSA IN JORDAN
+        </div>
+        <div class="outer-frame">
+            <div class="patient-section">
+                <div class="photo-container">
+                    <div class="photo">Photo (1)</div>
+                </div>
+                    <div class="patient-info">
+                        <div class="info-title">MEDICAL REPORT</div>
+                        <div>
+                            Name: {{patient_name}} <br />
+                        Sex: {{gender}} &emsp;&emsp; Age: {{age}}  &emsp;&emsp; Statue: {{status}}  &emsp;&emsp; Nationality: {{nationality}} <br />
+                        Passport No: {{passport_no}} &emsp; Place & Date of Issue: &emsp; {{passport_date}} &emsp; {{passport_place}} <br />
+                        Position Applied for <br />
+                        Dear sir:
+                        </div>
+                        <div class="ml-30">
+                            Please arrange to examine the above-mentioned candidate whether he / she is fit for above mentioned position
+                        </div>
+                        <div>Date: &emsp;{{report_date}}</div>
+                    </div>
+            </div>
+            <div class="history-section">
+                <div class="history-content">
+                    <div>History of any significant past illness including :</div>
+                    <div class="ml-30">
+                        <div>1- Psychiatric and neurological disorders (Epilepsy, depression)</div>
+                        <div>2- Allergy</div>
+                        <br />
+                        <div class="dots">
+                            &emsp;&emsp;.........................................NAD...............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-section">
+                <div class="table-div">
+                    <table>
+                        <thead>
+                            <tr>
+                                <td class="width-50" colspan="2">MEDICAL EXAMINATION</td>
+                                <td class="width-50" colspan="2">LABORATORY INVESTIGATIONS</td>
+                            </tr>
+                            <tr>
+                                <th class="width-30">Type of medical exam :</th>
+                                <th class="width-20">Results</th>
+                                <th class="width-30">Type of lab. Invest. :</th>
+                                <th class="width-20">Results</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                                <td>&emsp;&emsp;&emsp;&emsp;-vision R. eye</td>
+                                <td>{{vision_r_eye or "Normal"}}</td>
+                                <td></td>
+                                <td></td>
+                           </tr>
+                           <tr>
+                                <td>EYE&emsp;&nbsp;&emsp;&emsp;&emsp;&emsp;L. eye</td>
+                                <td>{{vision_l_eye or "Normal"}}</td>
+                                <td>URINE</td>
+                                <td></td>
+                           </tr>
+                           <tr>
+                                <td>&emsp;&nbsp;&nbsp;&nbsp;&emsp;&emsp;-others R. eye</td>
+                                <td>{{others_r_eye or "Normal"}}</td>
+                                <td></td>
+                                <td></td>
+                           </tr>
+                           <tr>
+                                <td>&emsp;&emsp;&nbsp;&emsp;&emsp;&emsp;&emsp;&emsp;L. eye</td>
+                                <td>{{others_l_eye or "Normal"}}</td>
+                                <td>&emsp;&emsp;&emsp;&emsp;- Sugar</td>
+                                <td>{{urine_sugar or "Normal"}}</td>
+                           </tr>
+                           <tr>
+                            <td>&emsp;</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                           </tr>
+                           <tr>
+                            <td>EAR&emsp;&nbsp;&emsp;&emsp;&emsp;&emsp;R. Ear</td>
+                            <td>{{r_ear or "Normal"}}</td>
+                            <td>&emsp;&emsp;&emsp;&emsp;- Albumin</td>
+                            <td>{{urine_albumin or "Normal"}}</td>
+                       </tr>
+                       <tr>
+                        <td>&emsp;</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                       </tr>
+                       <tr>
+                        <td>&nbsp;&nbsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;L. Ear</td>
+                        <td>{{l_ear or "Normal"}}</td>
+                        <td>&emsp;&emsp;&emsp;&emsp;- Bilharziasis</td>
+                        <td>{{urine_bilharziasis or "N/A"}}</td>
+                   </tr>
+                    <tr>
+                        <td>&emsp;</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Chest X Ray</td>
+                        <td>{{chest_xray or "Normal"}}</td>
+                        <td>&emsp;&emsp;&emsp;&emsp;- Others</td>
+                        <td>{{urine_others or "______"}}</td>
+                   </tr>
+                   <tr>
+                    <td>TUBERCULOSIS</td>
+                    <td>{{tuberculosis or "Negative"}}</td>
+                    <td></td>
+                    <td></td>
+               </tr>
+               <tr>
+                <td>SYSTEMIC EXAMINATION</td>
+                <td></td>
+                <td>STOOL</td>
+                <td></td>
+               </tr>
+               <tr>
+                <td></td>
+                <td></td>
+                <td>&emsp;&emsp;&emsp;&emsp;- Helminthes</td>
+                <td>{{stool_helminthes or "______"}}</td>
+               </tr>
+               <tr>
+                <td>&emsp;&emsp;&emsp;&emsp;- Blood pressure</td>
+                <td>{{blood_pressure or "Normal"}}</td>
+                <td></td>
+                <td></td>
+               </tr>
+               <tr>
+                <td></td>
+                <td></td>
+                <td>&emsp;&emsp;&emsp;&emsp;- Bilharziasis</td>
+                <td>{{stool_bilharziasis or "______"}}</td>
+               </tr>
+               <tr><td>&emsp;&emsp;&emsp;&emsp;- Heart</td>
+               <td>{{heart or "Free"}}</td>
+               <td></td>
+               <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>&emsp;&emsp;&emsp;&emsp;- Salmonella / Shigella</td>
+                <td>{{stool_salmonella or "______"}}</td>
+               </tr>
+            </tr>
+            <tr><td>&emsp;&emsp;&emsp;&emsp;- Lungs</td>
+            <td>{{lungs or "Clear"}}</td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td></td>
+            <td></td>
+            <td>&emsp;&emsp;&emsp;&emsp;- V. Cholera</td>
+            <td>{{stool_vcholera or "______"}}</td>
+           </tr>
+           <tr><td>&emsp;&emsp;&emsp;&emsp;- Abdomen</td>
+            <td>{{abdomen or "Normal"}}</td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr><td>OTHERES :</td>
+         <td></td>
+         <td></td>
+         <td></td></tr>
+         <tr><td>&emsp;&emsp;&emsp;&emsp;- Hernia</td>
+            <td>{{hernia or "Negative"}}</td>
+            <td>BLOOD</td>
+            <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>&emsp;&emsp;&emsp;&emsp;- Hemoglobin</td>
+                <td>{{hemoglobin or "Normal"}}</td>
+               </tr>
+               <tr><td>&emsp;&emsp;&emsp;&emsp;- Varicose veins</td>
+                <td>{{varicose or "Negative"}}</td>
+                <td></td>
+                <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>&emsp;&emsp;&emsp;&emsp;- Malaria Film</td>
+                    <td>{{malaria or "N/A"}}</td>
+                   </tr>
+                   <tr><td>&emsp;&emsp;&emsp;&emsp;- Extremities</td>
+                    <td>{{extremities or "Negative"}}</td>
+                    <td></td>
+                    <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>&emsp;&emsp;&emsp;&emsp;- Others</td>
+                        <td>{{blood_others or "______"}}</td>
+                       </tr>
+                       <tr><td>&emsp;&emsp;&emsp;&emsp;- Skin</td>
+                        <td>{{skin or "Normal"}}</td>
+                        <td></td>
+                        <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>SEROLOGY</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>VENEREAL DISEASES</td>
+                            <td></td>
+                            <td>&emsp;&emsp;&emsp;&emsp;- HIV test</td>
+                            <td>{{hiv or "Negative"}}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>&emsp;&emsp;&emsp;&emsp;- F.B.S.</td>
+                            <td>{{fbs or "Normal"}}</td>
+                        </tr>
+                        <tr>
+                            <td>&emsp;&emsp;- Clinical</td>
+                            <td>{{clinical or "Normal"}}</td>
+                            <td>&emsp;&emsp;&emsp;&emsp;- HBsAg/Anti HCV</td>
+                            <td>{{hbsag or "Negative/Negative"}}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>&emsp;&emsp;&emsp;&emsp;- L.F.T.</td>
+                            <td>{{lft or "Normal"}}</td>
+                        </tr>
+                        <tr>
+                            <td>&emsp;&emsp;- Lab</td>
+                            <td></td>
+                            <td>&emsp;&emsp;&emsp;&emsp;- Creatinine</td>
+                            <td>{{creatinine or "Normal"}}</td>
+                        </tr>
+                        <tr>
+                            <td>&emsp;&emsp;&emsp;&emsp;- VRDL</td>
+                            <td>{{vrdl or "Negative"}}</td>
+                            <td>&emsp;&emsp;&emsp;&emsp;- Urea</td>
+                            <td>{{urea or "Normal"}}</td>
+                        </tr>
+                        <tr>
+                            <td>&emsp;&emsp;&emsp;&emsp;- TPHA</td>
+                            <td>{{vrdl or "Negative"}}</td>
+                            <td>PREGNANCY TEST</td>
+                            <td>{{pregnancy or "Negative" if gender == "F" else "-------"}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -8,13 +8,13 @@ cur_frm.cscript.custom_refresh = function (doc) {
 	cur_frm.toggle_display('sb_normal', doc.normal_toggle);
 };
 
-const create_tests_result_type =  (childTest, options, units) => {
+const create_tests_result_type =  (childTest) => {
 	var result_type = undefined;
 	if (["Numeric", "Formula", "Ratio"].includes(childTest['control_type'])){
 		result_type = `
 	<input ${disable_input(childTest['status'])}  class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
 	<label>
-		${units["conv"] || "" }
+		${childTest["conv_unit"] || "" }
 	</label>
 `
 if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest['result_percentage']){
@@ -25,11 +25,11 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 	</label>
 	`
 }
-		if (units["si"] ){
+		if (childTest["si_unit"] ){
 			result_type += `
 			<input class="test-input-control" disabled name="${childTest['name']}" value="${childTest['secondary_uom_result'] || ""}"/>
 			<label>
-				${units["si"] || "" }
+				${childTest["si_unit"] || "" }
 			</label>
 			`
 		}
@@ -48,7 +48,7 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 		
 		<select ${disable_input(childTest['status'])}  class="test-input-control freetext-select">
 			<option></option>
-			${options}
+			${childTest["attribute_options"] || ""}
 	</select>
 		<label>
 		Result
@@ -68,7 +68,7 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 	<label>Default Option</label>
 	<select ${disable_input(childTest['status'])} class="test-input-control freetext-select">
 			<option></option>
-			${options}
+			${childTest["attribute_options"] || ""}
 	</select>
 		`
 	}else if (["Upload File"].includes(childTest['control_type'])){
@@ -87,7 +87,7 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 const disable_input = (status) => {
 	return status == "Rejected" || status == "Finalized" ? 'disabled' : ''; 
 }
-const format_tests_html = (tests, attr_options, test_units) => {
+const format_tests_html = (tests) => {
 	var html = "";
 	var buttons = `<div> 
 		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
@@ -107,14 +107,14 @@ const format_tests_html = (tests, attr_options, test_units) => {
 		//<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 	}
 	
-	var options = attr_options.reduce((obj, item) => (obj[item.template] = item.attribute_options, obj) ,{});
-	var units = test_units.reduce((obj, item) => (obj[item.name] = {"si": item.si_unit, "conv": item.conv_unit}, obj) ,{});
+	// var options = attr_options.reduce((obj, item) => (obj[item.template] = item.attribute_options, obj) ,{});
+	// var units = test_units.reduce((obj, item) => (obj[item.name] = {"si": item.si_unit, "conv": item.conv_unit}, obj) ,{});
 	for (var testTemplate in tests){
 		var child_tests_html = "";
 		for (var childTest of tests[testTemplate]){
 			var result_type = undefined;
 			var commentSection= "";
-			result_type = create_tests_result_type(childTest, options[childTest['template']], units[childTest.name])
+			result_type = create_tests_result_type(childTest)
 			if (result_type){
 				if (tests[testTemplate] && tests[testTemplate].length == 1){
 					commentSection = `
@@ -138,24 +138,24 @@ const format_tests_html = (tests, attr_options, test_units) => {
 			}
 			
 		}
-		if (testTemplate.includes("Complete Blood Count")){
-			html = `
-		<div class="test-container">
-			<h4>${testTemplate}</h4>
-			<div class="child-tests">
-			${child_tests_html}
-			</div>
-		</div>` + html;
-		}else{
-			html += `
+		// if (testTemplate.includes("Complete Blood Count")){
+		// 	html = `
+		// <div class="test-container">
+		// 	<h4>${testTemplate}</h4>
+		// 	<div class="child-tests">
+		// 	${child_tests_html}
+		// 	</div>
+		// </div>` + html;
+		// }else{
+			
+		// }
+		html += `
 		<div class="test-container">
 			<h4>${testTemplate}</h4>
 			<div class="child-tests">
 			${child_tests_html}
 			</div>
 		</div>`;
-		}
-		
 	}
 	html = buttons + html;
 	return html
@@ -271,28 +271,54 @@ frappe.ui.form.on('Lab Test', {
 				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}`
 				window. open(url, '_blank')
 			})
+
+			frappe.call({
+				method: "erpnext.healthcare.utils.is_embassy",
+				callback: (res) => {
+					if (res.message) {
+						frm.add_custom_button(__('Edit Cover'), function(){
+							frappe.db.get_value("Embassy Report", {sales_invoice: cur_frm.doc.sales_invoice}, "name").then(res => {
+								if (res.message.name){
+									frappe.set_route('Form', 'Embassy Report', res.message.name)
+								}else{
+									frappe.new_doc("Embassy Report", {patient_name: frm.doc.patient_name, sales_invoice: frm.doc.sales_invoice})
+								}
+							})
+
+						})
+						frm.add_custom_button(__('Print Cover'), function(){
+							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=${frm.doc.sales_invoice}`
+							window.open(url, '_blank')
+						})
+
+						frm.add_custom_button(__('Print All'), function(){
+							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_all_reports?lab_test=${frm.doc.name}`
+							let res = window.open(url, '_blank')
+
+						})
+					}
+				}})
 			
 			frappe.call({
-				method: "erpnext.healthcare.doctype.lab_test.lab_test.get_test_attribute_options",
+				method: "erpnext.healthcare.doctype.lab_test.lab_test.get_lab_test_form_tests",
 				args: {
 					lab_test: frm.doc.name
 				},
 			}).then(res => {
 				var tests = {};
-				var orders = res.message.orders.reduce((obj, item) => (obj[item.lab_test_template] = item.interface_order, obj) ,{});
 
-				cur_frm.doc.normal_test_items.forEach(item => {
-					if (! tests[item['report_code']]) {
-						tests[item['report_code']] = [];
+				res.message.forEach(item => {
+					if (! tests[item['parent_template']]) {
+						tests[item['parent_template']] = [];
 					}
-					tests[item['report_code']].push({"order": orders[item.template],...item});
+					tests[item['parent_template']].push(item);
 				})
 
-				for (var tname in tests){
-					tests[tname] = tests[tname].sort((a, b) => Number(a.order || 99999) - Number(b.order || 99999));
-				}
+				// for (var tname in tests){
+				// 	tests[tname] = tests[tname].sort((a, b) => Number(a.order || 99999) - Number(b.order || 99999));
+				// }
 
-				$(frm.fields_dict.lab_test_html.wrapper).html( format_tests_html(tests, res.message.options, res.message.units))
+				$(frm.fields_dict.lab_test_html.wrapper).html( format_tests_html(tests))
 				setup_input_listeners(frm);
 			})
 			
