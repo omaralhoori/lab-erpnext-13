@@ -1,0 +1,480 @@
+<style>
+
+    table{
+        width: 100%;
+    }
+    .width-75{
+        width: 75%;
+    }
+    .width-70{
+        width: 70%;
+        border: 1px solid;
+    }
+    .width-12{
+        width: 12.5%;
+        border: 1px solid;
+    }
+    .width-50{
+        width: 50%;
+        border: 1px solid;
+    }
+    .width-45{
+        width: 45%;
+        border: 1px solid;
+    }
+    .width-15{
+        width: 15%;
+        border: 1px solid;
+    }
+    .width-30{
+        width: 30%;
+        border: 1px solid;
+    }
+    .m-top-10{
+        margin-top: 10px;
+    }
+    .width-25{
+        width: 25%;
+    }
+    .center{
+        text-align: center;
+    }
+    .border > td{
+        border: 1px solid;
+    }
+    .qr-code{
+        width: 100px;
+        height: 100px;
+    }
+    .invoice-title{
+        font-size: 20px;
+    }
+    .t-right{
+        text-align: right;
+    }
+    .b-r{
+        border-right: 1px solid;
+    }
+    .b-l{
+        border-left: 1px solid;
+    }
+    .b-t{
+        border-top: 1px solid;
+    }
+    .b-b{
+        border-bottom: 1px solid;
+    }
+    .b-all{
+        border: 1px solid;
+    }
+
+    @media screen {
+    .print-format-gutter {
+        background-color: #ddd;
+        padding: 15px 0px;
+    }
+    .print-format {
+        background-color: white;
+        box-shadow: 0px 0px 9px rgba(0,0,0,0.5);
+        max-width: 8.3in;
+        min-height: 11.69in;
+        padding: 0.75in;
+        margin: auto;
+    }
+
+    .print-format.landscape {
+        max-width: 11.69in;
+        padding: 0.2in;
+    }
+
+    .page-break {
+        padding: 30px 0px;
+        border-bottom: 1px dashed #888;
+    }
+
+    .page-break:first-child {
+        padding-top: 0px;
+    }
+
+    .page-break:last-child {
+        border-bottom: 0px;
+    }
+
+    /* mozilla hack for images in table */
+    body:last-child .print-format td img {
+        width: 100% !important;
+    }
+
+    @media(max-width: 767px) {
+        .print-format {
+            padding: 0.2in;
+        }
+    }
+}
+
+@media print {
+    .print-format p {
+        margin-left: 1px;
+        margin-right: 1px;
+    }
+}
+
+.data-field {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.data-field .value {
+    word-wrap: break-word;
+}
+
+.important .value {
+    font-size: 120%;
+    font-weight: bold;
+}
+
+.important label {
+    line-height: 1.8;
+    margin: 0px;
+}
+
+.table {
+    margin: 20px 0px;
+}
+
+.square-image {
+    width: 100%;
+    height: 0;
+    padding: 50% 0;
+    background-size: contain;
+    /*background-size: cover;*/
+    background-repeat: no-repeat !important;
+    background-position: center center;
+    border-radius: 4px;
+}
+
+.print-item-image {
+    object-fit: contain;
+}
+
+.pdf-variables,
+.pdf-variable,
+.visible-pdf {
+    display: none !important;
+}
+
+.print-format {
+    font-size: 9pt;
+    font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
+    -webkit-print-color-adjust:exact;
+}
+
+.page-break {
+    page-break-after: always;
+}
+
+.print-heading {
+    border-bottom: 1px solid #aaa;
+    margin-bottom: 10px;
+}
+
+.print-heading h2 {
+    margin: 0px;
+}
+.print-heading h4 {
+    margin-top: 5px;
+}
+
+table.no-border, table.no-border td {
+    border: 0px;
+}
+
+.print-format label {
+    /* wkhtmltopdf breaks label into multiple lines when it is inline-block */
+    display: block;
+}
+
+.print-format img {
+    max-width: 100%;
+}
+
+.print-format table td > .primary:first-child {
+    font-weight: bold;
+}
+
+.print-format td, .print-format th {
+    vertical-align: top !important;
+    padding: 6px !important;
+}
+
+.print-format p {
+    margin: 3px 0px 3px;
+}
+
+table td div {
+    
+    /* needed to avoid partial cutting of text between page break in wkhtmltopdf */
+    page-break-inside: avoid !important;
+    
+}
+
+/* hack for webkit specific browser */
+@media (-webkit-min-device-pixel-ratio:0) {
+    thead, tfoot { display: table-row-group; }
+}
+
+[document-status] {
+    margin-bottom: 5mm;
+}
+
+.signature-img {
+    background: #fff;
+    border-radius: 3px;
+    margin-top: 5px;
+    max-height: 150px;
+}
+
+.print-heading {
+    text-align: right;
+    text-transform: uppercase;
+    color: #666;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #d1d8dd;
+}
+
+.print-heading h2 {
+    font-size: 24px;
+}
+
+.print-format th {
+    background-color: #eee !important;
+    border-bottom: 0px !important;
+}
+
+/* modern format: for-test */
+
+.pbi_avoid {
+    page-break-inside: avoid !important;
+}
+.pb_before {
+    page-break-before: always !important;
+}
+</style>
+
+
+{% for item_group in item_groups %}
+
+<div class="page-break">
+
+
+    <table class="page my-table">
+        <thead>
+            <tr>
+                <td colspan="8">
+                    <div  id="header-html" class="header header-html center-text">
+                    <table>
+                        <tr class="header-row">
+                            <td class="width-75">
+                                <div class="invoice-title ">Credit Invoice <br /> فاتورة ذمم</div>
+                                <div>
+                                   <small> Invoice No. {{doc.name}}</small>
+                                </div>
+                            </td>
+                            <td class="width-25">
+                                <div >
+                                    <img width="120" height="60" src="/files/josante-logo.png" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    </div >
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td  colspan="8">
+                    <table class="width-100">
+                        <tr style="border: 1px solid;">
+                            <td class="width-70">
+                                File No: {{ frappe.db.get_value("Patient", doc.patient, "patient_number") }} 
+                                <br/>
+                                Patient: {{ doc.patient }}
+                                <br/>
+                                Referring Dr.:{{ doc.ref_practitioner or "" }}
+                            </td>
+                            <td class="width-30"  >
+                                Visit Date: {{ frappe.utils.get_datetime(doc.creation).strftime("%d/%m/%Y",) }} 
+                                <br/>
+                                Tel:{{ frappe.db.get_value("Patient", doc.patient, "mobile") }} 
+                                <br/>
+                                {% set dob = frappe.db.get_value("Patient", doc.patient, "dob")  %}
+                                {% set now  = frappe.utils.nowdate() %}
+                                {% set invdate  = doc.creation %}
+                                {% set diff = frappe.utils.date_diff(invdate, dob) %}
+                                {% set year = diff//365 %}
+                                {% set month = (diff - (year * 365))//30 %}
+                                {% set day = ( (diff - (year * 365)) - (month * 30) ) %}                
+                                Age: {{ year }} Years, {{ month }} Months, {{day}} Days
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td  colspan="8">
+                    <table class="width-100"  style="border: 1px solid;">
+                        <tr class="center"  style="border: 1px solid;">
+                            <td colspan="2" class="width-45">
+                                Payer Name
+                            </td>
+                            <td colspan="2" class="width-25">
+                                Plan
+                            </td>
+                            <td colspan="2" class="width-15">
+                                Patient Card No.
+                            </td>
+                            <td colspan="2" class="width-15">
+                                Form No.
+                            </td>
+                        </tr>
+                        <tr class=" center"  style="border: 1px solid;">
+                            <td colspan="2" class="width-45">
+                                {{doc.insurance_party}}
+                            </td>
+                            <td colspan="2" class="width-25">
+                                Class Default 
+                            </td>
+                            <td colspan="2" class="width-15">
+                                {{ doc.patient_card_no or "" }}
+                            </td>
+                            <td colspan="2" class="width-15">
+                                {{ doc.form_no or ""}}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="8">
+                    <table class="width-100"  style="border: 1px solid;">
+                        <tr style="border: 1px solid;">
+                            <th colspan="3" style="border: 1px solid;">
+                                Service Description
+                            </th>
+                            <th style="border: 1px solid;">
+                                Full Charge
+                            </th>
+                            <th style="border: 1px solid;">
+                                Quantity
+                            </th>
+                            <th style="border: 1px solid;">
+                                Patient Share
+                            </th>
+                            <th style="border: 1px solid;">
+                                Company Discount
+                            </th>
+                            <th style="border: 1px solid;">
+                                Net Credit Amount
+                            </th>
+                        </tr>    
+                        
+                        {% for result_item_name in result_items_name %}
+                        {% if (lab_test_result["item_group",item_group]["item_name",result_item_name[1]]["item_des"] == result_item_name[1]) %}
+                        <tr style="border: 1px solid;">
+                            <td colspan="3" style="border: 1px solid;">
+                                {{ result_item_name[1]}} 
+                            </td>
+                            <td style="border: 1px solid;text-align: right;">
+                                {{ lab_test_result["item_group",item_group]["item_name",result_item_name[1]]["amount"] }} 
+                            </td>
+                            <td style="border: 1px solid;text-align: center;">
+                                {{ lab_test_result["item_group",item_group]["item_name",result_item_name[1]]["qty"] }} 
+                            </td>
+                            <td style="border: 1px solid;text-align: right;">
+                                {{ lab_test_result["item_group",item_group]["item_name",result_item_name[1]]["patient_share"] }} 
+                            </td>
+                            <td style="border: 1px solid;text-align: right;">
+                                {{ lab_test_result["item_group",item_group]["item_name",result_item_name[1]]["contract_discount"] }} 
+                            </td>
+                            <td style="border: 1px solid;text-align: right;">
+                                {{ lab_test_result["item_group",item_group]["item_name",result_item_name[1]]["discount_amount"] }} 
+                            </td>
+                        </tr>    
+                        {% endif %} 
+                        {%- endfor -%}
+                        
+                        
+                        <tr style="border: 1px solid;">
+                            <th colspan="3" style="border: 1px solid;">
+                                Total
+                            </th>
+                            <th style="border: 1px solid;text-align: right;">
+                                {{ '%0.2f'| format(lab_test_result["item_group",item_group]["amount"]|float)  }} 
+                                
+                            </th>
+                            <th style="border: 1px solid;text-align: center;">
+                                {{ lab_test_result["item_group",item_group]["qty"]  }} 
+                            </th>
+                            <th style="border: 1px solid;text-align: right;">
+                                {{ '%0.2f'| format(lab_test_result["item_group",item_group]["patient_share"] |float) }} 
+                            </th>
+                            <th style="border: 1px solid;text-align: right;">
+                                {{ '%0.2f'| format(lab_test_result["item_group",item_group]["contract_discount"]|float)  }} 
+                            </th>
+                            <th style="border: 1px solid;text-align: right;">
+                                {{ '%0.2f'| format(lab_test_result["item_group",item_group]["discount_amount"] |float) }} 
+                            </th>
+                        </tr>    
+        
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                   Currency
+                 </td>
+                <td colspan="2">
+                     :  {{ doc.currency }}
+                </td>   
+                <td colspan="5"></td>
+            </tr>
+            <tr>
+                <td>
+                    User
+                </td>
+                <td colspan="2">
+                    :  {{ frappe.get_fullname(doc.modified_by) }}
+                </td>
+                <td colspan="4"></td>
+            </tr>
+            <tr>
+                <td>
+                    Printing Date
+                </td>
+                <td colspan="2">
+                    :  {{ frappe.utils.get_datetime().strftime("%d/%m/%Y %H:%M:%S",) }}
+                </td>
+                <td colspan="5"></td>
+            </tr>
+            <tr>
+                <td>
+                    Printed By
+                </td>
+                <td colspan="2">
+                   :  {{ frappe.get_fullname(frappe.session.user)  }} 
+                </td>
+                <td colspan="5"></td>
+            </tr>
+        
+        </tbody>
+    </table>
+    <div id="footer-html" class="visible-pdf">
+        <div class="letter-head-footer">
+            This Invoice is considered Valid if it Carries the Official Number and Stamp
+        </div>
+    </div>    
+    
+</div>
+{% endfor %}

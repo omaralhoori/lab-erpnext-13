@@ -104,6 +104,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.show_general_ledger();
 
+		//ibrahim
+		cur_frm.add_custom_button(__('Claim Print'), function () {
+			print_claim_report(cur_frm);
+		});
+
+
 		if (doc.update_stock) this.show_stock_ledger();
 
 		if (doc.docstatus == 1 && doc.outstanding_amount != 0
@@ -1879,6 +1885,23 @@ var add_to_item_line = function (frm, checked_values, invoice_healthcare_service
 			}
 		}
 		frm.refresh_fields();
+	}
+};
+
+//ibrahim
+var print_claim_report = function (frm) {
+	if (frm.doc.insurance_party_type == 'Insurance Company' || frm.doc.insurance_party_type == 'Payer'){
+		if (frm.doc.items) {
+			open_url_post(
+				'/api/method/erpnext.accounts.api.claimrep',
+				{
+					sales_invoice: frm.doc.name,
+				}, true
+			);
+		}
+		else {
+			frappe.msgprint(__('No lab test found'));
+		}
 	}
 };
 

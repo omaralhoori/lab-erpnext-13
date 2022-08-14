@@ -53,6 +53,7 @@
   "patient_share",
   "base_patient_share",
   "section_break_44",
+  "contract_percentage",
   "contract_discount",
   "base_contract_discount",
   "section_break_47",
@@ -872,7 +873,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "contract_discount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -924,12 +925,20 @@
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "contract_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Contract Percentage",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-08-02 13:31:37.925178",
+ "modified": "2022-08-13 16:33:27.232007",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
