@@ -720,7 +720,10 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     order = "tltt.order"
     if item_group == "Chemistry":
+        item_group = "NOT IN ('Routine', 'Hematology')"
         order = "ltt.order"
+    else:
+        item_group = f"IN ('{item_group}')"
     return frappe.db.sql("""
         SELECT  
         lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
@@ -735,7 +738,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         LEFT JOIN `tabLab Test UOM` as stu
         ON stu.name=lt.secondary_uom
 
-        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
+        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         """.format(test_name=test_name, order= order, item_group=item_group, where_stmt=where_stmt), as_dict=True)
 
 def get_embassy_previous_tests(test_name, patient):

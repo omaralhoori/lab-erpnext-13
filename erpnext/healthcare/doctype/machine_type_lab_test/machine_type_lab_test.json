@@ -8,6 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "machine_type",
   "machine_name",
   "machine_type_lab_test_template"
@@ -33,12 +34,20 @@
    "fieldtype": "Table",
    "label": "Machine Type Lab Test Template",
    "options": "Machine Type Lab Test Template"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "search_index": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-11 12:00:40.200296",
+ "modified": "2022-08-15 09:03:55.205046",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Machine Type Lab Test",
