@@ -13,6 +13,7 @@
   "naming_series",
   "patient",
   "patient_name",
+  "patient_mobile",
   "patient_age",
   "patient_sex",
   "column_break_4",
@@ -73,9 +74,9 @@
    "hide_seconds": 1,
    "ignore_user_permissions": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
+   "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
@@ -153,12 +154,14 @@
    "fetch_from": "patient.patient_name",
    "fieldname": "patient_name",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Patient Name",
    "read_only": 1
   },
   {
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
@@ -193,11 +196,19 @@
    "label": "Collection Series",
    "read_only": 1,
    "unique": 1
+  },
+  {
+   "fetch_from": "patient.mobile",
+   "fieldname": "patient_mobile",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Patient Mobile",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-04 06:28:59.628100",
+ "modified": "2022-08-15 14:50:08.940507",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
