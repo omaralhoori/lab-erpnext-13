@@ -129,7 +129,7 @@ def filter_ranges(ranges, patient):
 
 
 import pdfkit
-@frappe.whitelist(allow_guest=True)
+
 def user_test_result(lab_test, get_html=True):
     # f = open("test-print.html", "r")
     # html  = f.read()
@@ -138,13 +138,14 @@ def user_test_result(lab_test, get_html=True):
     if not test_doc:
         frappe.throw("Lab Test not found")
     html = get_print_html_base()
-    header = get_print_header(test_doc, '<img class="img-header" src="/files/josante-logo.png" />')
+    url = frappe.local.request.host
+    header = get_print_header(test_doc, f'<img class="img-header" src="http://{url}/files/josante-logo.png" />')
     tbody = get_print_tbody(test_doc, header, True)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
-    if get_html:
-        return html
-    options = {"--margin-top" : "40mm", "--margin-left" : "0","--margin-right" : "0", "--margin-bottom": "20mm", "quiet":""}
+    # if get_html:
+    #     return html
+    options = { "quiet":""}
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"

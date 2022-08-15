@@ -24,11 +24,12 @@ def get_context(context):
 
     show_all_results = frappe.db.get_single_value("Healthcare Settings", "show_all_results")
     lab_test = frappe.db.get_value("Lab Test", {"patient": patient}, ["name"])
-    print(lab_test)
-    html = user_test_result(lab_test)
-    return {
-        "body": html
-    }
+    #print(lab_test)
+    # html = user_test_result(lab_test)
+    # return {
+    #     "body": html
+    # }
+    return {"body": ""}
     # test_results = get_lab_test_result(patient, show_all_results or False)
     # if len(test_results) == 0:
     #     return print_error_message("No test found")
@@ -40,6 +41,22 @@ def get_context(context):
     #     "body": html
     # }
 
+@frappe.whitelist(allow_guest=True)
+def user_result(usercode):
+    if not (frappe.form_dict.usercode):
+        return print_error_message("usercode is required")
+
+    usercode = frappe.form_dict.usercode.split("_")
+    if len(usercode) < 2:
+        return print_error_message("usercode is not correct")
+    
+    patient_password, patient_name = usercode[0], usercode[1]
+    patient = frappe.db.get_value("Patient", {"patient_number": patient_name, "patient_password": patient_password}, "name")
+    if not patient:
+        return print_error_message("Patient name or password is not correct")
+    lab_test = frappe.db.get_value("Lab Test", {"patient": patient}, ["name"])
+    user_test_result(lab_test)
+    
 
 @frappe.whitelist(allow_guest=True)
 def download_pdf(patient, password):

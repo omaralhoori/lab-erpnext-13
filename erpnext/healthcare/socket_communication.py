@@ -353,13 +353,12 @@ def start_infinty_listener(ip_address, port):
 def get_url(site):
     print("sent results to ", site)
     if site == "embassy":
-        return "josante-embassy.erp:8001"
+        return "josante-emb.erp:8002"
     elif site == "lab":
-        return "lab.erp:8001"
+        return "test.erp:8001"
     else: return site
 
 def log_result(log,msg):
-    return
     with open(log + "-log.txt", "a") as f:
         f.write(msg + "\n")
         f.close()
