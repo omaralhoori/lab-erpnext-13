@@ -398,15 +398,18 @@ def create_normals(template, lab_test, group_template=None):
 		SELECT mtt.parent, mtt.host_code FROM `tabMachine Type Lab Test Template` AS mtt
 		INNER JOIN `tabMachine Type` AS mt
 		ON mt.name=mtt.parent
-		WHERE mt.disable=0 AND mtt.lab_test_template='{template}'
+		WHERE mt.disable=0 AND mtt.lab_test_template="{template}"
 		"""
-	if group_template:
-		test_code = frappe.db.sql(query.format(template=group_template.name), as_dict=True)
-		#test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": group_template.name}, ["parent", "host_code"])
-		if len(test_code) == 0:
+	try:
+		if group_template:
+			test_code = frappe.db.sql(query.format(template=group_template.name), as_dict=True)
+			#test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": group_template.name}, ["parent", "host_code"])
+			if len(test_code) == 0:
+				test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
+		else:
 			test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
-	else:
-		test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
+	except:
+		print(query.format(template=template.name))
 	# print("888888888888888888888888888888888888888")
 	# print(template.name)
 	# print(test_code)

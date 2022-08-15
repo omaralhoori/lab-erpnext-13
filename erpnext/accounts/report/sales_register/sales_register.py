@@ -55,7 +55,9 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		row.update({
 			'grand_total': inv.total,
 			'total_patient': inv.total_patient, 
-			'outstanding_amount': inv.outstanding_amount
+			'outstanding_amount': inv.outstanding_amount,
+			'company_discount': inv.company_discount,
+			'company_net':inv.total_discount_provider - inv.company_discount
 		})
 
 		data.append(row)
@@ -130,6 +132,20 @@ def get_columns(invoice_list, additional_table_columns):
 			"width": 120
 		},
 		{
+			"label": _("Company Discount"),
+			"fieldname": "company_discount",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
+			"label": _("Company Net"),
+			"fieldname": "company_net",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
 			"label": _("Outstanding Amount"),
 			"fieldname": "outstanding_amount",
 			"fieldtype": "Currency",
@@ -159,12 +175,12 @@ def get_invoices(filters, additional_query_columns):
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""
+	invoices = frappe.db.sql("""
 		select name, posting_date, debit_to,  customer, total, total_discount_provider, total_patient,
 		insurance_party,  customer_group,
-		base_net_total, base_grand_total, base_rounded_total, outstanding_amount,
+		base_net_total, base_grand_total, base_rounded_total, outstanding_amount, discount_amount as company_discount,
 		is_internal_customer, represents_company, company {0}
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date , name """.format(additional_query_columns or '') %
 		conditions, filters, as_dict=1)
-
+	return invoices
