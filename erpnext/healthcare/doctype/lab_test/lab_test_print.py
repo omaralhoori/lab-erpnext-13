@@ -58,7 +58,7 @@ def get_normal_ranges(lab_test_template):
     nr.age_range, nr.from_age, nr.from_age_period, nr.to_age, nr.to_age_period
     FROM `tabAttribute Normal Range` as anr
     INNER JOIN `tabNormal Range` as nr ON nr.name = anr.normal_range_id
-    WHERE anr.parent='{lab_test_template}' AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (nr.effective_date IS NULL OR now() >nr.effective_date) AND (nr.expiry_date IS NULL OR now() < nr.expiry_date)
+    WHERE anr.parent="{lab_test_template}" AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (nr.effective_date IS NULL OR now() >nr.effective_date) AND (nr.expiry_date IS NULL OR now() < nr.expiry_date)
     """.format(lab_test_template=lab_test_template), as_dict=True)
 
 def filter_range_by_gender(range, patient):
@@ -129,7 +129,7 @@ def filter_ranges(ranges, patient):
 
 
 import pdfkit
-@frappe.whitelist(allow_guest=True)
+
 def user_test_result(lab_test, get_html=True):
     # f = open("test-print.html", "r")
     # html  = f.read()
@@ -138,13 +138,14 @@ def user_test_result(lab_test, get_html=True):
     if not test_doc:
         frappe.throw("Lab Test not found")
     html = get_print_html_base()
-    header = get_print_header(test_doc, '<img class="img-header" src="/files/josante-logo.png" />')
+    url = frappe.local.request.host
+    header = get_print_header(test_doc, f'<img class="img-header" src="http://{url}/files/josante-logo.png" />')
     tbody = get_print_tbody(test_doc, header, True)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
-    if get_html:
-        return html
-    options = {"--margin-top" : "40mm", "--margin-left" : "0","--margin-right" : "0", "--margin-bottom": "20mm", "quiet":""}
+    # if get_html:
+    #     return html
+    options = { "quiet":""}
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
@@ -155,6 +156,9 @@ def lab_test_result(lab_test):
     # f = open("test-print.html", "r")
     # html  = f.read()
     # f.close()
+    if frappe.local.conf.is_embassy:
+        embassy_test_result(lab_test)
+        return
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
@@ -169,6 +173,27 @@ def lab_test_result(lab_test):
     "quiet":""}
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
+    frappe.local.response.type = "pdf"
+
+
+@frappe.whitelist()
+def embassy_test_result(lab_test, return_html = False):
+    test_doc = frappe.get_doc("Lab Test", lab_test)
+    if not test_doc:
+        frappe.throw("Lab Test not found")
+    html = get_print_html_base()
+    header = get_print_header_embassy(test_doc)
+    tbody = get_print_tbody_embassy(test_doc, header)
+    body = get_print_body(header, tbody)
+    html = html.format(body=body,style=get_print_style())
+    footer = get_lab_result_footer(test_doc)
+    options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "30mm", 
+   "--footer-html" : footer,
+    "quiet":""}
+    pdf_content =  pdfkit.from_string( html, False, options)  or ''
+    if return_html: return pdf_content
+    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filecontent = pdf_content#get_pdf(html)
     frappe.local.response.type = "pdf"
 
 def get_lab_result_footer(test_doc):
@@ -288,6 +313,93 @@ def get_print_tbody(test_doc, header, only_finalized=False):
             body +=  html
     return body
 
+def get_print_tbody_embassy(test_doc, header, only_finalized=False):
+    body = ""
+    embassy_tests = get_embassy_tests(test_doc, only_finalized)
+    
+    if len(embassy_tests) > 0:
+        embassy_table = format_embassy_tests(embassy_tests, header)
+        body += embassy_table
+
+    return body
+
+def get_embassy_tests(test_doc, only_finalized=False):
+    tests = get_embassy_tests_items(test_doc.name, only_finalized)
+    previous_tests = get_embassy_previous_tests(test_doc.name, test_doc.patient)
+    #tests.sort(key=lambda x: x['order'])
+    patient = frappe.get_doc("Patient", test_doc.patient)
+    if patient:
+        for test in tests:
+            test['previous'] = previous_tests.get(test['template'])
+            test['template'] = filter_ranges(get_normal_ranges(test['template']), patient)
+    else: test['template'] = []
+    return tests
+
+
+def format_embassy_tests(tests, header, previous_tests={}):
+    tests_html = ""
+    test_num = 1
+    for test in tests:
+        normal_crit = ''
+        normal_range = ''
+        #previous_test = previous_tests.get()
+        #print(test['template'])
+        if test['template'] and len(test['template']) > 0:
+            
+            if len(test['template']) == 1:
+                normal_crit = test['template'][0]['criteria_text'] or ''
+            normal_range = test['template'][0]['range_text']
+        if test['conv_result']:
+            result = format_float_result(test['conv_result'])
+            test_html = f"""
+                <tr >
+                <td class="width-40">{test['lab_test_name']}</td>
+                <td class="width-5 f-s "></td>
+                <td class="width-10 ">{result} </td>
+                <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
+                <td class="f-s width-10">{normal_crit}</td>
+                <td class="f-s width-10">{normal_range}</td>
+                <td class="width-10">{test.get('previous') or ''}</td>
+                </tr>
+            """
+            test_html = f"<tr><td ><table>" + test_html + "</table></td></tr>"
+            tests_html+= test_html
+            if test_num < 15 and test_num % 2 == 0:
+                tests_html += "<tr><td>&nbsp;</td></tr>"
+            test_num += 1
+    html = f"""<table class="f-s">
+        <thead>
+        <tr>
+            <td>{header}</td>
+        </tr>
+       <tr>
+        <td class="b-bottom">
+            <table>
+             <tr>
+            <td class="width-40">Test</td>
+            <td class="width-10">Results</td>
+            <td class="width-10"></td>
+             <td colspan="2" class="width-20">Normal Range</td>
+             <td class="width-10">Previous Test</td>
+        </tr>
+            </table>
+        </td>
+       </tr>
+           
+        </thead>
+        <tbody>
+           {tests_html}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8">&nbsp;</td>
+            </tr>
+        </tfoot>
+    </table>"""
+    return html
+
+
+    
 def get_routine_tests(test_doc, only_finalized=False):
     tests = get_tests_by_item_group(test_doc.name, "Routine", only_finalized)
     patient = frappe.get_doc("Patient", test_doc.patient)
@@ -465,6 +577,7 @@ def format_hematology_tests(tests, header):
     </table>"""
     return html
 
+
 def get_chemistry_tests(test_doc, only_finalized=False):
     tests = get_tests_by_item_group(test_doc.name, "Chemistry", only_finalized)
     tests.sort(key=lambda x: x['order'])
@@ -607,7 +720,10 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     order = "tltt.order"
     if item_group == "Chemistry":
+        item_group = "NOT IN ('Routine', 'Hematology')"
         order = "ltt.order"
+    else:
+        item_group = f"IN ('{item_group}')"
     return frappe.db.sql("""
         SELECT  
         lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
@@ -622,8 +738,48 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         LEFT JOIN `tabLab Test UOM` as stu
         ON stu.name=lt.secondary_uom
 
-        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group="{item_group}" AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
+        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         """.format(test_name=test_name, order= order, item_group=item_group, where_stmt=where_stmt), as_dict=True)
+
+def get_embassy_previous_tests(test_name, patient):
+    tests =  frappe.db.sql(f"""
+        SELECT GROUP_CONCAT(lt.template SEPARATOR "/;/") as templates , GROUP_CONCAT(IFNULL(lt.result_value, '')  SEPARATOR "/;/") as results FROM `tabNormal Test Result` as lt
+        INNER JOIN `tabLab Test` AS lt1 ON lt1.name=lt.parent
+        WHERE lt.parent !='{test_name}' AND lt1.patient='{patient}'
+       	GROUP BY lt1.name
+        ORDER BY lt1.creation DESC
+        LIMIT 1;
+    """, as_dict=True)
+    if len(tests) == 0:
+        return {}
+    
+    test_templates = tests[0]['templates'].split("/;/")
+    test_results = tests[0]['results'].split("/;/")
+    if len(test_templates) != len(test_results): return {}
+    tests = {template: result for template, result in zip(test_templates, test_results) }
+    print(tests)
+    return tests
+def get_embassy_tests_items(test_name, only_finalized=False):
+    where_stmt = " lt.status IN ('Finalized', 'Released')"
+    if only_finalized: where_stmt = " lt.status IN ('Finalized')"
+    order = "tltt.order"
+    
+    return frappe.db.sql("""
+        SELECT  
+        lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
+        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+         FROM `tabNormal Test Result` as lt
+        LEFT JOIN `tabLab Test Template` as ltt
+        ON ltt.name=lt.report_code
+        INNER JOIN `tabLab Test Template` as tltt
+        ON tltt.name=lt.template
+        LEFT JOIN `tabLab Test UOM` as ctu
+        ON ctu.name=lt.lab_test_uom
+        LEFT JOIN `tabLab Test UOM` as stu
+        ON stu.name=lt.secondary_uom
+        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
+        ORDER BY ltt.order,tltt.order
+        """.format(test_name=test_name, order= order, where_stmt=where_stmt), as_dict=True)
 
 @frappe.whitelist(allow_guest=True)
 def get_test_uploaded_files(lab_test, password, test_name):
@@ -647,7 +803,36 @@ def get_test_uploaded_files(lab_test, password, test_name):
     frappe.local.response.filename = file_link.split("/")[-1]
     frappe.local.response.filecontent = file_content  or ''#get_pdf(html)
     frappe.local.response.type = "download"#file_link.split(".")[-1]
+import PyPDF2
+import shutil
+from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2.pdf import PageObject
 
+@frappe.whitelist()
+def print_all_reports(lab_test):
+    sales_invoice = frappe.db.get_value("Lab Test", lab_test, "sales_invoice")
+    print(sales_invoice, lab_test)
+    cover = get_embassy_cover(sales_invoice, return_html=True)
+    result = embassy_test_result(lab_test, return_html=True)
+    merger = PyPDF2.PdfFileMerger()
+    merger.append(cover)
+
+    frappe.local.response.filename = "Test Result"
+    frappe.local.response.filecontent = cover #get_pdf(html)
+    frappe.local.response.type = "pdf"
+
+@frappe.whitelist()
+def get_embassy_cover(sales_invoice, report_name="ksa_report", return_html=False):
+    embassy_report = frappe.get_doc("Embassy Report", {"sales_invoice": sales_invoice})
+    if not embassy_report: return ""
+    html = frappe.render_template(f'templates/test_result/{report_name}.html', embassy_report.prepare_report_data())
+    options = {"--margin-top" : "15mm", "--margin-left" : "10mm","--margin-right" : "10mm", "--margin-bottom": "10mm", "quiet":""}
+    pdf_content =  pdfkit.from_string( html, False, options)  or ''
+
+    if return_html: return pdf_content
+    frappe.local.response.filename = report_name
+    frappe.local.response.filecontent = pdf_content #get_pdf(html)
+    frappe.local.response.type = "pdf"
 def get_print_html_base():
     return """
     <!DOCTYPE html>
@@ -664,6 +849,43 @@ def get_print_html_base():
     </body>
     </html>
     """
+
+def get_print_header_embassy(test_doc):
+    return f"""
+    <table class="b-bottom f-s">
+        <tr >
+            <td >
+                 Patient Name
+            </td>
+            <td class="width-35">
+                : <span class="red">{ test_doc.patient_name }</span>
+            </td>
+            <td>Age</td>
+            <td class="width-35">: {test_doc.patient_age}</td>
+        <tr>
+         <tr>
+            <td >
+                 File No.
+            </td>
+            <td >
+                : { test_doc.get_patient_file() }
+            </td>
+            <td >Gender</td>
+            <td >: {test_doc.patient_sex}</td>
+        <tr>
+        <tr>
+            <td >
+                 Visit No.
+            </td>
+            <td >
+                : { test_doc.sales_invoice }
+            </td>
+            <td >Sample Date</td>
+            <td >: {  frappe.utils.get_datetime(test_doc.creation).strftime("%d/%m/%Y %r",)   }</td>
+        <tr>
+    </table>
+    """
+
 def get_break():
     return "<div class='break'> </div>"
 def get_print_style():

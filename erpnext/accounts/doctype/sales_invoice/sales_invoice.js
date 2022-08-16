@@ -1334,6 +1334,15 @@ frappe.ui.form.on('Sales Invoice', {
 				if (res.message) {
 
 					if (!frm.is_new() && frm.doc.patient && frm.doc.patient != "") {
+						frm.add_custom_button(__('Create Cover'), function(){
+							frappe.db.get_value("Embassy Report", {sales_invoice: frm.doc.name}, "name").then(res => {
+								if (res.message.name){
+									frappe.set_route('Form', 'Embassy Report', res.message.name)
+								}else{
+									frappe.new_doc("Embassy Report", {patient_name: frm.doc.patient_name, sales_invoice: frm.doc.name})
+								}
+							})
+						})
 						var patient_name = frm.doc.patient;
 						frm.add_custom_button(__('Add Fingerprint'), function () {
 							let d = new frappe.ui.Dialog({

@@ -27,7 +27,7 @@ class LabTest(Document):
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
 
-		if not self.sms_sent or self.sms_sent == 0:
+		if not frappe.local.conf.is_embassy and (not self.sms_sent or self.sms_sent == 0):
 			self.send_result_sms()
 	
 	def validate_sample_released(self):
@@ -398,15 +398,18 @@ def create_normals(template, lab_test, group_template=None):
 		SELECT mtt.parent, mtt.host_code FROM `tabMachine Type Lab Test Template` AS mtt
 		INNER JOIN `tabMachine Type` AS mt
 		ON mt.name=mtt.parent
-		WHERE mt.disable=0 AND mtt.lab_test_template='{template}'
+		WHERE mt.disable=0 AND mtt.lab_test_template="{template}"
 		"""
-	if group_template:
-		test_code = frappe.db.sql(query.format(template=group_template.name), as_dict=True)
-		#test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": group_template.name}, ["parent", "host_code"])
-		if len(test_code) == 0:
+	try:
+		if group_template:
+			test_code = frappe.db.sql(query.format(template=group_template.name), as_dict=True)
+			#test_code = frappe.db.get_value("Machine Type Lab Test Template", {"lab_test_template": group_template.name}, ["parent", "host_code"])
+			if len(test_code) == 0:
+				test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
+		else:
 			test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
-	else:
-		test_code = frappe.db.sql(query.format(template=template.name), as_dict=True)
+	except:
+		print(query.format(template=template.name))
 	# print("888888888888888888888888888888888888888")
 	# print(template.name)
 	# print(test_code)
@@ -853,6 +856,22 @@ def get_test_attribute_options(lab_test):
 		"units": units,
 		"orders": orders
 	}
+
+@frappe.whitelist()
+def get_lab_test_form_tests(lab_test):
+	return frappe.db.sql(f"""
+	SELECT tntr.name, tntr.template, tntr.report_code as parent_template, tltt.attribute_options, tntr.result_percentage,  tntr.control_type, 
+		tltu.lab_test_uom as conv_unit, tltu2.si_unit_name as si_unit, tntr.lab_test_comment, tntr.status, tntr.lab_test_name, tntr.result_value,
+		tntr.host_code, tntr.secondary_uom_result
+		FROM `tabNormal Test Result` tntr 
+		INNER JOIN `tabLab Test Template` tltt ON tntr.template=tltt.name
+		LEFT JOIN `tabLab Test Template` tltt2 ON tntr.report_code=tltt2.name
+		LEFT JOIN `tabLab Test UOM` tltu ON tltu.name=tntr.lab_test_uom
+		LEFT JOIN `tabLab Test UOM` tltu2 ON tltu2.name=tntr.secondary_uom
+		WHERE tntr.parent="{lab_test}"
+		ORDER BY ISNULL(tltt2.printing_order), ISNULL(tltt.printing_order), cast(tltt2.printing_order as unsigned), cast(tltt.printing_order as unsigned)
+		;
+	""", as_dict=True)
 
 
 @frappe.whitelist()

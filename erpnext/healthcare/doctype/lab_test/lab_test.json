@@ -28,6 +28,7 @@
   "sb_first",
   "patient",
   "patient_name",
+  "patient_mobile",
   "patient_age",
   "patient_sex",
   "inpatient_record",
@@ -108,6 +109,7 @@
    "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
+   "read_only": 1,
    "reqd": 1,
    "search_index": 1,
    "set_only_once": 1
@@ -578,11 +580,18 @@
    "fieldname": "sample_collected",
    "fieldtype": "Check",
    "hidden": 1
+  },
+  {
+   "fetch_from": "patient.mobile",
+   "fieldname": "patient_mobile",
+   "fieldtype": "Data",
+   "label": "Patient Mobile",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-12 11:46:21.957942",
+ "modified": "2022-08-15 14:39:39.278601",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

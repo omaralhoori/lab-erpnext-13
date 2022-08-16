@@ -13,29 +13,30 @@
         </div>
     </div>
     <script>
+
         document.addEventListener('DOMContentLoaded', () => {
-            const page_div = document.querySelector('.page-break');
+        //     const page_div = document.querySelector('.page-break');
     
-            page_div.style.display = 'flex';
-            page_div.style.flexDirection = 'column';
+        //     page_div.style.display = 'flex';
+        //     page_div.style.flexDirection = 'column';
     
-            const footer_html = document.getElementById('footer-html');
-            footer_html.classList.add('hidden-pdf');
-            footer_html.classList.remove('visible-pdf');
-            footer_html.style.order = 1;
-            footer_html.style.marginTop = '20px';
-        });
+        //     const footer_html = document.getElementById('footer-html');
+        //     footer_html.classList.add('hidden-pdf');
+        //     footer_html.classList.remove('visible-pdf');
+        //     footer_html.style.order = 1;
+        //     footer_html.style.marginTop = '20px';
+        // });
     
     
-            //allow wrapping of long tr
-            var elements = document.getElementsByTagName("tr");
-            var i = elements.length;
-            while (i--) {
-                if(elements[i].clientHeight>300){
-                    elements[i].setAttribute("style", "page-break-inside: auto;");
-                }
-            }
-    
+        //     //allow wrapping of long tr
+        //     var elements = document.getElementsByTagName("tr");
+        //     var i = elements.length;
+        //     while (i--) {
+        //         if(elements[i].clientHeight>300){
+        //             elements[i].setAttribute("style", "page-break-inside: auto;");
+        //         }
+        //     }
+        
             //window.print();
     
             // close the window after print
@@ -44,6 +45,10 @@
             // setTimeout(function() {
             //     window.close();
             // }, 5000);
+            var usercode = window.location.href.split("?")[1]
+
+            window.location.href =   "/api/method/erpnext.www.test-result.index.user_result?" + usercode  ;
+        })
     </script>
 </body>
 </html>
