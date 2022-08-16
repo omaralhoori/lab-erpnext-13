@@ -683,8 +683,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	price_list_rate: function(doc, cdt, cdn) {
+	cash_discount: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["cash_discount"]);
+		if (in_list(["Sales Invoice Item", "POS Invoice Item"]), cdt)
+			this.apply_pricing_rule_on_item(item);
+			this.calculate_taxes_and_totals();
+	},
+	price_list_rate: function(doc, cdt, cdn) {
+			var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
 		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate

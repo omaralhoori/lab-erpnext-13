@@ -115,6 +115,7 @@ class calculate_taxes_and_totals(object):
 					#item.rate = 0.0
 					item.net_rate = 0.0
 					item.patient_rate = 0.0
+					item.cash_discount = 0.0
 				elif item.price_list_rate:
 					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
 						#ibrahim
@@ -165,7 +166,7 @@ class calculate_taxes_and_totals(object):
 				#item.net_amount = item.amount
 				item.net_amount = item.patient_share
 
-				self._set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "net_rate", "contract_discount", "patient_share", "amount", "net_amount"])
+				self._set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "net_rate", "contract_discount", "patient_share", "cash_discount", "amount", "net_amount"])
 
 				item.item_tax_amount = 0.0
 

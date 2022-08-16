@@ -67,6 +67,8 @@
   "net_total",
   "total_qty",
   "column_break_59",
+  "total_cash_discount",
+  "base_total_cash_discount",
   "total_patient",
   "base_total_patient",
   "total_discount_provider",
@@ -2181,6 +2183,19 @@
    "fieldname": "apply_item_discount",
    "fieldtype": "Button",
    "label": "Apply Item Discount"
+  },
+  {
+   "fieldname": "total_cash_discount",
+   "fieldtype": "Float",
+   "label": "Total Cash Discount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_cash_discount",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Total Cash Discount (Company Currency)",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2193,7 +2208,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-13 15:03:44.931876",
+ "modified": "2022-08-16 08:19:34.125209",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

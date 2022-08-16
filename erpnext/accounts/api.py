@@ -132,8 +132,8 @@ def get_formatted_result_for_invoice_items(doc):
 			if not formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"]:
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = defaultdict(dict)
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = 0
-				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = lab_test.patient_share
-				formatted_result["item_group",item.item_group]["patient_share"] += lab_test.patient_share
+				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = lab_test.patient_share + lab_test.cash_discount
+				formatted_result["item_group",item.item_group]["patient_share"] += (lab_test.patient_share + lab_test.cash_discount)
 
 			if not formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["contract_discount"]:
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["contract_discount"] = defaultdict(dict)
