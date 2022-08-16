@@ -46,6 +46,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				item_patient_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
 				item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
 			}
+			if (item.cash_discount){
+				item.patient_share = flt(item.patient_rate * item.qty, precision("patient_share", item)) - flt(item.cash_discount , precision("cash_discount", item));				
+			}
 		}else{
 			if (item.discount_amount) {
 				item_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
@@ -140,7 +143,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				// ibrahim	
 				if ((!item.qty) && me.frm.doc.is_return) {
 					item.amount = flt(item.rate * -1, precision("amount", item));
-					item.patient_share = flt(item.patient_rate * -1, precision("patient_share", item));
+					item.patient_share = flt(item.patient_rate * -1, precision("patient_share", item)) ;
 					item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
 
 					if (me.frm.doc.additional_discount_percentage>=0){
@@ -152,9 +155,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 						}
 					}
 				} else {
+					console.log('1111')
 					item.amount = flt(item.rate * item.qty, precision("amount", item));
-					item.patient_share = flt(item.patient_rate * item.qty, precision("patient_share", item));
+					console.log(item.cash_discount);
+					item.patient_share = flt(item.patient_rate * item.qty, precision("patient_share", item)) - flt(item.cash_discount , precision("cash_discount", item));
 					item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
+					item.base_cash_discount = flt(item.cash_discount * me.frm.doc.conversion_rate, precision("base_cash_discount", item));
 					
 					if (me.frm.doc.additional_discount_percentage>=0){
 						item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) , precision("contract_discount", item));
@@ -172,7 +178,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
 
-				me.set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "amount", "contract_discount", "patient_share", "net_rate", "net_amount"]);
+				me.set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "amount", "contract_discount", "patient_share", "cash_discount", "net_rate", "net_amount"]);
 				
 			});
 		}
@@ -309,7 +315,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = this.frm.doc.total_discount_provider = 0.0;
 		this.frm.doc.base_total_discount_provider = this.frm.doc.total_patient = this.frm.doc.base_total_patient = 0.0;
-		this.frm.doc.discount_amount = this.frm.doc.base_discount_amount = 0.0;
+		this.frm.doc.discount_amount = this.frm.doc.base_discount_amount = this.frm.doc.total_cash_discount = this.frm.doc.base_total_cash_discount = 0.0;
 
 		//ibrahim
 		$.each(this.frm.doc["items"] || [], function(i, item) {
@@ -320,6 +326,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			me.frm.doc.base_net_total += item.base_net_amount;
 			me.frm.doc.total_discount_provider += item.discount_amount;
 			me.frm.doc.base_total_discount_provider += item.discount_amount;
+			me.frm.doc.total_cash_discount += item.cash_discount;
+			me.frm.doc.base_total_cash_discount += item.base_cash_discount;
 			me.frm.doc.total_patient += item.patient_share;
 			me.frm.doc.base_total_patient += item.base_patient_share;
 			me.frm.doc.discount_amount += item.contract_discount;

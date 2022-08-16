@@ -1092,6 +1092,18 @@ class SalesInvoice(SellingController):
 									"project": item.project or self.project
 								}, account_currency, item=item)
 							)
+						if item.cash_discount > 0:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": item.discount_account,
+									"against": income_account,
+									"debit": item.cash_discount,
+									"debit_in_account_currency": item.discount_amount,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+
 						#ibrahim
 						if not self.insurance_party :
 							if item.discount_amount > 0:

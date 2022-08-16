@@ -50,7 +50,10 @@
   "discount_amount",
   "base_rate_with_margin",
   "section_break_21",
+  "cash_discount",
   "patient_share",
+  "column_break_46",
+  "base_cash_discount",
   "base_patient_share",
   "section_break_44",
   "contract_percentage",
@@ -853,7 +856,7 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "patient_share",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -933,12 +936,31 @@
    "in_list_view": 1,
    "label": "Contract Percentage",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "cash_discount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cash Discount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_break_46",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_cash_discount",
+   "fieldtype": "Currency",
+   "label": "Cash Discount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-08-13 16:33:27.232007",
+ "modified": "2022-08-16 08:14:07.236345",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
