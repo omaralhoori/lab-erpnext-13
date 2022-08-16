@@ -325,35 +325,35 @@ frappe.ui.form.on('Lab Test', {
 
 		}
 		if (!frm.is_new() && frm.doc.docstatus != 1){
-			frm.add_custom_button(__('Send patient permitting message'), function() {
-				let d = new frappe.ui.Dialog({
-					title: 'Enter details',
-					fields: [
-						{
-							label: 'Send to User',
-							fieldname: 'to_user',
-							fieldtype: 'Link',
-							options: "User"
-						},
-					],
-					primary_action_label: 'Send',
-					primary_action(values) {
-						frappe.call({
-							method: "erpnext.healthcare.utils.publish_user_message",
-							args: {
-								user: values.to_user,
-								msg: `Please allow patient: <a onclick="function hi(){frappe.set_route('permitted-patient', 'new-permitted-patient',{patient:'${frm.doc.patient}' })};hi()" >${frm.doc.patient}</a> to proceed without paying`
-							}
-						})
+			// frm.add_custom_button(__('Send patient permitting message'), function() {
+			// 	let d = new frappe.ui.Dialog({
+			// 		title: 'Enter details',
+			// 		fields: [
+			// 			{
+			// 				label: 'Send to User',
+			// 				fieldname: 'to_user',
+			// 				fieldtype: 'Link',
+			// 				options: "User"
+			// 			},
+			// 		],
+			// 		primary_action_label: 'Send',
+			// 		primary_action(values) {
+			// 			frappe.call({
+			// 				method: "erpnext.healthcare.utils.publish_user_message",
+			// 				args: {
+			// 					user: values.to_user,
+			// 					msg: `Please allow patient: <a onclick="function hi(){frappe.set_route('permitted-patient', 'new-permitted-patient',{patient:'${frm.doc.patient}' })};hi()" >${frm.doc.patient}</a> to proceed without paying`
+			// 				}
+			// 			})
 
-						d.hide();
-					}
-				});
+			// 			d.hide();
+			// 		}
+			// 	});
 				
-				d.show();
+			// 	d.show();
 				
 				
-			});
+			// });
 			
 		}
 		refresh_field('normal_test_items');

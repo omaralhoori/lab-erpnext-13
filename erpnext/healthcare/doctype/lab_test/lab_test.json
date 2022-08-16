@@ -363,6 +363,7 @@
    "depends_on": "eval:doc.sample_collected || !doc.sample",
    "fieldname": "normal_test_items",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Normal Test Result",
    "options": "Normal Test Result",
    "print_hide": 1
@@ -591,7 +592,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-15 14:39:39.278601",
+ "modified": "2022-08-16 07:02:05.246432",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

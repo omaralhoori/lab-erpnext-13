@@ -168,7 +168,7 @@ def lab_test_result(lab_test):
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
     footer = get_lab_result_footer(test_doc)
-    options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "30mm", 
+    options = {"--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
    "--footer-html" : footer,
     "quiet":""}
     frappe.local.response.filename = "Test.pdf"
@@ -237,14 +237,14 @@ def get_print_header(test_doc, head=None):
         """
     else: head = ""
     return f"""
-    <table class="b-bottom f-s">
+    <table class="b-bottom header f-s">
         {head}
         <tr >
             <td >
                  Patient Name
             </td>
-            <td class="width-35">
-                : <span class="red">{ test_doc.patient_name }</span>
+            <td class="width-35 red">
+                : { test_doc.patient_name }
             </td>
             <td>Age</td>
             <td class="width-35">: {test_doc.patient_age}</td>
@@ -533,17 +533,25 @@ def format_hematology_tests(tests, header):
             if test['lab_test_name'] == "Leukocytes":
                 test_class = "border-line"
                 diff = 1
-            test_html = f"""
-                <tr >
-                <td class="width-25 hema-test">{test['lab_test_name']}</td>
-                <td class="f-s width-10 fb">{result} </td>
-                <td class="width-5 f-s ">{precentage}</td>
-                <td class="width-10 f-s fb">{secondary_result}</td>
-                <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
-                <td class="f-s width-40">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{test['template'][0]['range_text'] if test['template'] else ''}</td>
+            if test['control_type'] == "Free Text":
+                test_html = f"""
+                    <tr>
+                        <td class="width-25 hema-test">{test['lab_test_name']}</td>
+                        <td class="f-s">{result} </td>
+                    </tr>
+                """
+            else:
+                test_html = f"""
+                    <tr >
+                    <td class="width-25 hema-test">{test['lab_test_name']}</td>
+                    <td class="f-s width-10 fb">{result} </td>
+                    <td class="width-5 f-s ">{precentage}</td>
+                    <td class="width-10 f-s fb">{secondary_result}</td>
+                    <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
+                    <td class="f-s width-40">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{test['template'][0]['range_text'] if test['template'] else ''}</td>
 
-                </tr>
-            """
+                    </tr>
+                """
             test_html = f"{test_title}<tr><td class='{test_class}'><table>" + test_html + "</table></td></tr>"
             tests_html+= test_html
     html = f"""<table>
@@ -584,7 +592,10 @@ def get_chemistry_tests(test_doc, only_finalized=False):
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
-            test['template'] = filter_ranges(get_normal_ranges(test['template']), patient)
+            if test['print_all_normal_ranges']:
+                test['template'] =  get_normal_ranges(test['template'])
+            else:
+                test['template'] = filter_ranges(get_normal_ranges(test['template']), patient)
     else: test['template'] = []
     return tests
     
@@ -726,7 +737,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         item_group = f"IN ('{item_group}')"
     return frappe.db.sql("""
         SELECT  
-        lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
+        lt.template, tltt.control_type, tltt.print_all_normal_ranges, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
@@ -852,7 +863,7 @@ def get_print_html_base():
 
 def get_print_header_embassy(test_doc):
     return f"""
-    <table class="b-bottom f-s">
+    <table class="b-bottom header f-s">
         <tr >
             <td >
                  Patient Name
@@ -891,7 +902,9 @@ def get_break():
 def get_print_style():
     return """
     <style>
-    
+    .header td{
+        font-size: 17px;
+    }
               table {
         width: 100%;
         text-align:left;
