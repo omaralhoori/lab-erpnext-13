@@ -97,7 +97,7 @@
    "fieldname": "destination",
    "fieldtype": "Link",
    "label": "Destination",
-   "options": "Destination Country"
+   "options": "Country"
   },
   {
    "fetch_from": "destination.cover_title",
@@ -116,7 +116,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-17 06:53:06.966985",
+ "modified": "2022-08-17 10:27:51.994159",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Embassy Report",

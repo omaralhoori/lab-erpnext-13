@@ -1334,7 +1334,7 @@ frappe.ui.form.on('Sales Invoice', {
 				if (res.message) {
 
 					if (!frm.is_new() && frm.doc.patient && frm.doc.patient != "") {
-						frappe.db.get_value("Destination Country", frm.doc.destination_country, "has_cover").then(res => {
+						frappe.db.get_value("Country", frm.doc.destination_country, "has_cover").then(res => {
 							if (res.message.has_cover){
 								frm.add_custom_button(__('Create Cover'), function(){
 									frappe.db.get_value("Embassy Report", {sales_invoice: frm.doc.name}, "name").then(res => {

@@ -2202,9 +2202,10 @@
   },
   {
    "fieldname": "social_status",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "hidden": 1,
-   "label": "Social Status"
+   "label": "Social Status",
+   "options": "\nSingle\nMarried\nDivorced\nWidowed"
   },
   {
    "fieldname": "passport_place",
@@ -2217,7 +2218,7 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Destination",
-   "options": "Destination Country"
+   "options": "Country"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2230,7 +2231,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-17 05:52:23.638295",
+ "modified": "2022-08-17 13:22:01.186269",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

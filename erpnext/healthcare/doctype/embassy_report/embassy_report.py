@@ -40,7 +40,7 @@ def calculate_age(patient):
 def has_cover(sales_invoice):
 	destination = frappe.db.get_value("Sales Invoice", sales_invoice, "destination_country")
 	if destination:
-		has_cover = frappe.db.get_value("Destination Country", destination, "has_cover")
+		has_cover = frappe.db.get_value("Country", destination, "has_cover")
 		return has_cover
 
 	return False
