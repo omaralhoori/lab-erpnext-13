@@ -1409,7 +1409,20 @@ frappe.ui.form.on('Sales Invoice', {
 									const SuccessFunc = (frm, values, result) => {
 										if (result.ErrorCode == 0) {
 											if (result != null && result.BMPBase64.length > 0) {
-												uploadFP(frm, b64toBlob(result.BMPBase64, "image/bmp"), values)
+												
+												var d = new frappe.ui.Dialog({
+													'fields': [
+														{'fieldname': 'ht', 'fieldtype': 'HTML'},
+												
+													],
+													primary_action: function(){
+														d.hide();
+														uploadFP(frm, b64toBlob(result.BMPBase64, "image/bmp"), values)
+														//show_alert(d.get_values());
+													}
+												});
+												d.fields_dict.ht.$wrapper.html(`<img src="data:image/bmp;base64,${result.BMPBase64}"/>`);
+												d.show();
 											} else {
 												frappe.throw("Fingerprint Capture Fail");
 											}
