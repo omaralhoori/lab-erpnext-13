@@ -344,6 +344,7 @@ def create_rad_test_doc(patient, template, invoice):
 	template_row.template = template.name
 	rad_test.company = invoice.company
 	rad_test.sales_invoice = invoice.name
+	rad_test.physician = invoice.ref_practitioner
 	return rad_test
 
 def create_lab_test_doc(invoiced, practitioner, patient, template, company):

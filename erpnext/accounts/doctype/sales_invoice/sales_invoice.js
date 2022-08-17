@@ -1334,15 +1334,22 @@ frappe.ui.form.on('Sales Invoice', {
 				if (res.message) {
 
 					if (!frm.is_new() && frm.doc.patient && frm.doc.patient != "") {
-						frm.add_custom_button(__('Create Cover'), function(){
-							frappe.db.get_value("Embassy Report", {sales_invoice: frm.doc.name}, "name").then(res => {
-								if (res.message.name){
-									frappe.set_route('Form', 'Embassy Report', res.message.name)
-								}else{
-									frappe.new_doc("Embassy Report", {patient_name: frm.doc.patient_name, sales_invoice: frm.doc.name})
-								}
-							})
+						frappe.db.get_value("Destination Country", frm.doc.destination_country, "has_cover").then(res => {
+							if (res.message.has_cover){
+								frm.add_custom_button(__('Create Cover'), function(){
+									frappe.db.get_value("Embassy Report", {sales_invoice: frm.doc.name}, "name").then(res => {
+										if (res.message.name){
+											frappe.set_route('Form', 'Embassy Report', res.message.name)
+										}else{
+											frappe.new_doc("Embassy Report", {
+											
+												sales_invoice: frm.doc.name})
+										}
+									})
+								})
+							}
 						})
+						
 						var patient_name = frm.doc.patient;
 						frm.add_custom_button(__('Add Fingerprint'), function () {
 							let d = new frappe.ui.Dialog({
@@ -1496,7 +1503,14 @@ frappe.ui.form.on('Sales Invoice', {
 							d.show();
 						});
 					}
-					frm.toggle_display(["passport_no", "passport_issue_date", "passport_expiry_date"], true);
+					let embassy_fields = ["passport_no", "passport_issue_date", "passport_expiry_date", "destination_country", "social_status", "passport_place"];
+					frm.toggle_display(embassy_fields, true);
+					frm.toggle_reqd(embassy_fields, true)
+					// for (var field in embassy_fields ){
+					// 	frm.set_df_property(field, "reqd", true);
+					// }
+					// frm.set_df_property("ref_practitioner", "reqd", false);
+					//frm.toggle_reqd("ref_practitioner", false)
 				}
 			}
 

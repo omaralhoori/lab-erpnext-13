@@ -11,5 +11,18 @@ frappe.ui.form.on('Embassy Report', {
 				window. open(url, '_blank')
 			})
 		}
+	},
+	patient: function(frm){
+		frappe.call({
+			method:"erpnext.healthcare.doctype.embassy_report.embassy_report.calculate_age",
+			args: {
+				patient: frm.doc.patient
+			},
+			callback: (res) => {
+				if (res.message){
+					frm.set_value("age", res.message)
+				}
+			}
+		})
 	}
 });

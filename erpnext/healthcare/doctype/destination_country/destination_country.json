@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:country_name",
+ "creation": "2022-08-17 05:51:29.037679",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "country_name",
+  "has_cover",
+  "cover_title"
+ ],
+ "fields": [
+  {
+   "fieldname": "country_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Country Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_cover",
+   "fieldtype": "Check",
+   "label": "Has Cover"
+  },
+  {
+   "fieldname": "cover_title",
+   "fieldtype": "Data",
+   "label": "Cover Title"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-08-17 05:51:42.789470",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Destination Country",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

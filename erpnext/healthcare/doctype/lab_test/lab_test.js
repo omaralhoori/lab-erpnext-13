@@ -276,26 +276,42 @@ frappe.ui.form.on('Lab Test', {
 				method: "erpnext.healthcare.utils.is_embassy",
 				callback: (res) => {
 					if (res.message) {
-						frm.add_custom_button(__('Edit Cover'), function(){
-							frappe.db.get_value("Embassy Report", {sales_invoice: cur_frm.doc.sales_invoice}, "name").then(res => {
-								if (res.message.name){
-									frappe.set_route('Form', 'Embassy Report', res.message.name)
-								}else{
-									frappe.new_doc("Embassy Report", {patient_name: frm.doc.patient_name, sales_invoice: frm.doc.sales_invoice})
+						frappe.call({
+							method: "erpnext.healthcare.doctype.embassy_report.embassy_report.has_cover", 
+							args: {
+								sales_invoice: frm.doc.sales_invoice
+							},
+							callback: (res2) => {
+								if (res2.message){
+									frm.add_custom_button(__('Edit Cover'), function(){
+										frappe.db.get_value("Embassy Report", {sales_invoice: cur_frm.doc.sales_invoice}, "name").then(res => {
+											if (res.message.name){
+												frappe.set_route('Form', 'Embassy Report', res.message.name)
+											}else{
+												frappe.new_doc("Embassy Report", {sales_invoice: frm.doc.sales_invoice})
+											}
+										})
+			
+									})
+									frm.add_custom_button(__('Print Cover'), function(){
+										let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=${frm.doc.sales_invoice}`
+										window.open(url, '_blank')
+									})
 								}
-							})
-
+								
+							}
 						})
-						frm.add_custom_button(__('Print Cover'), function(){
-							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=${frm.doc.sales_invoice}`
+
+						frm.add_custom_button(__('Print XRay'), function(){
+							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_xray_report?sales_invoice=${frm.doc.sales_invoice}`
 							window.open(url, '_blank')
 						})
 
-						frm.add_custom_button(__('Print All'), function(){
-							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_all_reports?lab_test=${frm.doc.name}`
-							let res = window.open(url, '_blank')
+						// frm.add_custom_button(__('Print All'), function(){
+						// 	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_all_reports?lab_test=${frm.doc.name}`
+						// 	let res = window.open(url, '_blank')
 
-						})
+						// })
 					}
 				}})
 			

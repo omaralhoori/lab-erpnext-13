@@ -15,6 +15,8 @@ from erpnext.healthcare.doctype.patient.patient import validate_invoice_paid
 
 class SampleCollection(Document):
 	def validate(self):
+		if frappe.local.conf.is_embassy:
+			if self.record_status != "Released": frappe.throw(_('Sample not verified with fingerprint'))
 		for detail in self.sample_collection_detail:
 			if flt(detail.sample_qty) <= 0:
 				frappe.throw(_('Sample Quantity cannot be negative or 0'), title=_('Invalid Quantity'))

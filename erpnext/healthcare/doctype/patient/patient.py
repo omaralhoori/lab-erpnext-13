@@ -344,13 +344,12 @@ def upload_fingerprint():
 		patient_name = frappe.form_dict.docname
 		finger_name = frappe.form_dict.finger_name
 		file_name = frappe.form_dict.filename
-
 		file_content = file.stream.read()
 		now_date = datetime.now()
 		full_path = frappe.local.site + "/private/files/fingerprints/" + str(now_date.year) + "-" +str(now_date.month)
-
+		file_no = frappe.db.get_value("Patient", file_name.split("_")[0], ["patient_number"])
 		create_path(full_path)
-		file_path = get_file_path(full_path, file_name)
+		file_path = get_file_path(full_path, file_no + "_" + finger_name)
 
 		with open(file_path, 'wb') as fw:
 			fw.write(file_content)
@@ -396,7 +395,23 @@ def match_fingerprint():
 		patient = verify_fingerprint(file_content)
 		if patient and patient != "":
 			sample = frappe.db.get_value("Sample Collection", {"patient": patient}, ["name"])
+			if sample:
+				frappe.db.set_value("Sample Collection", sample, "record_status", "Released")
 			return {"path": "/app/sample-collection/" + str(sample)}
+	return None
+
+@frappe.whitelist()
+def match_fingerprint_radiology():
+	if frappe.request.files['file']:
+		file = frappe.request.files['file']
+		file_content = file.stream.read()
+		patient = verify_fingerprint(file_content)
+		if patient and patient != "":
+			sample = frappe.db.get_value("Radiology Test", {"patient": patient}, ["name", "record_status"])
+			if sample:
+				if sample[1] != "Finalized":
+					frappe.db.set_value("Radiology Test", sample[0], "record_status", "Released")
+				return {"path": "/app/radiology-test/" + str(sample[0])}
 	return None
 
 def validate_invoice_paid(patient, invoice):

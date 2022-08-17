@@ -9,13 +9,16 @@
  "field_order": [
   "naming_series",
   "physician",
+  "practitioner_name",
   "sales_invoice",
+  "record_status",
   "column_break_3",
   "template",
   "company",
   "patient_info_section",
   "patient",
   "patient_name",
+  "patient_mobile",
   "column_break_8",
   "patient_sex",
   "patient_age",
@@ -27,7 +30,6 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "Series",
    "options": "HLC-RAD-.YYYY.-",
    "reqd": 1
@@ -60,7 +62,6 @@
   {
    "fieldname": "patient",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
    "read_only": 1,
@@ -70,7 +71,7 @@
    "fetch_from": "patient.patient_name",
    "fieldname": "patient_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Patient Name",
    "read_only": 1,
    "reqd": 1
@@ -115,8 +116,10 @@
   },
   {
    "fieldname": "physician",
-   "fieldtype": "Data",
-   "label": "Referring Physician"
+   "fieldtype": "Link",
+   "label": "Referring Physician",
+   "options": "Healthcare Practitioner",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -124,12 +127,35 @@
    "hidden": 1,
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fetch_from": "patient.mobile",
+   "fieldname": "patient_mobile",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Patient Mobile",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "physician.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Practitioner Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "record_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Record Status",
+   "options": "Draft\nReleased\nFinalized",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2022-08-08 11:00:59.748633",
+ "modified": "2022-08-17 07:52:56.466496",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",
@@ -149,5 +175,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "title_field": "patient"
 }

@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:lab_test_code",
@@ -762,7 +761,7 @@
   }
  ],
  "links": [],
- "modified": "2022-08-12 10:01:25.207453",
+ "modified": "2022-08-17 05:44:31.668214",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

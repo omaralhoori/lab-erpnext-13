@@ -9,11 +9,14 @@
   "customer_section",
   "title",
   "naming_series",
+  "social_status",
+  "destination_country",
   "column_break1",
   "due_date",
   "posting_date",
   "posting_time",
   "passport_no",
+  "passport_place",
   "passport_issue_date",
   "passport_expiry_date",
   "column_break_19",
@@ -2196,6 +2199,25 @@
    "hidden": 1,
    "label": "Total Cash Discount (Company Currency)",
    "read_only": 1
+  },
+  {
+   "fieldname": "social_status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Social Status"
+  },
+  {
+   "fieldname": "passport_place",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Passport Place of Issue"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Destination",
+   "options": "Destination Country"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2208,7 +2230,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-16 08:19:34.125209",
+ "modified": "2022-08-17 05:52:23.638295",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

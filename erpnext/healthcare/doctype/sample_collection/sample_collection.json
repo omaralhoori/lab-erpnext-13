@@ -21,6 +21,7 @@
   "company",
   "invoiced",
   "num_print",
+  "record_status",
   "test_templates_section",
   "lab_test_templates",
   "section_break_6",
@@ -204,11 +205,18 @@
    "in_standard_filter": 1,
    "label": "Patient Mobile",
    "read_only": 1
+  },
+  {
+   "fieldname": "record_status",
+   "fieldtype": "Select",
+   "label": "Record Status",
+   "options": "Draft\nReleased",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-15 14:50:08.940507",
+ "modified": "2022-08-17 08:06:24.104328",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

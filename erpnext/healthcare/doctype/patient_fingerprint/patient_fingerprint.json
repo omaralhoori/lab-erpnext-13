@@ -24,7 +24,7 @@
   },
   {
    "fieldname": "file_path",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "File Path",
    "read_only": 1
   }
@@ -32,7 +32,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-06-25 11:50:25.563119",
+ "modified": "2022-08-16 21:40:33.057740",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Fingerprint",
