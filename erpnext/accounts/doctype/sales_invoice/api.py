@@ -1,5 +1,7 @@
 
 from __future__ import unicode_literals
+import re
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 import frappe
 import json
@@ -17,6 +19,7 @@ def get_invoice():
         "patient": invoice_data['customer'],
         "company": invoice_data['company'],
         "total_patient": total,
+        "discount_amount": 0,
         "selling_price_list": invoice_data['price_list'],
         "price_list_currency": invoice_data['currency']
     })
@@ -28,7 +31,17 @@ def get_invoice():
         item.patient_share= item_data['patient_share']
         item.patient_rate= item_data['patient_share']
     invoice.save(ignore_permissions=True)
-    #invoice.submit()
+    invoice.submit()
     frappe.db.commit()
     return invoice.name
+
+@frappe.whitelist(allow_guest=True)
+def pay_invoice(invoice):
+    #invoice_doc = frappe.get_doc("Sales Invoice", invoice)
+    #if not invoice_doc: frappe.throw("Invoice not found")
+    payment = get_payment_entry("Sales Invoice", invoice)
+    payment.save(ignore_permissions=True)
+    payment.submit()
+    frappe.db.commit()
+    return payment.name
 
