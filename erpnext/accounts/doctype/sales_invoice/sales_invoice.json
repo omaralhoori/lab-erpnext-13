@@ -11,6 +11,7 @@
   "naming_series",
   "social_status",
   "destination_country",
+  "referred_by",
   "column_break1",
   "due_date",
   "posting_date",
@@ -23,6 +24,7 @@
   "company",
   "company_tax_id",
   "customer",
+  "mobile_no",
   "customer_name",
   "tax_id",
   "set_posting_time",
@@ -2219,6 +2221,20 @@
    "hidden": 1,
    "label": "Destination",
    "options": "Country"
+  },
+  {
+   "fetch_from": "customer.customer_mobile_no",
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "referred_by",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Referred By",
+   "options": "Employment Offices"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2231,7 +2247,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-17 13:22:01.186269",
+ "modified": "2022-08-17 15:35:50.144574",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

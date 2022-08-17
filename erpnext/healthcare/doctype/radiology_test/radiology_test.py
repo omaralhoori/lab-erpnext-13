@@ -67,10 +67,10 @@ def create_results(template, lab_test):
 import json
 @frappe.whitelist()
 def finalize_selected(tests):
-	tests = json.loads(tests)
+	tests = json.loads(tests) #AND record_status IN ('Released')
 	frappe.db.sql("""
 	UPDATE `tabRadiology Test` SET record_status="Finalized"
-	WHERE name in ({tests}) AND record_status IN ('Released')
+	WHERE name in ({tests}) 
 	""".format(tests=",".join(tests)))
 
 @frappe.whitelist()
