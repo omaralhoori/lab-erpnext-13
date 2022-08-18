@@ -15,6 +15,7 @@
   "is_group",
   "need_lab_test",
   "need_sample_collection",
+  "claim_type",
   "image",
   "column_break_5",
   "defaults",
@@ -220,6 +221,12 @@
    "fieldname": "need_sample_collection",
    "fieldtype": "Check",
    "label": "Need Sample Collection"
+  },
+  {
+   "fieldname": "claim_type",
+   "fieldtype": "Select",
+   "label": "Claim Type",
+   "options": "\nLaboratory\nRadiology\nClinical\nPharmacy"
   }
  ],
  "hide_toolbar": 1,
@@ -229,7 +236,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2022-07-28 22:06:49.310696",
+ "modified": "2022-08-18 09:14:08.452124",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

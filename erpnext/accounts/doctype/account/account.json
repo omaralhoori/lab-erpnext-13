@@ -201,8 +201,7 @@
    "fieldname": "level",
    "fieldtype": "Select",
    "label": "Level",
-   "options": "1\n2\n3\n4",
-   "reqd": 1
+   "options": "\n1\n2\n3\n4"
   },
   {
    "fieldname": "oldid",
@@ -221,7 +220,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-07-11 09:17:02.742495",
+ "modified": "2022-08-18 07:53:20.721637",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
