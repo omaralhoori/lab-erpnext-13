@@ -90,14 +90,12 @@ const disable_input = (status) => {
 const format_tests_html = (tests) => {
 	var html = "";
 	var buttons = `<div> 
-		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
 		</div>`
 	if (frappe.user.has_role('LabTest Approver')){
 		buttons = `<div> 
-		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
 		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
@@ -307,11 +305,11 @@ frappe.ui.form.on('Lab Test', {
 							window.open(url, '_blank')
 						})
 
-						// frm.add_custom_button(__('Print All'), function(){
-						// 	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_all_reports?lab_test=${frm.doc.name}`
-						// 	let res = window.open(url, '_blank')
+						frm.add_custom_button(__('Print All'), function(){
+							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_all_reports?lab_test=${frm.doc.name}`
+							let res = window.open(url, '_blank')
 
-						// })
+						})
 					}
 				}})
 			
