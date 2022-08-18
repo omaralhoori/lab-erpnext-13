@@ -659,6 +659,7 @@ def format_uploaded_tests(test_doc,tests, header=""):
 
 def format_float_result(result, point=2):
     try:
+        if result.startswith("+") or result.startswith("-"): return result
         if point != 0:
             return f"%.{point}f" % float(result)
         else:

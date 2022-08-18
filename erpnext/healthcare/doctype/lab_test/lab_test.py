@@ -22,7 +22,7 @@ class LabTest(Document):
 
 	def on_submit(self):
 		self.validate_sample_released()
-		validate_invoice_paid(self.patient, self.sales_invoice)
+		#validate_invoice_paid(self.patient, self.sales_invoice)
 		self.validate_result_values()
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')

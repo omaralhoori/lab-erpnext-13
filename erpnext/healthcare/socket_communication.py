@@ -451,6 +451,7 @@ def parse_sysmex_msg(res_msg):
     o = 1
     res_msg = res_msg.decode()
     parsed_results = []
+    embassy_results = []
     while True:
         order_info = get_sysmex_order(res_msg, o)
         if not order_info: break
@@ -458,8 +459,11 @@ def parse_sysmex_msg(res_msg):
         results = get_sysmex_results(res_msg,o_end,o_second_start)
         o += 1
         if len(results) == 0: continue
-        parsed_results.append({"order_id": order, "results": results })
-    return parsed_results
+        if is_embassy_order(order):
+            embassy_results.append({"order_id": order, "results": results })
+        else:
+            parsed_results.append({"order_id": order, "results": results })
+    return parsed_results, embassy_results
 
 def start_sysmex_listener(ip_address, port):
     while True:
@@ -485,13 +489,14 @@ def start_sysmex_listener(ip_address, port):
                         if not data:
                             break
                         if msg.endswith(b'L|1|N\r'):
-                            results = parse_sysmex_msg(msg)
+                            results, embassy_results = parse_sysmex_msg(msg)
                             msg = b''
                             print(results)
                             log_result("sysmex", "Result " + json.dumps(results))
                             if len(results) > 0:
-                                requests.post("http://127.0.0.1/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
-
+                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
+                            if len(embassy_results) > 0:
+                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(embassy_results))
                         conn.sendall(chr(6).encode())
             except socket.error:
                 print("Socket cannot connect")

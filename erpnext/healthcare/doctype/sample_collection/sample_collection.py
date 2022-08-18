@@ -32,7 +32,7 @@ class SampleCollection(Document):
 	def on_submit(self):
 		if frappe.local.conf.is_embassy:
 			if self.record_status != "Released": frappe.throw(_('Sample not verified with fingerprint'))
-		validate_invoice_paid(self.patient, self.sales_invoice)
+		#validate_invoice_paid(self.patient, self.sales_invoice)
 		test_name = frappe.db.get_value("Lab Test", {"sample": self.name}, ["name"])
 		if test_name:
 			send_received_msg_order(self.name, test_name)
