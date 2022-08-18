@@ -883,7 +883,7 @@ def apply_test_button_action(action, tests, test_name, sample):
 			frappe.throw("Sample is not collected")
 		where_stmt = "(status is NULL or status not in ('Released', 'Finalized'))"
 	elif action == "Released":
-		where_stmt = "status='Received'"
+		where_stmt = "status='Received' AND result_value !='' AND result_value IS NOT NULL "
 	elif action == 'Finalized':
 		where_stmt = "status='Released'"
 	elif action == 'Rejected':

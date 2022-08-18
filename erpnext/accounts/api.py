@@ -84,6 +84,8 @@ def get_formatted_result_for_invoice_items(doc):
 		result = get_lab_test_template(doc,lab_test.item_code)
 		if not result:
 			item = frappe.get_doc("Item",lab_test.item_code)
+			Claim_type = frappe.db.get_value("Item Group", {"name": item.item_group}, ["claim_type"]) or item.item_group
+			item.item_group = Claim_type
 			item_group_dict[item.item_group]=item.item_group
 
 			if not formatted_result["item_group",item.item_group]:
@@ -166,8 +168,17 @@ def get_formatted_result_for_invoice_items(doc):
 				lab_doc = frappe.get_doc("Lab Test Template", {"name": res['lab_test_name']})
 				#frappe.msgprint(cstr(lab_doc))
 				
-				item = frappe.get_doc("Item", {"name": lab_doc.item})
+				#item = frappe.get_doc("Item", {"name": lab_doc.item})
+				#item_group_dict[item.item_group]=item.item_group
+
+				item = frappe.get_doc("Item",lab_doc.item)
+				Claim_type = frappe.db.get_value("Item Group", {"name": item.item_group}, ["claim_type"]) or item.item_group
+				item.item_group = Claim_type
 				item_group_dict[item.item_group]=item.item_group
+
+
+
+
 
 				if not formatted_result["item_group",item.item_group]:
 					formatted_result["item_group",item.item_group] = defaultdict(dict)

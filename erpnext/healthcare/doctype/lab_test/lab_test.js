@@ -407,7 +407,7 @@ frappe.ui.form.on('Lab Test', {
 		// 	get_release_sample(frm);
 		// });
 
-		frm.add_custom_button(__('Receive Sample'), function () {
+		frm.page.add_menu_item(__('Receive Sample'), function () {
 			get_receive_sample(frm);
 		});
 
