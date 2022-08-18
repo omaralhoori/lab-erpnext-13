@@ -41,3 +41,20 @@ class SampleCollection(Document):
 				UPDATE `tabNormal Test Result` SET status='Received'
 			WHERE parent='{test_name}'
 			""".format(test_name=test_name))
+
+import json
+@frappe.whitelist()
+def release_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabSample Collection` SET record_status="Released"
+	WHERE name in ({tests}) AND record_status IN ('Draft')
+	""".format(tests=",".join(tests)))
+
+@frappe.whitelist()
+def unrelease_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabSample Collection` SET record_status="Draft"
+	WHERE name in ({tests}) AND record_status IN ('Released')
+	""".format(tests=",".join(tests)))

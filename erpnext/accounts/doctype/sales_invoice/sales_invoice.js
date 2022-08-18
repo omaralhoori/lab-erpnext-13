@@ -1326,7 +1326,12 @@ frappe.ui.form.on('Sales Invoice', {
 			frm.set_df_property("ref_practitioner", "hidden", 1);
 		}
 
-
+		if (!frm.is_new() ){
+			frm.add_custom_button(__('Print'), function(){
+				let url = `/printview?doctype=Sales%20Invoice&name=${frm.doc.name}&trigger_print=1&format=Sales%20Invoice&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`
+				window.open(url, '_blank')
+			})
+		}
 
 		frappe.call({
 			method: "erpnext.healthcare.utils.is_embassy",

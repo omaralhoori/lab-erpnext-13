@@ -33,7 +33,17 @@ frappe.ui.form.on('Radiology Test', {
 					}
 				})
 			})
-
+			frm.add_custom_button("Realese",  () => {
+				frappe.call({
+					method: "erpnext.healthcare.doctype.radiology_test.radiology_test.release_selected",
+					args: {
+						tests: [`"${frm.doc.name}"`]
+					}
+					,callback: () => {
+						frm.reload_doc();
+					}
+				})
+			})
 
 			frm.add_custom_button("Unrealese",  () => {
 				frappe.call({

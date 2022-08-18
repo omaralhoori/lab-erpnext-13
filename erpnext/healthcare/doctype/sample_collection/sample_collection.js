@@ -15,6 +15,37 @@ frappe.ui.form.on('Sample Collection', {
 				let url = `/printview?doctype=Sample%20Collection&name=${frm.doc.name}&trigger_print=1&format=Sample%20ID%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en`
 				window. open(url, '_blank')
 			})
+
+			frappe.call({
+				method: "erpnext.healthcare.utils.is_embassy",
+				callback: (res) => {
+					if (res.message) {
+						frm.add_custom_button("Realese",  () => {
+							frappe.call({
+								method: "erpnext.healthcare.doctype.sample_collection.sample_collection.release_selected",
+								args: {
+									tests: [`"${frm.doc.name}"`]
+								}
+								,callback: () => {
+									frm.reload_doc();
+								}
+							})
+						})
+			
+						frm.add_custom_button("Unrealese",  () => {
+							frappe.call({
+								method: "erpnext.healthcare.doctype.sample_collection.sample_collection.unrelease_selected",
+								args: {
+									tests: [`"${frm.doc.name}"`]
+								}
+								,callback: () => {
+									frm.reload_doc();
+								}
+							})
+						})
+					}
+				}
+			})
 		}
 		if (!frm.is_new() && frm.doc.docstatus != 1){
 			frm.add_custom_button(__('Send patient permitting message'), function() {

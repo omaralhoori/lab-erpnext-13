@@ -143,6 +143,17 @@ class SalesInvoice(SellingController):
 			</tr>
 		"""
 		return html
+	
+	def update_patient_info(self):
+		if self.patient:
+			patient = frappe.get_doc("Patient", self.patient)
+			patient.social_status  = self.social_status if self.social_status else patient.social_status
+			patient.passport_no = self.passport_no if self.passport_no else patient.passport_no
+			patient.passport_place = self.passport_place if self.passport_place else patient.passport_place
+			patient.passport_issue_date = self.passport_issue_date if self.passport_issue_date else patient.passport_issue_date
+			patient.passport_expiry_date = self.passport_expiry_date if self.passport_expiry_date else patient.passport_expiry_date
+			patient.save(ignore_permissions=True)
+
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.calculate_grand_total()
@@ -531,6 +542,7 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
+		self.update_patient_info()
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
