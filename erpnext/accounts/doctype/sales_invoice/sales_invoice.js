@@ -588,6 +588,13 @@ cur_frm.fields_dict['project'].get_query = function (doc, cdt, cdn) {
 		filters: { 'customer': doc.customer }
 	}
 }
+// Practitioner Query
+// --------------------------------
+cur_frm.fields_dict["ref_practitioner"].get_query  = function (doc) {
+	return {
+		query: "erpnext.controllers.queries.get_practitioner_name",
+	}
+};
 
 // Income Account in Details Table
 // --------------------------------
