@@ -344,6 +344,7 @@ def create_rad_test_doc(patient, template, invoice):
 	template_row.template = template.name
 	rad_test.company = invoice.company
 	rad_test.sales_invoice = invoice.name
+	rad_test.physician = invoice.ref_practitioner
 	return rad_test
 
 def create_lab_test_doc(invoiced, practitioner, patient, template, company):
@@ -882,7 +883,7 @@ def apply_test_button_action(action, tests, test_name, sample):
 			frappe.throw("Sample is not collected")
 		where_stmt = "(status is NULL or status not in ('Released', 'Finalized'))"
 	elif action == "Released":
-		where_stmt = "status='Received' AND result_value "
+		where_stmt = "status='Received' AND result_value !='' AND result_value IS NOT NULL "
 	elif action == 'Finalized':
 		where_stmt = "status='Released'"
 	elif action == 'Rejected':
@@ -892,12 +893,11 @@ def apply_test_button_action(action, tests, test_name, sample):
 		action = 'Released'
 	else: frappe.throw("Undefined action: " + action)
 	tests = json.loads(tests)
-	tests = [f'"{s}"' for s in tests]
+	tests = [f"'{s}'" for s in tests]
 	query= """
 	UPDATE `tabNormal Test Result` SET status='{action}'
 	WHERE name in ({tests}) AND {where_stmt}
 	""".format(action=action, tests=",".join(tests), where_stmt=where_stmt)
-
 	frappe.db.sql(query)
 	frappe.db.commit()
 

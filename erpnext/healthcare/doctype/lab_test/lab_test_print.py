@@ -3,6 +3,7 @@ from asyncore import write
 
 import frappe
 from frappe.permissions import get_valid_perms
+from frappe.utils.pdf import get_file_data_from_writer
 
 def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
     show_all_results = True if show_all_results == 1 else False
@@ -814,36 +815,134 @@ def get_test_uploaded_files(lab_test, password, test_name):
     frappe.local.response.filename = file_link.split("/")[-1]
     frappe.local.response.filecontent = file_content  or ''#get_pdf(html)
     frappe.local.response.type = "download"#file_link.split(".")[-1]
-import PyPDF2
-import shutil
+
 from PyPDF2 import PdfFileReader, PdfFileWriter
-from PyPDF2.pdf import PageObject
+import io
+
+def get_pdf_writer(filedata):
+    reader = PdfFileReader(io.BytesIO(filedata))
+    writer = PdfFileWriter()
+    writer.appendPagesFromReader(reader)
+    
+    return writer
 
 @frappe.whitelist()
 def print_all_reports(lab_test):
     sales_invoice = frappe.db.get_value("Lab Test", lab_test, "sales_invoice")
-    print(sales_invoice, lab_test)
-    cover = get_embassy_cover(sales_invoice, return_html=True)
     result = embassy_test_result(lab_test, return_html=True)
-    merger = PyPDF2.PdfFileMerger()
-    merger.append(cover)
-
+    cover = get_embassy_cover(sales_invoice, return_html=True)
+    xray = get_xray_report(sales_invoice, return_html=True)
+    writer = get_pdf_writer(result)
+    if xray and xray != "":
+        reader = PdfFileReader(io.BytesIO(xray))
+        writer.appendPagesFromReader(reader)
+    if cover and cover != "":
+        reader = PdfFileReader(io.BytesIO(cover))
+        writer.appendPagesFromReader(reader)
+    output = get_file_data_from_writer(writer)
     frappe.local.response.filename = "Test Result"
-    frappe.local.response.filecontent = cover #get_pdf(html)
+    frappe.local.response.filecontent = output #get_pdf(html)
     frappe.local.response.type = "pdf"
 
 @frappe.whitelist()
 def get_embassy_cover(sales_invoice, report_name="ksa_report", return_html=False):
-    embassy_report = frappe.get_doc("Embassy Report", {"sales_invoice": sales_invoice})
-    if not embassy_report: return ""
-    html = frappe.render_template(f'templates/test_result/{report_name}.html', embassy_report.prepare_report_data())
-    options = {"--margin-top" : "15mm", "--margin-left" : "10mm","--margin-right" : "10mm", "--margin-bottom": "10mm", "quiet":""}
-    pdf_content =  pdfkit.from_string( html, False, options)  or ''
+    try:
+        embassy_report = frappe.get_doc("Embassy Report", {"sales_invoice": sales_invoice})
+        if not embassy_report: return ""
+        html = frappe.render_template(f'templates/test_result/{report_name}.html', embassy_report.prepare_report_data())
+        options = {"--margin-top" : "15mm", "--margin-left" : "10mm","--margin-right" : "10mm", "--margin-bottom": "10mm", "quiet":""}
+        pdf_content =  pdfkit.from_string( html, False, options)  or ''
 
-    if return_html: return pdf_content
-    frappe.local.response.filename = report_name
-    frappe.local.response.filecontent = pdf_content #get_pdf(html)
-    frappe.local.response.type = "pdf"
+        if return_html: return pdf_content
+        frappe.local.response.filename = report_name
+        frappe.local.response.filecontent = pdf_content #get_pdf(html)
+        frappe.local.response.type = "pdf"
+    except:
+        return ""
+
+
+@frappe.whitelist()
+def get_xray_report(sales_invoice, return_html = False):
+    try:
+        xray_test = frappe.get_doc("Radiology Test",{"sales_invoice": sales_invoice})
+        if not xray_test: frappe.throw("No Radiology Test created with this invoice.")
+        if xray_test.record_status != "Finalized": frappe.throw("Radiology test not finalized.")
+        if len(xray_test.test_results) == 0: frappe.throw("Radiology test has no test result.")
+        reports = { result.test_name: result.test_result for result in xray_test.test_results }
+        header = format_xray_header(xray_test)
+        html = get_print_html_base()
+
+        tbody = get_embassy_xray_tbody(reports, header)
+        html = html.format(body=tbody,style=get_print_style())
+        options = {"--margin-top" : "40mm", "--margin-left" : "0","--margin-right" : "0",  "quiet":""}
+        pdf_content =  pdfkit.from_string( html, False, options)  or ''
+        if return_html : return pdf_content
+        frappe.local.response.filename = "Test.pdf"
+        frappe.local.response.filecontent = pdf_content#get_pdf(html)
+        frappe.local.response.type = "pdf"
+    except:
+        return ""
+
+def format_xray_header(xray_test):
+    visit_date = frappe.db.get_value("Sales Invoice", xray_test.sales_invoice, "creation")
+    return f"""
+    <table class="b-bottom header f-s">
+        <tr class="center fb"><td colspan="6">Radiology Report</td> </tr>
+        <tr >
+            <td >
+                 Patient Name
+            </td>
+            <td >
+                : <span class="red">{ xray_test.patient_name }</span>
+            </td>
+            <td>Age</td>
+            <td >: {" ".join(xray_test.patient_age.split(" ")[:2])}</td>
+            <td>Gender</td>
+            <td>: {xray_test.patient_sex}</td>
+        <tr>
+         <tr>
+            <td >
+                 Visit Date
+            </td>
+            <td >
+                : { frappe.utils.get_datetime(visit_date).strftime("%d/%m/%Y %r",) }
+            </td>
+            <td >Referring Physician</td>
+            <td colspan="3">: {xray_test.practitioner_name or "" }</td>
+        <tr>
+        <tr>
+            <td >
+                Report Date
+            </td>
+            <td colspan="5">: {  frappe.utils.get_datetime().strftime("%d/%m/%Y %r",)   }</td>
+        <tr>
+    </table>
+    """
+
+
+def get_embassy_xray_tbody(reports, header):
+    body = ""
+    for report in reports:
+        body += f"""
+            <tr><td>
+                {reports[report]}
+            </td></tr>
+        """
+    html = f"""
+        <table>
+        <thead>
+            <tr><td>{header}</td></tr>
+        </thead>
+        <tbody class="fh-2">
+            <tr class="center fb"><td> CHEST X-RAY REPORT </td></tr>
+            {body}
+        </tbody>
+        </table>
+
+    """
+    return html
+
+
 def get_print_html_base():
     return """
     <!DOCTYPE html>
@@ -909,6 +1008,9 @@ def get_print_style():
         width: 100%;
         text-align:left;
     }
+    .fh-2{
+        font-size: 20px;
+    }
     td{
         padding-bottom: 4px;
     }
@@ -956,6 +1058,9 @@ def get_print_style():
     }
     .red{
         color: red;
+    }
+    .header .red{
+        font-size: 1.3em;
     }
     .b-bottom{
         border-bottom: 1px solid;

@@ -90,14 +90,12 @@ const disable_input = (status) => {
 const format_tests_html = (tests) => {
 	var html = "";
 	var buttons = `<div> 
-		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
 		</div>`
 	if (frappe.user.has_role('LabTest Approver')){
 		buttons = `<div> 
-		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
 		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
@@ -276,18 +274,34 @@ frappe.ui.form.on('Lab Test', {
 				method: "erpnext.healthcare.utils.is_embassy",
 				callback: (res) => {
 					if (res.message) {
-						frm.add_custom_button(__('Edit Cover'), function(){
-							frappe.db.get_value("Embassy Report", {sales_invoice: cur_frm.doc.sales_invoice}, "name").then(res => {
-								if (res.message.name){
-									frappe.set_route('Form', 'Embassy Report', res.message.name)
-								}else{
-									frappe.new_doc("Embassy Report", {patient_name: frm.doc.patient_name, sales_invoice: frm.doc.sales_invoice})
+						frappe.call({
+							method: "erpnext.healthcare.doctype.embassy_report.embassy_report.has_cover", 
+							args: {
+								sales_invoice: frm.doc.sales_invoice
+							},
+							callback: (res2) => {
+								if (res2.message){
+									frm.add_custom_button(__('Edit Cover'), function(){
+										frappe.db.get_value("Embassy Report", {sales_invoice: cur_frm.doc.sales_invoice}, "name").then(res => {
+											if (res.message.name){
+												frappe.set_route('Form', 'Embassy Report', res.message.name)
+											}else{
+												frappe.new_doc("Embassy Report", {sales_invoice: frm.doc.sales_invoice})
+											}
+										})
+			
+									})
+									frm.add_custom_button(__('Print Cover'), function(){
+										let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=${frm.doc.sales_invoice}`
+										window.open(url, '_blank')
+									})
 								}
-							})
-
+								
+							}
 						})
-						frm.add_custom_button(__('Print Cover'), function(){
-							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=${frm.doc.sales_invoice}`
+
+						frm.add_custom_button(__('Print XRay'), function(){
+							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_xray_report?sales_invoice=${frm.doc.sales_invoice}`
 							window.open(url, '_blank')
 						})
 
@@ -393,7 +407,7 @@ frappe.ui.form.on('Lab Test', {
 		// 	get_release_sample(frm);
 		// });
 
-		frm.add_custom_button(__('Receive Sample'), function () {
+		frm.page.add_menu_item(__('Receive Sample'), function () {
 			get_receive_sample(frm);
 		});
 

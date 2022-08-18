@@ -61,3 +61,39 @@ def create_multiline_normals(template, lab_test):
 def create_results(template, lab_test):
 	result = lab_test.append('test_results')
 	result.test_template = template.name
+	result.test_result = template.result_legend
+
+
+import json
+@frappe.whitelist()
+def finalize_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabRadiology Test` SET record_status="Finalized"
+	WHERE name in ({tests}) AND record_status IN ('Released')
+	""".format(tests=",".join(tests)))
+
+@frappe.whitelist()
+def definalize_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabRadiology Test` SET record_status="Released"
+	WHERE name in ({tests}) AND record_status IN ('Finalized')
+	""".format(tests=",".join(tests)))
+
+
+@frappe.whitelist()
+def release_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabRadiology Test` SET record_status="Released"
+	WHERE name in ({tests}) AND record_status IN ('Draft')
+	""".format(tests=",".join(tests)))
+
+@frappe.whitelist()
+def unrelease_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabRadiology Test` SET record_status="Draft"
+	WHERE name in ({tests}) AND record_status IN ('Released')
+	""".format(tests=",".join(tests)))

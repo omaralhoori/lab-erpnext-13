@@ -48,7 +48,7 @@ def verify_fingerprint(fingerprint):
     paths = get_fingerprint_paths()
     best_score = 0
     patient = None
-    
+    print(paths)
     selecting_method = frappe.db.get_single_value("Healthcare Settings", "selecting_method")
 
     first_match = True if selecting_method == "First Match" else False

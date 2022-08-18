@@ -30,6 +30,8 @@ class SampleCollection(Document):
 		self.collection_serial = prg_serial
 
 	def on_submit(self):
+		if frappe.local.conf.is_embassy:
+			if self.record_status != "Released": frappe.throw(_('Sample not verified with fingerprint'))
 		validate_invoice_paid(self.patient, self.sales_invoice)
 		test_name = frappe.db.get_value("Lab Test", {"sample": self.name}, ["name"])
 		if test_name:
@@ -39,3 +41,20 @@ class SampleCollection(Document):
 				UPDATE `tabNormal Test Result` SET status='Received'
 			WHERE parent='{test_name}'
 			""".format(test_name=test_name))
+
+import json
+@frappe.whitelist()
+def release_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabSample Collection` SET record_status="Released"
+	WHERE name in ({tests}) AND record_status IN ('Draft')
+	""".format(tests=",".join(tests)))
+
+@frappe.whitelist()
+def unrelease_selected(tests):
+	tests = json.loads(tests)
+	frappe.db.sql("""
+	UPDATE `tabSample Collection` SET record_status="Draft"
+	WHERE name in ({tests}) AND record_status IN ('Released')
+	""".format(tests=",".join(tests)))

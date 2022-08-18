@@ -9,17 +9,22 @@
   "customer_section",
   "title",
   "naming_series",
+  "social_status",
+  "destination_country",
+  "referred_by",
   "column_break1",
   "due_date",
   "posting_date",
   "posting_time",
   "passport_no",
+  "passport_place",
   "passport_issue_date",
   "passport_expiry_date",
   "column_break_19",
   "company",
   "company_tax_id",
   "customer",
+  "mobile_no",
   "customer_name",
   "tax_id",
   "set_posting_time",
@@ -2095,18 +2100,27 @@
    "options": "Customer"
   },
   {
+   "allow_on_submit": 1,
+   "fetch_from": "patient.passport_issue_date",
+   "fetch_if_empty": 1,
    "fieldname": "passport_issue_date",
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Passport Issue Date"
   },
   {
+   "allow_on_submit": 1,
+   "fetch_from": "patient.passport_expiry_date",
+   "fetch_if_empty": 1,
    "fieldname": "passport_expiry_date",
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Passport Expiry Date"
   },
   {
+   "allow_on_submit": 1,
+   "fetch_from": "patient.passport_no",
+   "fetch_if_empty": 1,
    "fieldname": "passport_no",
    "fieldtype": "Data",
    "hidden": 1,
@@ -2196,6 +2210,47 @@
    "hidden": 1,
    "label": "Total Cash Discount (Company Currency)",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "patient.social_status",
+   "fetch_if_empty": 1,
+   "fieldname": "social_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Social Status",
+   "options": "\nSingle\nMarried\nDivorced\nWidowed"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "patient.passport_place",
+   "fetch_if_empty": 1,
+   "fieldname": "passport_place",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Passport Place of Issue"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "destination_country",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Destination",
+   "options": "Country"
+  },
+  {
+   "fetch_from": "customer.customer_mobile_no",
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "referred_by",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Referred By",
+   "options": "Employment Offices"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2208,7 +2263,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-16 08:19:34.125209",
+ "modified": "2022-08-18 05:34:40.792284",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

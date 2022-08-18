@@ -1326,7 +1326,12 @@ frappe.ui.form.on('Sales Invoice', {
 			frm.set_df_property("ref_practitioner", "hidden", 1);
 		}
 
-
+		if (!frm.is_new() ){
+			frm.add_custom_button(__('Print'), function(){
+				let url = `/printview?doctype=Sales%20Invoice&name=${frm.doc.name}&trigger_print=1&format=Sales%20Invoice&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`
+				window.open(url, '_blank')
+			})
+		}
 
 		frappe.call({
 			method: "erpnext.healthcare.utils.is_embassy",
@@ -1334,15 +1339,22 @@ frappe.ui.form.on('Sales Invoice', {
 				if (res.message) {
 
 					if (!frm.is_new() && frm.doc.patient && frm.doc.patient != "") {
-						frm.add_custom_button(__('Create Cover'), function(){
-							frappe.db.get_value("Embassy Report", {sales_invoice: frm.doc.name}, "name").then(res => {
-								if (res.message.name){
-									frappe.set_route('Form', 'Embassy Report', res.message.name)
-								}else{
-									frappe.new_doc("Embassy Report", {patient_name: frm.doc.patient_name, sales_invoice: frm.doc.name})
-								}
-							})
+						frappe.db.get_value("Country", frm.doc.destination_country, "has_cover").then(res => {
+							if (res.message.has_cover){
+								frm.add_custom_button(__('Create Cover'), function(){
+									frappe.db.get_value("Embassy Report", {sales_invoice: frm.doc.name}, "name").then(res => {
+										if (res.message.name){
+											frappe.set_route('Form', 'Embassy Report', res.message.name)
+										}else{
+											frappe.new_doc("Embassy Report", {
+											
+												sales_invoice: frm.doc.name})
+										}
+									})
+								})
+							}
 						})
+						
 						var patient_name = frm.doc.patient;
 						frm.add_custom_button(__('Add Fingerprint'), function () {
 							let d = new frappe.ui.Dialog({
@@ -1402,7 +1414,20 @@ frappe.ui.form.on('Sales Invoice', {
 									const SuccessFunc = (frm, values, result) => {
 										if (result.ErrorCode == 0) {
 											if (result != null && result.BMPBase64.length > 0) {
-												uploadFP(frm, b64toBlob(result.BMPBase64, "image/bmp"), values)
+												
+												var d = new frappe.ui.Dialog({
+													'fields': [
+														{'fieldname': 'ht', 'fieldtype': 'HTML'},
+												
+													],
+													primary_action: function(){
+														d.hide();
+														uploadFP(frm, b64toBlob(result.BMPBase64, "image/bmp"), values)
+														//show_alert(d.get_values());
+													}
+												});
+												d.fields_dict.ht.$wrapper.html(`<img src="data:image/bmp;base64,${result.BMPBase64}"/>`);
+												d.show();
 											} else {
 												frappe.throw("Fingerprint Capture Fail");
 											}
@@ -1496,7 +1521,14 @@ frappe.ui.form.on('Sales Invoice', {
 							d.show();
 						});
 					}
-					frm.toggle_display(["passport_no", "passport_issue_date", "passport_expiry_date"], true);
+					let embassy_fields = ["passport_no", "passport_issue_date", "passport_expiry_date", "destination_country", "social_status", "passport_place"];
+					frm.toggle_display(embassy_fields, true);
+					frm.toggle_reqd(embassy_fields, true)
+					// for (var field in embassy_fields ){
+					// 	frm.set_df_property(field, "reqd", true);
+					// }
+					// frm.set_df_property("ref_practitioner", "reqd", false);
+					//frm.toggle_reqd("ref_practitioner", false)
 				}
 			}
 
