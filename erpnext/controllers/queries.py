@@ -14,6 +14,39 @@ from frappe.utils import nowdate, unique
 import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_practitioner_name(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+
+	fields = ["name", "practitioner_name", "mobile_phone"]
+
+	fields = get_fields("Healthcare Practitioner", fields)
+
+	searchfields = fields#frappe.get_meta("Healthcare Practitioner").get_search_fields()
+	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
+
+	return frappe.db.sql("""select {fields} from `tabHealthcare Practitioner`
+		where docstatus < 2
+			and ({scond})
+			{fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, practitioner_name), locate(%(_txt)s, practitioner_name), 99999),
+			idx desc,
+			name, practitioner_name
+		limit %(start)s, %(page_len)s""".format(**{
+			"fields": ", ".join(fields),
+			"scond": searchfields,
+			"mcond": get_match_cond(doctype),
+			"fcond": get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
+
 
 # searches for active employees
 @frappe.whitelist()
