@@ -1053,7 +1053,7 @@ class SalesInvoice(SellingController):
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")) or item.discount_amount > 0:
+			if flt(item.base_net_amount, item.precision("base_net_amount")) or item.discount_amount > 0 or item.cash_discount > 0:
 				if item.is_fixed_asset:
 					asset = self.get_asset(item)
 
@@ -1090,7 +1090,6 @@ class SalesInvoice(SellingController):
 						account_currency = get_account_currency(income_account)
 						discount_currency = get_account_currency(item.discount_account)
 						#ibrahim
-						#msgprint(cstr(base_amount))
 						if base_amount > 0:
 							gl_entries.append(
 								self.get_gl_dict({
@@ -1105,12 +1104,13 @@ class SalesInvoice(SellingController):
 								}, account_currency, item=item)
 							)
 						if item.cash_discount > 0:
+							#frappe.msgprint('ibbb')
 							gl_entries.append(
 								self.get_gl_dict({
 									"account": item.discount_account,
 									"against": income_account,
 									"debit": item.cash_discount,
-									"debit_in_account_currency": item.discount_amount,
+									"debit_in_account_currency": item.cash_discount,
 									"cost_center": item.cost_center,
 									"project": item.project or self.project
 								}, account_currency, item=item)
