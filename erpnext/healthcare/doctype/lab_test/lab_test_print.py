@@ -293,14 +293,15 @@ def get_print_body(header, tbody):
 
 def get_print_tbody(test_doc, header, only_finalized=False):
     body = ""
-    chemistry_tests = get_chemistry_tests(test_doc, only_finalized)
-    if len(chemistry_tests) > 0:
-        chemistry_table = format_chemistry_tests(chemistry_tests, header)
-        body += chemistry_table
     hematology_tests = get_hematology_tests(test_doc, only_finalized)
     if len(hematology_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_hematology_tests(hematology_tests, header)
+    chemistry_tests = get_chemistry_tests(test_doc, only_finalized)
+    if len(chemistry_tests) > 0:
+        if len(body) > 0: body += get_break()
+        chemistry_table = format_chemistry_tests(chemistry_tests, header)
+        body += chemistry_table
     routine_tests = get_routine_tests(test_doc, only_finalized)
     if len(routine_tests) > 0:
         if len(body) > 0: body += get_break()
@@ -351,7 +352,7 @@ def format_embassy_tests(tests, header, previous_tests={}):
                 normal_crit = test['template'][0]['criteria_text'] or ''
             normal_range = test['template'][0]['range_text']
         if test['conv_result']:
-            result = format_float_result(test['conv_result'])
+            result = format_float_result(test['conv_result'], test['conventional_round_digits'])
             test_html = f"""
                 <tr >
                 <td class="width-40">{test['lab_test_name']}</td>
@@ -360,7 +361,7 @@ def format_embassy_tests(tests, header, previous_tests={}):
                 <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
                 <td class="f-s width-10">{normal_crit}</td>
                 <td class="f-s width-10">{normal_range}</td>
-                <td class="width-10">{test.get('previous') or ''}</td>
+                <td class="width-15 center">{test.get('previous') or ''}</td>
                 </tr>
             """
             test_html = f"<tr><td ><table>" + test_html + "</table></td></tr>"
@@ -374,21 +375,21 @@ def format_embassy_tests(tests, header, previous_tests={}):
             <td>{header}</td>
         </tr>
        <tr>
-        <td class="b-bottom">
+        <td class="b-bottom fb-1">
             <table>
              <tr>
             <td class="width-40">Test</td>
             <td class="width-10">Results</td>
-            <td class="width-10"></td>
-             <td colspan="2" class="width-20">Normal Range</td>
-             <td class="width-10">Previous Test</td>
+            <td class="width-5"></td>
+             <td colspan="2" class="width-20 center">Normal Range</td>
+             <td class="width-15 center">Previous Test</td>
         </tr>
             </table>
         </td>
        </tr>
            
         </thead>
-        <tbody>
+        <tbody class=" fb-1">
            {tests_html}
         </tbody>
         <tfoot>
@@ -435,7 +436,7 @@ def format_routine_page_tests(tests, header, test_name):
                 test_html = f"""
                     <tr>
                     <td class="width-20">{test['lab_test_name']}</td>
-                    <td class="{'width-15' if test['conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['conv_result'])}</strong></td>
+                    <td class="{'width-15' if test['conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['conv_result'], test['conventional_round_digits'])}</strong></td>
                     <td class="width-10"> {test['conv_uom'] or ''} </td>
                      <td class="width-50"> {test['template'][0]['range_text'] if test['template'] else ''} </td>
                     </tr>
@@ -513,7 +514,7 @@ def format_hematology_tests(tests, header):
     diff= 0
     for test in tests:
         if test['conv_result']:
-            result = format_float_result(test['conv_result'])
+            result = format_float_result(test['conv_result'], test['conventional_round_digits'])
             precentage = ""
             secondary_result = ""
             test_title = ""
@@ -525,11 +526,11 @@ def format_hematology_tests(tests, header):
                 """
                 diff=2
             if test['result_percentage']:
-                secondary_result = format_float_result(test['conv_result'], 3)
+                secondary_result = format_float_result(test['conv_result'], test['conventional_round_digits'])
                 precentage = "%"
                 result = format_float_result(test['result_percentage'], 0)
             elif diff == 2:
-                result = format_float_result(test['conv_result'], 0)
+                result = format_float_result(test['conv_result'], test['conventional_round_digits'])
             test_class = ""
             if test['lab_test_name'] == "Leukocytes":
                 test_class = "border-line"
@@ -674,9 +675,9 @@ def format_chemistry_tests(tests, header=""):
         si = ""
         conv = ""
         if test['si_result'] and test['si_uom']:
-            si =format_float_result(test['si_result'])+ ' ' + test['si_uom']
+            si =str(format_float_result(test['si_result'], test['si_round_digits']))+ ' ' + test['si_uom']
         if test['conv_result'] and test['conv_uom']:
-            conv = format_float_result(test['conv_result']) + ' ' + test['conv_uom']
+            conv = str(format_float_result(test['conv_result'], test['conventional_round_digits'])) + ' ' + test['conv_uom']
         if (test['si_result'] or test['conv_result'] ):
 
             test_html += f"""
@@ -710,7 +711,7 @@ def format_chemistry_tests(tests, header=""):
             <td>{header}</td>
         </tr>
         <tr>
-            <td class="b-bottom">
+            <td class="b-bottom fh-1">
                  <table>
                 <tr >
             <th class="width-50">Laboratory Result</th>
@@ -722,7 +723,7 @@ def format_chemistry_tests(tests, header=""):
         </tr>
            
         </thead>
-        <tbody>
+        <tbody class="fh-1">
            {tests_html}
         </tbody>
     </table>"""
@@ -740,7 +741,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
     return frappe.db.sql("""
         SELECT  
         lt.template, tltt.control_type, tltt.print_all_normal_ranges, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits,  lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
@@ -780,7 +781,7 @@ def get_embassy_tests_items(test_name, only_finalized=False):
     return frappe.db.sql("""
         SELECT  
         lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
@@ -1011,6 +1012,12 @@ def get_print_style():
     }
     .fh-2{
         font-size: 20px;
+    }
+     .fh-1{
+        font-size: 1.05em;
+    }
+    .fb-1{
+        font-size: 1.05em;
     }
     td{
         padding-bottom: 4px;

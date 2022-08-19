@@ -106,7 +106,6 @@
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
    "read_only": 1,
@@ -118,9 +117,10 @@
    "fetch_from": "patient.patient_name",
    "fieldname": "patient_name",
    "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
    "label": "Patient Name",
    "print_hide": 1,
-   "read_only": 1,
    "report_hide": 1
   },
   {
@@ -592,7 +592,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-16 07:02:05.246432",
+ "modified": "2022-08-18 17:32:25.020970",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

@@ -118,7 +118,9 @@ class SalesInvoice(SellingController):
 		results = frappe.db.sql("""
 			SELECT tltt2.lab_test_name  FROM `tabLab Test Group Template` tltgt 
 			INNER JOIN `tabLab Test Template` tltt2 ON tltt2.name=tltgt.lab_test_template AND tltt2.is_billable=1 
-			WHERE tltgt.parent="{template_name}";
+			WHERE tltgt.parent="{template_name}"
+			ORDER BY tltt2.order
+			;
 		""".format(template_name=template.name), as_dict=True)
 		if not results: return False
 		return results
@@ -129,9 +131,10 @@ class SalesInvoice(SellingController):
 		# 	patient_share = float(price) - (float(price) * float(discount) / 100.0) 
 		price = "" if not price else "%.2f" % float(price)
 		prefix = "&emsp;" if not price else ""
+		style = "style='font-weight: bold'" if price else ""
 		html = f"""
 			<tr  class="border">
-				<td colspan="6">
+				<td colspan="6" {style}>
 					{prefix}{test_name}
 				</td>
 				 <td class="center">

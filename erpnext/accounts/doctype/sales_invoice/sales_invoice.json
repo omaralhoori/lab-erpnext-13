@@ -2233,6 +2233,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": " ",
    "fieldname": "destination_country",
    "fieldtype": "Link",
    "hidden": 1,
@@ -2264,7 +2265,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-18 15:23:54.948117",
+ "modified": "2022-08-19 07:22:21.968768",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
