@@ -81,8 +81,8 @@ def get_conditions(filters):
 	if filters.get("patient"): conditions += " and lt.patient = %(patient)s"
 	if filters.get("insurance_party"): conditions += " and si.insurance_party = %(insurance_party)s"
 
-	if filters.get("from_date"): conditions += " and lt.creation >= %(from_date)s"
-	if filters.get("to_date"): conditions += " and lt.creation <= %(to_date)s"
+	if filters.get("from_date"): conditions += " and si.posting_date >= %(from_date)s"
+	if filters.get("to_date"): conditions += " and si.posting_date <= %(to_date)s"
 	if filters.get("finalized"): conditions += " and lt.status IN ('Finalized', 'Partially Finalized') "
 	return conditions
 
@@ -90,16 +90,16 @@ def get_conditions(filters):
 def get_tests(filters, additional_query_columns=[]):
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
-
+	with_header = filters.get("with_header") or ''
 	conditions = get_conditions(filters)
 	invoices = frappe.db.sql("""
 		select lt.name,lt.sales_invoice, lt.creation as visiting_date, si.insurance_party, lt.patient, lt.patient_mobile as mobile,
 		p.dob as birth_date, lt.status,
-		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"))''>Print</button>'), '' )as print_btn
+		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"))''>Print</button>'), '' )as print_btn
 		 {0}
 		from `tabLab Test` as lt
 		INNER JOIN `tabSales Invoice` as si ON si.name=lt.sales_invoice
 		INNER JOIN `tabPatient` as p ON p.name=lt.patient
-		where %s order by lt.creation""".format(additional_query_columns or '') %
+		where %s order by lt.creation""".format(additional_query_columns or '', with_header) %
 		conditions, filters, as_dict=1)
 	return invoices

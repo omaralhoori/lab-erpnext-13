@@ -560,9 +560,18 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Lab Result Report",
+   "link_to": "Lab Test Results Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-08-08 13:06:12.264531",
+ "modified": "2022-08-20 10:58:09.509824",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -614,6 +623,12 @@
    "label": "Dashboard",
    "link_to": "Healthcare",
    "type": "Dashboard"
+  },
+  {
+   "doc_view": "",
+   "label": "Lab Result Report",
+   "link_to": "Lab Test Results Report",
+   "type": "Report"
   }
  ]
 }

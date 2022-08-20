@@ -115,6 +115,7 @@
   },
   {
    "fetch_from": "patient.patient_name",
+   "fetch_if_empty": 1,
    "fieldname": "patient_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -592,7 +593,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-20 07:09:08.910607",
+ "modified": "2022-08-20 11:26:11.700265",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

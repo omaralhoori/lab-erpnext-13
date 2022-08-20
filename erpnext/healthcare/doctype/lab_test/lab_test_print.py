@@ -152,21 +152,29 @@ def user_test_result(lab_test, get_html=True):
     frappe.local.response.type = "pdf"
 
 @frappe.whitelist()
-def print_report_result(lab_test):
+def print_report_result(lab_test, with_header=False):
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
     html = get_print_html_base()
     url = frappe.local.request.host
-    header = get_print_header(test_doc)
-    tbody = get_print_tbody(test_doc, header, True)
+    #url = frappe.local.request.host
+    head = f'<img class="img-header" src="http://{url}/files/josante-logo.png" />' if with_header else None
+    if frappe.local.conf.is_embassy:
+        header = get_print_header_embassy(test_doc, head)
+        tbody = get_print_tbody_embassy(test_doc, header, True)
+    else:
+        header = get_print_header(test_doc, head)
+        tbody = get_print_tbody(test_doc, header, True)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
     footer = get_lab_result_footer(test_doc)
     # if get_html:
     #     return html
-    options = { "--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
+    options = {  "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
    "--footer-html" : footer, "quiet":"", "footer-center": "Page [page]/[topage]"}
+    if not with_header:
+        options['--margin-top'] = '45mm'
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
@@ -896,7 +904,7 @@ def get_xray_report(sales_invoice, return_html = False):
 
         tbody = get_embassy_xray_tbody(reports, header)
         html = html.format(body=tbody,style=get_print_style())
-        options = {"--margin-top" : "40mm", "--margin-left" : "0","--margin-right" : "0",  "quiet":""}
+        options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0",  "quiet":""}
         pdf_content =  pdfkit.from_string( html, False, options)  or ''
         if return_html : return pdf_content
         frappe.local.response.filename = "Test.pdf"
@@ -982,9 +990,17 @@ def get_print_html_base():
     </html>
     """
 
-def get_print_header_embassy(test_doc):
+def get_print_header_embassy(test_doc, head=None):
+    if head:
+        head= f"""
+        <tr>
+            <td colspan="4" style="text-align: center">{head}</td>
+        </tr>
+        """
+    else: head = ""
     return f"""
     <table class="b-bottom header f-s">
+        {head}
         <tr >
             <td >
                  Patient Name

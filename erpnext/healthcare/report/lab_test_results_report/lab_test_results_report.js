@@ -1,14 +1,14 @@
 // Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 /* eslint-disable */
-
+// frappe.datetime.add_days(frappe.datetime.get_today(), -1),
 frappe.query_reports["Lab Test Results Report"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_days(frappe.datetime.get_today(), -1),
+			"default":  frappe.datetime.get_today(),
 			"width": "80"
 		},
 		{
@@ -49,13 +49,19 @@ frappe.query_reports["Lab Test Results Report"] = {
 			"fieldtype": "Check",
 			"default": 0
 		},
+		{
+			"fieldname":"with_header",
+			"label": __("Print with Header"),
+			"fieldtype": "Check",
+			"default": 1
+		},
 	]
 }
 
 erpnext.utils.add_dimensions('Lab Test Results Report', 7);
 
-const print_result = (msg) =>
+const print_result = (msg, with_header) =>
 {
-	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_result?lab_test=${msg}`;
+	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_result?lab_test=${msg}&with_header=${with_header}`;
 	window.open(url, '_blank');
 }
