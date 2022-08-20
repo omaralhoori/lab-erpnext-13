@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from functools import partial
 
 import frappe
 from frappe import _, log
@@ -131,7 +132,21 @@ class LabTest(Document):
 			for i, item in enumerate(sensitivity):
 				item.idx = i + 1
 			self.sensitivity_test_items = sensitivity
-
+		self.set_test_status()
+	def set_test_status(self):
+		status = self.status
+		all_finalized, all_released = True, True
+		partially_finalized, partially_released = False, False
+		for item in self.normal_test_items:
+			if item.status!='Finalized': all_finalized=False
+			if item.status!='Released': all_released= False
+			if item.status=='Finalized': partially_finalized=True
+			if item.status=='Released': partially_released= True
+		if all_finalized: status = 'Finalized'
+		elif partially_finalized: status='Partially Finalized'
+		elif all_released: status='Released'
+		elif partially_released: status='Partially Released'
+		self.db_set('status', status)
 	def after_insert(self):
 		if self.prescription:
 			frappe.db.set_value('Lab Prescription', self.prescription, 'lab_test_created', 1)
@@ -900,7 +915,9 @@ def apply_test_button_action(action, tests, test_name, sample):
 	""".format(action=action, tests=",".join(tests), where_stmt=where_stmt)
 	frappe.db.sql(query)
 	frappe.db.commit()
-
+	lab_test = frappe.get_doc('Lab Test', test_name)
+	if lab_test:
+		lab_test.set_test_status()
 	if action == "Received":
 		infinty_tests = frappe.db.sql("""
 			SELECT host_code FROM `tabNormal Test Result`

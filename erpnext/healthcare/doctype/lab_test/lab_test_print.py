@@ -151,6 +151,26 @@ def user_test_result(lab_test, get_html=True):
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
+@frappe.whitelist()
+def print_report_result(lab_test):
+    test_doc = frappe.get_doc("Lab Test", lab_test)
+    if not test_doc:
+        frappe.throw("Lab Test not found")
+    html = get_print_html_base()
+    url = frappe.local.request.host
+    header = get_print_header(test_doc)
+    tbody = get_print_tbody(test_doc, header, True)
+    body = get_print_body(header, tbody)
+    html = html.format(body=body,style=get_print_style())
+    footer = get_lab_result_footer(test_doc)
+    # if get_html:
+    #     return html
+    options = { "--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
+   "--footer-html" : footer, "quiet":"", "footer-center": "Page [page]/[topage]"}
+    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
+    frappe.local.response.type = "pdf"
+
 
 @frappe.whitelist()
 def lab_test_result(lab_test):
@@ -170,7 +190,7 @@ def lab_test_result(lab_test):
     html = html.format(body=body,style=get_print_style())
     footer = get_lab_result_footer(test_doc)
     options = {"--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
-   "--footer-html" : footer,
+   "--footer-html" : footer, "footer-center": "Page [page]/[topage]",
     "quiet":""}
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
@@ -549,7 +569,7 @@ def format_hematology_tests(tests, header):
                     <td class="f-s width-10 fb">{result} </td>
                     <td class="width-5 f-s ">{precentage}</td>
                     <td class="width-10 f-s fb">{secondary_result}</td>
-                    <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
+                    <td class="width-10 f-s ">{test['conv_uom'] or test['si_uom'] or ''}</td>
                     <td class="f-s width-40">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{test['template'][0]['range_text'] if test['template'] else ''}</td>
 
                     </tr>
