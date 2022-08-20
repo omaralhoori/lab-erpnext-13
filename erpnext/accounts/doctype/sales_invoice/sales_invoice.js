@@ -880,13 +880,64 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.refresh_fields();
 	},
+	//ibrahim & omar
+	apply_zero_discount: function(frm){
+		var selected_items = frm.get_selected()["items"]
+		selected_items.forEach(item => {
+			frappe.model.set_value("Sales Invoice Item", item, "cash_discount", 0)
+		})
+	},
+	//ibrahim & omar
 	apply_item_discount: function(frm){
+		var tot_dis_dis = 0.0
+		var tot_dis_amt = 0.0
 		var selected_items = frm.get_selected()["items"]
 		if (selected_items){
-			var discount = frm.doc.additional_item_discount || 0
 			selected_items.forEach(item => {
-				frappe.model.set_value("Sales Invoice Item", item, "discount_percentage", discount)
+				var patient_share_amt = frappe.model.get_value("Sales Invoice Item", item,"patient_share")
+				tot_dis_amt += flt(patient_share_amt)
 			})
+			var discount = frm.doc.additional_item_discount || 0.0
+			if (flt(tot_dis_amt) <= 0.0 || flt(discount) <= 0.0)
+				return;
+			
+			var dis_per = flt(discount)/ flt(tot_dis_amt);
+			dis_per = parseFloat(dis_per).toFixed(2)
+			if (flt(dis_per) > 1)
+				return;
+			//console.log(flt(dis_per))
+			
+			selected_items.forEach(item => {
+				var patient_share_amt = frappe.model.get_value("Sales Invoice Item", item,"patient_share")
+				var old_disc = frappe.model.get_value("Sales Invoice Item", item,"cash_discount")
+				var new_disc = flt( ( flt(patient_share_amt) * flt(dis_per)), precision("total_patient"));
+				if ((flt(new_disc) + flt(old_disc)) <= flt(patient_share_amt) ) {
+					tot_dis_dis += flt(new_disc)
+					frappe.model.set_value("Sales Invoice Item", item, "cash_discount", parseFloat((new_disc + old_disc)).toFixed(3))
+				}
+			})
+			//console.log(tot_dis_dis)
+			if (flt(tot_dis_dis) != flt(discount)){
+				var dif = flt(discount) - flt(tot_dis_dis);
+				dif = parseFloat(dif).toFixed(2)
+				//console.log(dif)
+				selected_items.forEach(item => {
+					var patient_share_amt = frappe.model.get_value("Sales Invoice Item", item,"patient_share")
+					var new_disc = frappe.model.get_value("Sales Invoice Item", item,"cash_discount")
+					//console.log(patient_share_amt)
+					//console.log(new_disc)
+
+					new_disc = flt(new_disc) + flt(dif) ;
+					//console.log(new_disc)
+
+					if ((flt(new_disc) <= flt(patient_share_amt)) && flt(dif) != 0.0) {
+						//console.log('---------')
+						//console.log(new_disc)
+						frappe.model.set_value("Sales Invoice Item", item, "cash_discount", parseFloat(new_disc).toFixed(3))
+						dif = 0
+					}
+				})
+			}
 		}
 	},
 

@@ -59,6 +59,7 @@
   "currency",
   "additional_item_discount",
   "apply_item_discount",
+  "apply_zero_discount",
   "sec_warehouse",
   "set_warehouse",
   "column_break_55",
@@ -252,6 +253,7 @@
    "oldfieldtype": "Select",
    "options": "JO\nACC-SINV-RET-.YYYY.-",
    "print_hide": 1,
+   "read_only": 1,
    "reqd": 1,
    "set_only_once": 1
   },
@@ -2191,7 +2193,7 @@
   {
    "fieldname": "additional_item_discount",
    "fieldtype": "Float",
-   "label": "Additional Item Discount",
+   "label": "Cash Discount (Select Items)",
    "precision": "2"
   },
   {
@@ -2233,7 +2235,6 @@
   },
   {
    "allow_on_submit": 1,
-   "default": " ",
    "fieldname": "destination_country",
    "fieldtype": "Link",
    "hidden": 1,
@@ -2253,6 +2254,11 @@
    "in_standard_filter": 1,
    "label": "Referred By",
    "options": "Employment Offices"
+  },
+  {
+   "fieldname": "apply_zero_discount",
+   "fieldtype": "Button",
+   "label": "Apply Zero Discount"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2265,7 +2271,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-19 07:22:21.968768",
+ "modified": "2022-08-20 01:03:37.456252",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

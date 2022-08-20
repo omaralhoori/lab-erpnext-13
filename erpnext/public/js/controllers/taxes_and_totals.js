@@ -155,9 +155,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 						}
 					}
 				} else {
-					console.log('1111')
+					//console.log('1111')
 					item.amount = flt(item.rate * item.qty, precision("amount", item));
-					console.log(item.cash_discount);
+					//console.log(item.cash_discount);
 					item.patient_share = flt(item.patient_rate * item.qty, precision("patient_share", item)) - flt(item.cash_discount , precision("cash_discount", item));
 					item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
 					item.base_cash_discount = flt(item.cash_discount * me.frm.doc.conversion_rate, precision("base_cash_discount", item));
