@@ -299,6 +299,7 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		# this sequence because outstanding may get -ve
+		#frappe.msgprint('1111')
 		self.make_gl_entries()
 
 		if self.update_stock == 1:
@@ -542,6 +543,14 @@ class SalesInvoice(SellingController):
 				(not self.project and not data.sales_invoice) or \
 				(not sales_invoice and data.sales_invoice == self.name):
 				data.sales_invoice = sales_invoice
+	#ibrahim 2022
+	def on_update_after_submit(self):
+		#frappe.msgprint('bbbbbbbb')
+		#frappe.msgprint(self.docstatus)
+		if self.docstatus == 1:
+			#frappe.msgprint('aaaaaaaaaaaaa')
+			#self.docstatus == 1
+			self.make_gl_entries(inv_modify=True)
 
 	def on_update(self):
 		self.set_paid_amount()
@@ -899,7 +908,8 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, gl_entries=None, from_repost=False):
+	#ibrahim 2022
+	def make_gl_entries(self, gl_entries=None, from_repost=False,inv_modify=False):
 		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
@@ -910,6 +920,10 @@ class SalesInvoice(SellingController):
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
+			#ibrahim
+			if inv_modify:
+				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+
 			if self.docstatus == 1:
 				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 			elif self.docstatus == 2:
@@ -1094,8 +1108,8 @@ class SalesInvoice(SellingController):
 						discount_currency = get_account_currency(item.discount_account)
 						#ibrahim
 						if base_amount > 0:
-							msgprint('ibbb')
-							msgprint(cstr(base_amount))
+							#msgprint('ibbb')
+							#msgprint(cstr(base_amount))
 							gl_entries.append(
 								self.get_gl_dict({
 									"account": income_account,
@@ -1109,8 +1123,8 @@ class SalesInvoice(SellingController):
 								}, account_currency, item=item)
 							)
 						if item.cash_discount > 0:
-							frappe.msgprint('ibbb3')
-							msgprint(cstr(item.cash_discount))
+							#frappe.msgprint('ibbb3')
+							#msgprint(cstr(item.cash_discount))
 							gl_entries.append(
 								self.get_gl_dict({
 									"account": item.discount_account,
