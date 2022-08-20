@@ -6,6 +6,9 @@ import frappe
 import requests
 import re, json
 
+import time
+import sqlite3
+
 def start_socket():
     print( "------------------------------------------------------------------")
     try:
@@ -160,8 +163,21 @@ def getCheckSumValue(frame):
     
     return "0" + upper if len(upper) == 1   else upper
 
-import time
+
 def send_infinty_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_code):
+    try:
+        tests_joined = "\\".join(list(map(map_test_code, tests)))
+        msg = tcode("ENQ") + get_msg(file_no, dob, gender, sample_id, sample_date, tests_joined) + tcode("EOT")
+        print("receiving msg")
+        print(msg)
+        db_insert_msg(sample_id, msg.decode(), "infinity")
+        return True
+    except:
+        frappe.msgprint("Unable to receive order")
+        return False
+
+
+def send_infinty_msg_order_old(file_no, dob, gender, sample_id, sample_date, tests, host_code):
     # res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
     # if not res:
     #     frappe.throw("Host Machine not defined")
@@ -363,9 +379,73 @@ def log_result(log,msg):
         f.write(msg + "\n")
         f.close()
 
+#------------------------Read order DB--------------
+def connect_db():
+    conn = sqlite3.connect("orders.db")
+    return conn
+
+def read_orders_from_db(machine):
+    conn= connect_db()
+    orders = conn.execute(f"""
+        SELECT * FROM orders WHERE machine='{machine}' AND is_sent=0;
+    """)
+    result = [order for order in orders]
+    conn.close()
+    return result
+
+def db_insert_msg(sample_id, msg, machine):
+    conn = connect_db()
+    conn.execute(f"""
+        INSERT INTO orders(id, msg, machine)
+        VALUES("{sample_id}", "{msg}", "{machine}")
+    """)
+    conn.commit()
+    conn.close()
+
+def delete_or_mark_order(order_id, machine):
+    conn = connect_db()
+    conn.execute(f"""
+        UPDATE orders SET is_sent=1 WHERE id='{order_id}' AND machine='{machine}';
+    """)
+    conn.commit()
+    conn.close()
 
 #------------------------infinty orders-------------------
 def start_infinty_order_listener(ip_address, port, local_ip, local_port):
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                print(f"Connecting client to {ip_address}:{port}---------------------------")
+                log_result("infinty_order",f"Connecting client to {ip_address}:{port}---------------------------")
+                try:
+                    s.connect((ip_address, port))
+                    print(f"Connected")
+                    while True:
+                        orders = read_orders_from_db("infinity")
+                        print(orders)
+                        for order in orders:
+                            msg = order[1]
+                            if msg:
+                                log_result("infinty_order",msg)
+                                s.sendall(msg.encode())
+                                result = s.recv(1024)
+                                print("recvvvv--------")
+                                print(result)
+                                if result.endswith(tcode("ACK")):
+                                    print("DELETE ------------------", order[0])
+                                    delete_or_mark_order(order[0], 'infinity')
+                                    time.sleep(2)
+                        time.sleep(60)
+
+                except socket.error:
+                    print('Unable to connect')
+                    log_result("infinty_order",'Unable to connect')
+                    time.sleep(10)
+                    pass
+        except:
+            continue
+
+def start_infinty_order_listener_old(ip_address, port, local_ip, local_port):
     # res = frappe.db.get_value("Host Machine", {"machine_code": host_code}, ["ip_address", "port_no"])
     # if not res:
     #     frappe.throw("Host Machine not defined")
