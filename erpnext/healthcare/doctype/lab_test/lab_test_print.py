@@ -151,6 +151,12 @@ def user_test_result(lab_test, get_html=True):
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
+
+@frappe.whitelist()
+def print_report_xray(sales_invoice, with_header=False):
+    get_xray_report(sales_invoice, False, with_header)
+
+
 @frappe.whitelist()
 def print_report_result(lab_test, with_header=False):
     test_doc = frappe.get_doc("Lab Test", lab_test)
@@ -261,7 +267,7 @@ def get_print_header(test_doc, head=None):
     if head:
         head= f"""
         <tr>
-            <td colspan="4" style="text-align: center">{head}</td>
+            <td colspan="4" style="text-align: center">{head}</td> 
         </tr>
         """
     else: head = ""
@@ -892,19 +898,24 @@ def get_embassy_cover(sales_invoice, report_name="ksa_report", return_html=False
 
 
 @frappe.whitelist()
-def get_xray_report(sales_invoice, return_html = False):
+def get_xray_report(sales_invoice, return_html = False, with_header=False):
     try:
         xray_test = frappe.get_doc("Radiology Test",{"sales_invoice": sales_invoice})
         if not xray_test: frappe.throw("No Radiology Test created with this invoice.")
         if xray_test.record_status != "Finalized": frappe.throw("Radiology test not finalized.")
         if len(xray_test.test_results) == 0: frappe.throw("Radiology test has no test result.")
         reports = { result.test_name: result.test_result for result in xray_test.test_results }
-        header = format_xray_header(xray_test)
+        url = frappe.local.request.host
+        header = format_xray_header(xray_test, with_header, url)
         html = get_print_html_base()
-
-        tbody = get_embassy_xray_tbody(reports, header)
+        if frappe.local.conf.is_embassy:
+            tbody = get_embassy_xray_tbody(reports, header)
+        else:
+            tbody = get_normal_xray_tbody(reports, header)
         html = html.format(body=tbody,style=get_print_style())
-        options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0",  "quiet":""}
+        options = { "--margin-left" : "0","--margin-right" : "0",  "quiet":""}
+        if not with_header:
+            options["--margin-top" ] ="50mm"
         pdf_content =  pdfkit.from_string( html, False, options)  or ''
         if return_html : return pdf_content
         frappe.local.response.filename = "Test.pdf"
@@ -913,12 +924,20 @@ def get_xray_report(sales_invoice, return_html = False):
     except:
         return ""
 
-def format_xray_header(xray_test):
+def format_xray_header(xray_test, with_header=False, url=""):
     visit_date = frappe.db.get_value("Sales Invoice", xray_test.sales_invoice, "creation")
+    header= ""
+    if with_header:
+        header = f"""
+            <tr>
+            <td colspan="6" style="text-align: center"><img class="img-header" src="http://{url}/files/josante-logo.png" /></td>
+        </tr>
+        """
     return f"""
     <table class="b-bottom header f-s">
+        {header}
         <tr class="center fb"><td colspan="6">Radiology Report</td> </tr>
-        <tr >
+        <tr class="fb">
             <td >
                  Patient Name
             </td>
@@ -948,6 +967,31 @@ def format_xray_header(xray_test):
         <tr>
     </table>
     """
+
+
+def get_normal_xray_tbody(reports, header):
+    html = ""
+    for report in reports:
+        if len(html) > 0:
+            body += get_break()
+        body = f"""
+        <tr class="center fb"><td> {report} </td></tr>
+            <tr><td>
+                {reports[report]}
+            </td></tr>
+        """
+        html += f"""
+            <table>
+            <thead>
+                <tr><td>{header}</td></tr>
+            </thead>
+            <tbody class="fh-2">
+                {body}
+            </tbody>
+            </table>
+
+        """
+    return html
 
 
 def get_embassy_xray_tbody(reports, header):

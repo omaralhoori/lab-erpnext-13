@@ -65,3 +65,9 @@ const print_result = (msg, with_header) =>
 	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_result?lab_test=${msg}&with_header=${with_header}`;
 	window.open(url, '_blank');
 }
+
+const print_xray = (msg, with_header) =>
+{
+	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_xray?sales_invoice=${msg}&with_header=${with_header}`;
+	window.open(url, '_blank');
+}

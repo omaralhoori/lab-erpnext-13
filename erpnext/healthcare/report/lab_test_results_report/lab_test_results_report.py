@@ -22,8 +22,14 @@ def get_columns( additional_table_columns=[]):
 			'width': 120
 		},
 		{
-			'label': _("Status"),
-			'fieldname': 'status',
+			'label': _("Lab Status"),
+			'fieldname': 'lab_status',
+			'fieldtype': 'Data',
+			'width': 120
+		},
+		{
+			'label': _("Radiology Status"),
+			'fieldname': 'rad_status',
 			'fieldtype': 'Data',
 			'width': 120
 		},
@@ -64,6 +70,12 @@ def get_columns( additional_table_columns=[]):
 			'fieldname': "print_btn",
 			'fieldtype': 'html',
 			'width': 120
+		},
+		{
+			'label': "Print Xray",
+			'fieldname': "xray_btn",
+			'fieldtype': 'html',
+			'width': 120
 		}
 	]
 
@@ -93,13 +105,15 @@ def get_tests(filters, additional_query_columns=[]):
 	with_header = filters.get("with_header") or ''
 	conditions = get_conditions(filters)
 	invoices = frappe.db.sql("""
-		select lt.name,lt.sales_invoice, lt.creation as visiting_date, si.insurance_party, lt.patient, lt.patient_mobile as mobile,
-		p.dob as birth_date, lt.status,
-		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"))''>Print</button>'), '' )as print_btn
+		select si.name as sales_invoice, si.creation as visiting_date, si.insurance_party, si.patient, si.mobile_no as mobile,
+		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
+		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Test</button>'), '' )as print_btn,
+		IF(rt.record_status IN ('Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', si.name ,''' onClick=''print_xray(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Xray</button>'), '' ) as xray_btn
 		 {0}
-		from `tabLab Test` as lt
-		INNER JOIN `tabSales Invoice` as si ON si.name=lt.sales_invoice
-		INNER JOIN `tabPatient` as p ON p.name=lt.patient
-		where %s order by lt.creation""".format(additional_query_columns or '', with_header) %
+		from`tabSales Invoice` as si 
+		LEFT JOIN  `tabLab Test` as lt  ON si.name=lt.sales_invoice
+		INNER JOIN `tabPatient` as p ON p.name=si.patient
+		LEFT JOIN `tabRadiology Test` as rt ON rt.sales_invoice=si.name
+		where %s order by si.creation""".format(additional_query_columns or '', with_header) %
 		conditions, filters, as_dict=1)
 	return invoices
