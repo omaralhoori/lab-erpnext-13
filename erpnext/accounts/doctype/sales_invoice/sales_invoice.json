@@ -728,6 +728,7 @@
   },
   {
    "allow_bulk_edit": 1,
+   "allow_on_submit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -820,6 +821,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "hide_days": 1,
@@ -828,6 +830,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -838,6 +841,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -857,6 +861,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -866,6 +871,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1131,6 +1137,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1169,6 +1176,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "description": "In Words will be visible once you save the Sales Invoice.",
    "fieldname": "base_in_words",
    "fieldtype": "Small Text",
@@ -1182,6 +1190,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "bold": 1,
    "fieldname": "grand_total",
    "fieldtype": "Currency",
@@ -1221,6 +1230,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "in_words",
    "fieldtype": "Small Text",
    "hide_days": 1,
@@ -1245,6 +1255,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -2157,12 +2168,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_patient",
    "fieldtype": "Float",
    "label": "Total Patient",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_total_patient",
    "fieldtype": "Currency",
    "label": "Total Patient (Company Currency)",
@@ -2191,6 +2204,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "additional_item_discount",
    "fieldtype": "Float",
    "label": "Cash Discount (Select Items)",
@@ -2202,12 +2216,14 @@
    "label": "Apply Item Discount"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_cash_discount",
    "fieldtype": "Float",
    "label": "Total Cash Discount",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_total_cash_discount",
    "fieldtype": "Data",
    "hidden": 1,
@@ -2271,7 +2287,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-20 01:03:37.456252",
+ "modified": "2022-08-20 23:06:12.242531",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
