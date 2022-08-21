@@ -158,8 +158,7 @@ frappe.listview_settings['Radiology Test'] = {
 	}
 }
 		})
-
-		if(frappe.user.has_role('Xray Technician')){
+		if(frappe.user.has_role('Xray Approver')){
 			listview.page.add_action_item("Finalize",  () => {
 				var selected = listview.get_checked_items().map(item => `"${item.name}"`)
 				frappe.call({
@@ -185,7 +184,21 @@ frappe.listview_settings['Radiology Test'] = {
 					}
 				})
 			})
-
+		}
+		if(frappe.user.has_role('Xray Technician')){
+			
+			listview.page.add_action_item("Release",  () => {
+				var selected = listview.get_checked_items().map(item => `"${item.name}"`)
+				frappe.call({
+					method: "erpnext.healthcare.doctype.radiology_test.radiology_test.release_selected",
+					args: {
+						tests: selected
+					}
+					,callback: () => {
+						listview.refresh();
+					}
+				})
+			})
 
 			listview.page.add_action_item("Unrelease",  () => {
 				var selected = listview.get_checked_items().map(item => `"${item.name}"`)
@@ -198,6 +211,22 @@ frappe.listview_settings['Radiology Test'] = {
 						listview.refresh();
 					}
 				})
+			})
+
+			listview.page.add_action_item("Print All",  () => {
+				var selected = listview.get_checked_items().map(item => `${item.sales_invoice}`)
+				var url = `/api/method/erpnext.healthcare.doctype.radiology_test.radiology_test.print_selected?invoices=${JSON.stringify(selected)}`
+				window.open(url, "_blank")
+				// frappe.call({
+				// 	method: "erpnext.healthcare.doctype.radiology_test.radiology_test.print_selected",
+				// 	args: {
+				// 		invoices: selected
+				// 	}
+				// 	,callback: (res) => {
+				// 		console.log(res);
+				// 		//listview.refresh();
+				// 	}
+				// })
 			})
 		}
 		

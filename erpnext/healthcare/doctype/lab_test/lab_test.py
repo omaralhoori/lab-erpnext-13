@@ -133,6 +133,16 @@ class LabTest(Document):
 				item.idx = i + 1
 			self.sensitivity_test_items = sensitivity
 		self.set_test_status()
+		old_doc = self.get_doc_before_save()
+		if old_doc:
+			added_items, removed_items = self.get_created_or_deleted_items(old_doc.template, self.template)
+			add_test_from_template(self, added_items)
+	def get_created_or_deleted_items(self, old_items, new_items):
+		old_items_code, new_items_code = [item.template for item in old_items], [item.template for item in new_items]
+		added_items = [x for x in new_items if x.template not in old_items_code]
+		removed_items =  [x for x in old_items if x.template not in new_items_code]
+		return added_items, removed_items
+
 	def set_test_status(self):
 		status = self.status
 		all_finalized, all_released = True, True
@@ -215,6 +225,18 @@ def create_test_from_template(lab_test):
 		sample_created = True
 		lab_test = load_result_format(lab_test, template, None, None)
 
+
+
+def add_test_from_template(lab_test,  added_items):
+	templates = added_items
+	if lab_test.sample:
+		frappe.db.set_value("Sample Collection", lab_test.sample, {"docstatus": 0})
+	for template_name in templates:
+		template = frappe.get_doc('Lab Test Template', template_name.template)
+		patient = frappe.get_doc('Patient', lab_test.patient)
+		lab_test = create_sample_collection(lab_test, template, patient, lab_test.sales_invoice, sample_created=True)
+		lab_test = load_result_format(lab_test, template, None, None)
+
 @frappe.whitelist()
 def update_status(status, name):
 	if name and status:
@@ -238,6 +260,20 @@ def create_multiple(doctype, docname):
 		frappe.msgprint(_('Lab Test(s) {0} created successfully').format(lab_test_created), indicator='green')
 	else:
 		frappe.msgprint(_('No Lab Tests created'))
+
+@frappe.whitelist()
+def create_or_delete_items(sales_invoice, removed_item, added_items):
+	# if lab not created create lab test
+	lab_test = frappe.db.exists("Lab Test", {"sales_invoice": sales_invoice.name}, "name")
+	if not lab_test:
+		create_lab_test_from_invoice(sales_invoice.name)
+		return
+	# else delete or add new items
+	add_new_items_lab_test(lab_test, added_items, sales_invoice)
+
+def add_new_items_lab_test(lab_test, new_items, invoice):
+	add_new_items_lab_test_joined(invoice, new_items)
+
 
 def create_lab_test_from_encounter(encounter):
 	lab_test_created = False
@@ -316,6 +352,31 @@ def create_lab_test_joined(sales_invoice):
 	return lab_tests_created
 
 
+
+def add_new_items_lab_test_joined(invoice, new_items):
+	lab_test = None
+	rad_test = None
+	if invoice and invoice.patient:
+		patient = frappe.get_doc('Patient', invoice.patient)
+		for item in new_items:
+			print(item.item_code)
+			template = get_lab_test_template(item.item_code)
+			if template:
+				if template.lab_test_group == "Radiology Services":
+					rad_test = add_or_create_rad_test_doc(patient, template, invoice)
+						
+				elif template.lab_test_group == "Lab Test Packages" and template.has_radiology():
+					rad_test = add_or_create_rad_test_doc(patient, template, invoice)
+					lab_test = add_or_create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, invoice.name)
+						
+				else:
+					lab_test = add_or_create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, invoice.name)
+		if lab_test:
+			lab_test.sales_invoice = invoice.name
+			lab_test.save(ignore_permissions = True)
+		if rad_test:
+			rad_test.save(ignore_permissions = True)
+
 def create_lab_test_separated(sales_invoice):
 	lab_tests_created = False
 	invoice = frappe.get_doc('Sales Invoice', sales_invoice)
@@ -362,6 +423,15 @@ def create_rad_test_doc(patient, template, invoice):
 	rad_test.physician = invoice.ref_practitioner
 	return rad_test
 
+
+def add_or_create_rad_test_doc(patient, template, invoice):
+	rad_test = frappe.db.get_value("Radiology Test", {"sales_invoice": invoice.name}, ["name"])
+	if not rad_test: return create_rad_test_doc(patient, template, invoice)
+	rad_test = frappe.get_doc("Radiology Test", rad_test)
+	template_row = rad_test.append("template")
+	template_row.template = template.name
+	return rad_test
+
 def create_lab_test_doc(invoiced, practitioner, patient, template, company):
 	lab_test = frappe.new_doc('Lab Test')
 	lab_test.invoiced = invoiced
@@ -379,6 +449,15 @@ def create_lab_test_doc(invoiced, practitioner, patient, template, company):
 	lab_test.lab_test_group = template.lab_test_group
 	lab_test.result_date = getdate()
 	lab_test.company = company
+	return lab_test
+
+
+def add_or_create_lab_test_doc(invoiced, practitioner, patient, template, company, sales_invoice):
+	lab_test = frappe.db.get_value('Lab Test', {"sales_invoice": sales_invoice}, ['name'])
+	if not lab_test: return create_lab_test_doc(invoiced, practitioner, patient, template, company)
+	lab_test = frappe.get_doc('Lab Test', {"sales_invoice": sales_invoice})
+	template_row = lab_test.append("template")
+	template_row.template = template.name
 	return lab_test
 
 def create_normals(template, lab_test, group_template=None):

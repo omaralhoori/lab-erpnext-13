@@ -547,10 +547,19 @@ class SalesInvoice(SellingController):
 	def on_update_after_submit(self):
 		#frappe.msgprint('bbbbbbbb')
 		#frappe.msgprint(self.docstatus)
+		old_invoice = self.get_doc_before_save()
+		added_items, removed_items = self.get_created_or_deleted_items(old_invoice.items, self.items)
+		manage_invoice_submit_cancel(self, "on_update_after_submit", removed_items, added_items)
 		if self.docstatus == 1:
 			#frappe.msgprint('aaaaaaaaaaaaa')
 			#self.docstatus == 1
 			self.make_gl_entries(inv_modify=True)
+
+	def get_created_or_deleted_items(self, old_items, new_items):
+		old_items_code, new_items_code = [item.item_code for item in old_items], [item.item_code for item in new_items]
+		added_items = [x for x in new_items if x.item_code not in old_items_code]
+		removed_items =  [x for x in old_items if x.item_code not in new_items_code]
+		return added_items, removed_items
 
 	def on_update(self):
 		self.set_paid_amount()

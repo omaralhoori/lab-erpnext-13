@@ -14,7 +14,7 @@ from frappe.utils.formatters import format_value
 
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
-from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
+from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple, create_or_delete_items
 
 
 @frappe.whitelist()
@@ -415,7 +415,7 @@ def get_practitioner_charge(practitioner, is_inpatient):
 	return False
 
 
-def manage_invoice_submit_cancel(doc, method):
+def manage_invoice_submit_cancel(doc, method, removed_item=[], added_items=[]):
 	if doc.items:
 		for item in doc.items:
 			if item.get('reference_dt') and item.get('reference_dn'):
@@ -424,7 +424,8 @@ def manage_invoice_submit_cancel(doc, method):
 
 	if method=='on_submit' and frappe.db.get_single_value('Healthcare Settings', 'create_lab_test_on_si_submit'):
 		create_multiple('Sales Invoice', doc.name)
-
+	elif method=='on_update_after_submit' and frappe.db.get_single_value('Healthcare Settings', 'create_lab_test_on_si_submit'):
+		create_or_delete_items(doc, removed_item, added_items)
 
 def set_invoiced(item, method, ref_invoice=None):
 	invoiced = False

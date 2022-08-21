@@ -156,6 +156,27 @@ def user_test_result(lab_test, get_html=True):
 def print_report_xray(sales_invoice, with_header=False):
     get_xray_report(sales_invoice, False, with_header)
 
+def print_all_xray_report(invoices):
+    writer = None
+    expectedValue = 0
+    for idx, sales_invoice in enumerate(invoices):
+        print("0000000000000000000000000000000000000000")
+        print(idx, sales_invoice)
+        xray = get_xray_report(sales_invoice, return_html=True)
+        if xray == "": 
+            expectedValue +=1
+            continue
+        if idx == expectedValue:
+            writer = get_pdf_writer(xray)
+        else:
+            reader = PdfFileReader(io.BytesIO(xray))
+            writer.appendPagesFromReader(reader)
+    if not writer: return "Tests couldn't printed"
+    output = get_file_data_from_writer(writer)
+
+    frappe.local.response.filename = "Test Result"
+    frappe.local.response.filecontent = output #get_pdf(html)
+    frappe.local.response.type = "pdf"
 
 @frappe.whitelist()
 def print_report_result(lab_test, with_header=False):
@@ -900,7 +921,11 @@ def get_embassy_cover(sales_invoice, report_name="ksa_report", return_html=False
 @frappe.whitelist()
 def get_xray_report(sales_invoice, return_html = False, with_header=False):
     try:
+        print(sales_invoice)
+        xray_name = frappe.db.get_value("Radiology Test", {"sales_invoice": sales_invoice}, ["name"])
+        print(xray_name)
         xray_test = frappe.get_doc("Radiology Test",{"sales_invoice": sales_invoice})
+        print(xray_test)
         if not xray_test: frappe.throw("No Radiology Test created with this invoice.")
         if xray_test.record_status != "Finalized": frappe.throw("Radiology test not finalized.")
         if len(xray_test.test_results) == 0: frappe.throw("Radiology test has no test result.")

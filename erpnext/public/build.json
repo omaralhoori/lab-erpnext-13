@@ -4,7 +4,8 @@
 		"public/less/hub.less",
 		"public/scss/call_popup.scss",
 		"public/scss/point-of-sale.scss",
-		"public/scss/hierarchy_chart.scss"
+		"public/scss/hierarchy_chart.scss",
+		"public/css/custom_style.css"
 	],
 	"css/marketplace.css": [
 		"public/less/hub.less"

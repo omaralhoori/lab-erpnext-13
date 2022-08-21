@@ -8,8 +8,7 @@ frappe.ui.form.on('Radiology Test', {
 		}else{
 			frm.set_df_property("test_results","read_only",0);
 		}
-		
-		if(frappe.user.has_role('Xray Technician')){
+		if(frappe.user.has_role('Xray Approver')){
 			frm.add_custom_button("Finalize",  () => {
 				frappe.call({
 					method: "erpnext.healthcare.doctype.radiology_test.radiology_test.finalize_selected",
@@ -33,6 +32,9 @@ frappe.ui.form.on('Radiology Test', {
 					}
 				})
 			})
+		}
+		if(frappe.user.has_role('Xray Technician')){
+			
 			frm.add_custom_button("Realese",  () => {
 				frappe.call({
 					method: "erpnext.healthcare.doctype.radiology_test.radiology_test.release_selected",

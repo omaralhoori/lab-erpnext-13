@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from erpnext.healthcare.doctype.lab_test.lab_test_print import print_all_xray_report
 import frappe
 from frappe.model.document import Document
 
@@ -97,3 +98,8 @@ def unrelease_selected(tests):
 	UPDATE `tabRadiology Test` SET record_status="Draft"
 	WHERE name in ({tests}) AND record_status IN ('Released')
 	""".format(tests=",".join(tests)))
+
+@frappe.whitelist()
+def print_selected(invoices):
+	invoices = json.loads(invoices)
+	print_all_xray_report(invoices)
