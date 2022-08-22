@@ -1189,6 +1189,19 @@ class SalesInvoice(SellingController):
 									}, account_currency, item=item)
 								)
 
+							#if item.discount_amount > 0 and base_amount == item.patient_share:
+							#	#msgprint('ibbb1')
+							#	#msgprint(cstr(item.discount_amount))
+							#	gl_entries.append(
+							#		self.get_gl_dict({
+							#			"account": income_account,
+							#			"against": self.insurance_party,
+							#			"credit": item.discount_amount,
+							#			"credit_in_account_currency": item.discount_amount,
+							#			"cost_center": item.cost_center,
+							#			"project": item.project or self.project
+							#		}, account_currency, item=item)
+							#	)
 
 
 

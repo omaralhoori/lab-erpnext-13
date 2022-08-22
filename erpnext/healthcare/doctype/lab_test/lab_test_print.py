@@ -795,7 +795,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         item_group = f"IN ('{item_group}')"
     return frappe.db.sql("""
         SELECT  
-        lt.template, tltt.control_type, tltt.print_all_normal_ranges, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
+        lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits,  lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
@@ -835,7 +835,7 @@ def get_embassy_tests_items(test_name, only_finalized=False):
     
     return frappe.db.sql("""
         SELECT  
-        lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
+        lt.template, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
@@ -927,7 +927,7 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         xray_test = frappe.get_doc("Radiology Test",{"sales_invoice": sales_invoice})
         print(xray_test)
         if not xray_test: frappe.throw("No Radiology Test created with this invoice.")
-        if xray_test.record_status != "Finalized": frappe.throw("Radiology test not finalized.")
+        if xray_test.record_status != "Finalized" and xray_test.record_status != "Released": frappe.throw("Radiology test not finalized.")
         if len(xray_test.test_results) == 0: frappe.throw("Radiology test has no test result.")
         reports = { result.test_name: result.test_result for result in xray_test.test_results }
         url = frappe.local.request.host

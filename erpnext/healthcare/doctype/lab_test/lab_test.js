@@ -96,6 +96,7 @@ const format_tests_html = (tests) => {
 		</div>`
 	if (frappe.user.has_role('LabTest Approver')){
 		buttons = `<div> 
+		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
 		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
