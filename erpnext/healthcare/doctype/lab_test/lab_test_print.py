@@ -927,7 +927,7 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         xray_test = frappe.get_doc("Radiology Test",{"sales_invoice": sales_invoice})
         print(xray_test)
         if not xray_test: frappe.throw("No Radiology Test created with this invoice.")
-        if xray_test.record_status != "Finalized": frappe.throw("Radiology test not finalized.")
+        if xray_test.record_status != "Finalized" or xray_test.record_status != "Released": frappe.throw("Radiology test not finalized.")
         if len(xray_test.test_results) == 0: frappe.throw("Radiology test has no test result.")
         reports = { result.test_name: result.test_result for result in xray_test.test_results }
         url = frappe.local.request.host
