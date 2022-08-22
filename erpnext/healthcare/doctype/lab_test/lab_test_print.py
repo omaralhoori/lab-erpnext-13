@@ -921,11 +921,7 @@ def get_embassy_cover(sales_invoice, report_name="ksa_report", return_html=False
 @frappe.whitelist()
 def get_xray_report(sales_invoice, return_html = False, with_header=False):
     try:
-        print(sales_invoice)
-        xray_name = frappe.db.get_value("Radiology Test", {"sales_invoice": sales_invoice}, ["name"])
-        print(xray_name)
         xray_test = frappe.get_doc("Radiology Test",{"sales_invoice": sales_invoice})
-        print(xray_test)
         if not xray_test: frappe.throw("No Radiology Test created with this invoice.")
         if xray_test.record_status != "Finalized" and xray_test.record_status != "Released": frappe.throw("Radiology test not finalized.")
         if len(xray_test.test_results) == 0: frappe.throw("Radiology test has no test result.")

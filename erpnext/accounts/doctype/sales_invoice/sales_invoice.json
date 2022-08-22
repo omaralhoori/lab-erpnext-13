@@ -100,6 +100,10 @@
   "base_rounding_adjustment",
   "base_rounded_total",
   "base_in_words",
+  "custom_functions_section",
+  "custom_group_item",
+  "column_break_97",
+  "add_item_group_btn",
   "pricing_rule_details",
   "pricing_rules",
   "packing_list",
@@ -2275,6 +2279,28 @@
    "fieldname": "apply_zero_discount",
    "fieldtype": "Button",
    "label": "Apply Zero Discount"
+  },
+  {
+   "fieldname": "custom_functions_section",
+   "fieldtype": "Section Break",
+   "label": "Custom Functions"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "custom_group_item",
+   "fieldtype": "Link",
+   "label": "Group Item",
+   "options": "Lab Test Template"
+  },
+  {
+   "fieldname": "column_break_97",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "add_item_group_btn",
+   "fieldtype": "Button",
+   "label": "Add Item Group"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2287,7 +2313,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-21 13:35:49.387646",
+ "modified": "2022-08-22 15:30:09.773226",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

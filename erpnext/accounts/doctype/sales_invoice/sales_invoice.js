@@ -596,6 +596,12 @@ cur_frm.fields_dict["ref_practitioner"].get_query  = function (doc) {
 	}
 };
 
+cur_frm.fields_dict["custom_group_item"].get_query  = function (doc) {
+	return {
+		filters: { 'lab_test_template_type': 'Grouped', 'disabled': 0,  }
+	}
+};
+
 // Income Account in Details Table
 // --------------------------------
 cur_frm.set_query("income_account", "items", function (doc) {
@@ -983,6 +989,27 @@ frappe.ui.form.on('Sales Invoice', {
 		if(frm.doc.charged_percentage || frm.doc.charged_percentage == 0){
 			frm.set_value("coverage_percentage", 100 - frm.doc.charged_percentage)
 		}
+	},
+	add_item_group_btn: function(frm){
+		frappe.call({
+			method: "erpnext.healthcare.doctype.lab_test_template.lab_test_template.get_package_items",
+			args:{
+				test_template: frm.doc.custom_group_item
+			},
+			callback: (res) => {
+				console.log(res);
+				if (res.message){
+					
+					for (var item of res.message){
+						var row = frm.add_child("items");
+						frappe.model.set_value(row.doctype, row.name, "item_code", item.item);
+					}
+
+					frm.set_value("custom_group_item", "")
+					frm.refresh_fields("items");
+				}
+			}
+		})
 	},
 
 	//ibrahim

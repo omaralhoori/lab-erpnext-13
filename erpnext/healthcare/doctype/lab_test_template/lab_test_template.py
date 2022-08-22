@@ -153,3 +153,14 @@ def change_test_code_from_template(lab_test_code, doc):
 		frappe.db.set_value('Lab Test Template', doc.name, 'lab_test_name', lab_test_code)
 		rename_doc('Lab Test Template', doc.name, lab_test_code, ignore_permissions=True)
 	return lab_test_code
+
+
+@frappe.whitelist()
+def get_package_items(test_template):
+	#template = frappe.get_doc("Lab Test Template", lab_test_template)
+	return frappe.db.sql(f"""
+		   SELECT ltt.lab_test_code as item FROM `tabLab Test Group Template` as ntt 
+		LEFT JOIN `tabLab Test Template` as ltt ON ntt.lab_test_template =ltt.name
+		WHERE ntt.parent='{test_template}' AND ltt.is_billable=1
+
+	""", as_dict=True)
