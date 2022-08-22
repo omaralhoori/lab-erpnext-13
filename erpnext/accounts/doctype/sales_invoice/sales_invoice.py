@@ -1119,25 +1119,22 @@ class SalesInvoice(SellingController):
 
 						account_currency = get_account_currency(income_account)
 						discount_currency = get_account_currency(item.discount_account)
-						#ibrahim
-						if base_amount > 0:
-							#msgprint('ibbb')
-							#msgprint(cstr(base_amount))
+
+						#row_income_amt  = flt(item.cash_discount) + flt(item.patient_share) + flt(item.discount_amount)
+
+						if item.patient_share > 0 :
 							gl_entries.append(
 								self.get_gl_dict({
 									"account": income_account,
 									"against": self.customer,
-									"credit": flt(base_amount, item.precision("base_net_amount")),
-									"credit_in_account_currency": (flt(base_amount, item.precision("base_net_amount"))
-										if account_currency==self.company_currency
-										else flt(amount, item.precision("net_amount"))),
+									"credit": flt(item.patient_share),
+									"credit_in_account_currency": flt(item.patient_share),
 									"cost_center": item.cost_center,
 									"project": item.project or self.project
 								}, account_currency, item=item)
 							)
-						if item.cash_discount > 0:
-							#frappe.msgprint('ibbb3')
-							#msgprint(cstr(item.cash_discount))
+
+						if item.cash_discount > 0 :
 							gl_entries.append(
 								self.get_gl_dict({
 									"account": item.discount_account,
@@ -1148,22 +1145,18 @@ class SalesInvoice(SellingController):
 									"project": item.project or self.project
 								}, account_currency, item=item)
 							)
-
-						#ibrahim
-						if not self.insurance_party :
-							if item.cash_discount > 0:
-								gl_entries.append(
-									self.get_gl_dict({
-										"account": income_account,
-										"against": item.discount_account,
-										"credit": item.cash_discount,
-										"credit_in_account_currency": item.cash_discount,
-										"cost_center": item.cost_center,
-										"project": item.project or self.project
-									}, account_currency, item=item)
-								)
-							
-							if item.discount_amount > 0:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": income_account,
+									"against": item.discount_account,
+									"credit": item.cash_discount,
+									"credit_in_account_currency": item.cash_discount,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+						if item.discount_amount > 0 :
+							if not self.insurance_party :
 								gl_entries.append(
 									self.get_gl_dict({
 										"account": item.discount_account,
@@ -1184,27 +1177,13 @@ class SalesInvoice(SellingController):
 										"project": item.project or self.project
 									}, account_currency, item=item)
 								)
-						else:
-							if item.cash_discount > 0 and (base_amount == 0 or self.charged_percentage == 100):
-								gl_entries.append(
-									self.get_gl_dict({
-										"account": income_account,
-										"against": item.discount_account,
-										"credit": item.cash_discount,
-										"credit_in_account_currency": item.cash_discount,
-										"cost_center": item.cost_center,
-										"project": item.project or self.project
-									}, account_currency, item=item)
-								)
-							if item.discount_amount > 0 and base_amount == 0:
-								#msgprint('ibbb1')
-								#msgprint(cstr(item.discount_amount))
+							else:
 								gl_entries.append(
 									self.get_gl_dict({
 										"account": income_account,
 										"against": self.insurance_party,
-										"credit": item.discount_amount,
-										"credit_in_account_currency": item.discount_amount,
+										"credit": flt(item.discount_amount),
+										"credit_in_account_currency": flt(item.discount_amount),
 										"cost_center": item.cost_center,
 										"project": item.project or self.project
 									}, account_currency, item=item)
@@ -1223,6 +1202,114 @@ class SalesInvoice(SellingController):
 							#			"project": item.project or self.project
 							#		}, account_currency, item=item)
 							#	)
+
+
+
+						#ibrahim
+						#if base_amount > 0:
+						#	msgprint('ibbb')
+						#	msgprint(cstr(base_amount))
+						#	gl_entries.append(
+						#		self.get_gl_dict({
+						#			"account": income_account,
+						#			"against": self.customer,
+						#			"credit": flt(base_amount, item.precision("base_net_amount")),
+						#			"credit_in_account_currency": (flt(base_amount, item.precision("base_net_amount"))
+						#				if account_currency==self.company_currency
+						#				else flt(amount, item.precision("net_amount"))),
+						#			"cost_center": item.cost_center,
+						#			"project": item.project or self.project
+						#		}, account_currency, item=item)
+						#	)
+						#if item.cash_discount > 0:
+						#	#frappe.msgprint('ibbb3')
+						#	#msgprint(cstr(item.cash_discount))
+						#	gl_entries.append(
+						#		self.get_gl_dict({
+						#			"account": item.discount_account,
+						#			"against": income_account,
+						#			"debit": item.cash_discount,
+						#			"debit_in_account_currency": item.cash_discount,
+						#			"cost_center": item.cost_center,
+						#			"project": item.project or self.project
+						#		}, account_currency, item=item)
+						#	)
+
+						#ibrahim
+						#if not self.insurance_party :
+						#	if item.cash_discount > 0:
+						#		gl_entries.append(
+						#			self.get_gl_dict({
+						#				"account": income_account,
+						#				"against": item.discount_account,
+						#				"credit": item.cash_discount,
+						#				"credit_in_account_currency": item.cash_discount,
+						#				"cost_center": item.cost_center,
+						#				"project": item.project or self.project
+						#			}, account_currency, item=item)
+						#		)
+							
+						#	if item.discount_amount > 0:
+						#		gl_entries.append(
+						#			self.get_gl_dict({
+						#				"account": item.discount_account,
+						#				"against": income_account,
+						#				"debit": item.discount_amount,
+						#				"debit_in_account_currency": item.discount_amount,
+						#				"cost_center": item.cost_center,
+						#				"project": item.project or self.project
+						#			}, account_currency, item=item)
+						#		)
+						#		gl_entries.append(
+						#			self.get_gl_dict({
+						#				"account": income_account,
+						#				"against": item.discount_account,
+						#				"credit": item.discount_amount,
+						#				"credit_in_account_currency": item.discount_amount,
+						#				"cost_center": item.cost_center,
+						#				"project": item.project or self.project
+						#			}, account_currency, item=item)
+						#		)
+						#else:
+						#	if item.cash_discount > 0 and (base_amount == 0 or self.charged_percentage == 100):
+						#		gl_entries.append(
+						#			self.get_gl_dict({
+						#				"account": income_account,
+						#				"against": item.discount_account,
+						#				"credit": item.cash_discount,
+						#				"credit_in_account_currency": item.cash_discount,
+						#				"cost_center": item.cost_center,
+						#				"project": item.project or self.project
+						#			}, account_currency, item=item)
+						#		)
+						#	if item.discount_amount > 0 and base_amount == 0:
+						#		msgprint('ibbb1')
+						#		msgprint(cstr(base_amount))
+						#		msgprint(cstr(item.discount_amount))
+						#		gl_entries.append(
+						#			self.get_gl_dict({
+						#				"account": income_account,
+						#				"against": self.insurance_party,
+						#				"credit": item.discount_amount,
+						#				"credit_in_account_currency": item.discount_amount,
+						#				"cost_center": item.cost_center,
+						#				"project": item.project or self.project
+						#			}, account_currency, item=item)
+						#		)
+						#	if item.discount_amount > 0 and base_amount == item.patient_share:
+						#		#msgprint('ibbb1')
+						#		#msgprint(cstr(item.discount_amount))
+						#		gl_entries.append(
+						#			self.get_gl_dict({
+						#				"account": income_account,
+						#				"against": self.insurance_party,
+						#				"credit": item.discount_amount,
+						#				"credit_in_account_currency": item.discount_amount,
+						#				"cost_center": item.cost_center,
+						#				"project": item.project or self.project
+						#			}, account_currency, item=item)
+						#		)
+
 
 
 						#if self.insurance_party and self.coverage_percentage > 0:
