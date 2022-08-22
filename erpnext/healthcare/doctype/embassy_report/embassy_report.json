@@ -51,6 +51,7 @@
   },
   {
    "fetch_from": "patient.country",
+   "fetch_if_empty": 1,
    "fieldname": "nationality",
    "fieldtype": "Data",
    "label": "Nationality"
@@ -121,7 +122,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-20 11:24:44.879309",
+ "modified": "2022-08-21 13:36:20.900950",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Embassy Report",
