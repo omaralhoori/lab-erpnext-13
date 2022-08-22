@@ -18,6 +18,7 @@ def get_invoice():
         "customer": invoice_data['customer'],
         "patient": invoice_data['customer'],
         "company": invoice_data['company'],
+        "ref_practitioner": invoice_data['ref_practitioner'],
         "total_patient": total,
         "discount_amount": 0,
         "selling_price_list": invoice_data['price_list'],

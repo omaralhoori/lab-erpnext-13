@@ -108,15 +108,15 @@ def filter_range_by_age(range, patient):
             if range['from_age_period'] == 'Day(s)':
                 from_days = int(range['from_age'])
             elif range['from_age_period'] == 'Month(s)':
-                from_days =  int(range['from_age']) * 25
+                from_days =  int(range['from_age']) * 30
             else:
-                from_days =  int(range['from_age']) * 330   
+                from_days =  int(range['from_age']) * 365   
             if range['to_age_period'] == 'Day(s)':
                 to_days = int(range['to_age'])
             elif range['to_age_period'] == 'Month(s)':
-                to_days =  int(range['to_age']) * 25
+                to_days =  int(range['to_age']) * 30
             else:
-                to_days =  int(range['to_age']) * 330
+                to_days =  int(range['to_age']) * 365
             return patient_days > from_days and patient_days < to_days
     return True
 

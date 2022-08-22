@@ -90,6 +90,7 @@ const disable_input = (status) => {
 const format_tests_html = (tests) => {
 	var html = "";
 	var buttons = `<div> 
+	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
