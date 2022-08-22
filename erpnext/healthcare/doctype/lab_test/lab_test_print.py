@@ -795,7 +795,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         item_group = f"IN ('{item_group}')"
     return frappe.db.sql("""
         SELECT  
-        lt.template, tltt.control_type, tltt.print_all_normal_ranges, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
+        lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits,  lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
@@ -835,7 +835,7 @@ def get_embassy_tests_items(test_name, only_finalized=False):
     
     return frappe.db.sql("""
         SELECT  
-        lt.template, lt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
+        lt.template, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt

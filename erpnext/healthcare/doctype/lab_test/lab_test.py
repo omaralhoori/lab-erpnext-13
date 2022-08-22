@@ -1018,11 +1018,11 @@ def apply_test_button_action(action, tests, test_name, sample):
 	lab_test = frappe.get_doc('Lab Test', test_name)
 	if lab_test:
 		lab_test.set_test_status()
-	if action == "Received":
-		infinty_tests = frappe.db.sql("""
-			SELECT host_code FROM `tabNormal Test Result`
-			WHERE name in ({tests}) AND status='Received' AND host_name='Inifinty'
-		""".format(tests=",".join(tests)), as_dict=True)
-		infinty_tests = list(set([test['host_code'] for test in infinty_tests if test['host_code'] and test['host_code'] !=""]))
-		if len(infinty_tests) > 0:
-			send_infinty_msg_with_patient(test_name, sample, infinty_tests)
+	# if action == "Received":
+	# 	infinty_tests = frappe.db.sql("""
+	# 		SELECT host_code FROM `tabNormal Test Result`
+	# 		WHERE name in ({tests}) AND status='Received' AND host_name='Inifinty'
+	# 	""".format(tests=",".join(tests)), as_dict=True)
+	# 	infinty_tests = list(set([test['host_code'] for test in infinty_tests if test['host_code'] and test['host_code'] !=""]))
+	# 	if len(infinty_tests) > 0:
+	# 		send_infinty_msg_with_patient(test_name, sample, infinty_tests)
