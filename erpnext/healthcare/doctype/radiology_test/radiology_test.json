@@ -159,12 +159,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2022-08-22 20:28:40.264708",
-=======
- "migration_hash": "ef704ef4fa9dfe981829fd02d32fe77b",
- "modified": "2022-08-22 18:37:23.092295",
->>>>>>> 45ef70b85e7daefa476fb4abd288e455a633a75a
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",
