@@ -11,6 +11,7 @@
   "physician",
   "practitioner_name",
   "sales_invoice",
+  "invoice_date",
   "record_status",
   "column_break_3",
   "template",
@@ -151,11 +152,18 @@
    "label": "Record Status",
    "options": "Draft\nReleased\nFinalized",
    "read_only": 1
+  },
+  {
+   "fetch_from": "sales_invoice.posting_date",
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-17 07:52:56.466496",
+ "migration_hash": "ef704ef4fa9dfe981829fd02d32fe77b",
+ "modified": "2022-08-22 18:37:23.092295",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",
