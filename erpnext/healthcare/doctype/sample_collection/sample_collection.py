@@ -39,7 +39,7 @@ class SampleCollection(Document):
 			frappe.db.set_value("Lab Test", test_name, {"status": "Received", "sample_collected": 1})
 			frappe.db.sql("""
 				UPDATE `tabNormal Test Result` SET status='Received'
-			WHERE parent='{test_name}'
+			WHERE parent='{test_name}' AND status NOT IN ('Rejected', 'Finalized')
 			""".format(test_name=test_name))
 
 import json

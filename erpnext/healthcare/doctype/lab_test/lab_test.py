@@ -229,8 +229,8 @@ def create_test_from_template(lab_test):
 
 def add_test_from_template(lab_test,  added_items):
 	templates = added_items
-	if lab_test.sample:
-		frappe.db.set_value("Sample Collection", lab_test.sample, {"docstatus": 0})
+	# if lab_test.sample:
+	# 	frappe.db.set_value("Sample Collection", lab_test.sample, {"docstatus": 0})
 	for template_name in templates:
 		template = frappe.get_doc('Lab Test Template', template_name.template)
 		patient = frappe.get_doc('Patient', lab_test.patient)
@@ -262,18 +262,39 @@ def create_multiple(doctype, docname):
 		frappe.msgprint(_('No Lab Tests created'))
 
 @frappe.whitelist()
-def create_or_delete_items(sales_invoice, removed_item, added_items):
+def create_or_delete_items(sales_invoice, removed_items, added_items):
 	# if lab not created create lab test
 	lab_test = frappe.db.exists("Lab Test", {"sales_invoice": sales_invoice.name}, "name")
+	print("ssssssssssssssssssssssssssssssssssssssssssssssssss")
+	print(removed_items)
 	if not lab_test:
 		create_lab_test_from_invoice(sales_invoice.name)
 		return
 	# else delete or add new items
 	add_new_items_lab_test(lab_test, added_items, sales_invoice)
+	remove_items_lab_test(lab_test, removed_items)
 
 def add_new_items_lab_test(lab_test, new_items, invoice):
 	add_new_items_lab_test_joined(invoice, new_items)
 
+def remove_items_lab_test(lab_test, removed_items):
+	print(removed_items)
+	lab_test = frappe.get_doc("Lab Test", lab_test)
+	for rmv_item in removed_items:
+		template = get_lab_test_template(rmv_item.item_code)
+		print(template.name, template.lab_test_template_type)
+		print(f"""
+				UPDATE `tabNormal Test Result` as ntr
+				 set status='Rejected'
+				WHERE ntr.parent='{lab_test.name}' AND ntr.report_code IN (SELECT lab_test_name FROM `tabNormal Test Template` WHERE parent='{template.name}')
+			""")
+		if not template: continue
+		if template.lab_test_template_type == "Grouped":
+			frappe.db.sql(f"""
+				UPDATE `tabNormal Test Result` as ntr
+				 set status='Rejected'
+				WHERE ntr.parent='{lab_test.name}' AND ntr.report_code IN (SELECT lab_test_name FROM `tabNormal Test Template` WHERE parent='{template.name}')
+			""")
 
 def create_lab_test_from_encounter(encounter):
 	lab_test_created = False
@@ -800,14 +821,14 @@ def get_receive_sample(sample, test_name=None):
 		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
 	frappe.db.sql("""
 				UPDATE `tabNormal Test Result` SET status='Received'
-			WHERE parent='{test_name}' AND status NOT IN ('Released', 'Finalized')
+			WHERE parent='{test_name}' AND status NOT IN ('Released', 'Finalized', 'Rejected')
 			""".format(test_name=test_name))
 	return str(sample_docstatus)
 def send_received_msg_order(sample, test_name):
 	sent = False
 	if frappe.get_cached_value("Healthcare Settings",None, "send_test_order"):
-		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name"])
-		infinty_tests = list(set([code['host_code'] for code in tests if (code['host_name'] == "Inifinty" and  code['host_code'] and code['host_code'] != "") ]))
+		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name", "status"])
+		infinty_tests = list(set([code['host_code'] for code in tests if (code['host_name'] == "Inifinty" and code['status'] != 'Rejected' and code['host_code'] and code['host_code'] != "") ]))
 		print(infinty_tests)
 		if len(infinty_tests) > 0:
 			sent = send_infinty_msg_with_patient(test_name, sample, infinty_tests)
@@ -975,7 +996,7 @@ def apply_test_button_action(action, tests, test_name, sample):
 	if action == "Received":
 		if frappe.db.get_value("Sample Collection", sample, ["docstatus"]) != 1:
 			frappe.throw("Sample is not collected")
-		where_stmt = "(status is NULL or status not in ('Released', 'Finalized'))"
+		where_stmt = "(status is NULL or status not in ('Released', 'Finalized', 'Rejected'))"
 	elif action == "Released":
 		where_stmt = "status='Received' AND result_value !='' AND result_value IS NOT NULL "
 	elif action == 'Finalized':

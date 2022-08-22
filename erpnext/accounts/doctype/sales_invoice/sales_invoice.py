@@ -544,16 +544,20 @@ class SalesInvoice(SellingController):
 				(not sales_invoice and data.sales_invoice == self.name):
 				data.sales_invoice = sales_invoice
 	#ibrahim 2022
-	def on_update_after_submit(self):
-		#frappe.msgprint('bbbbbbbb')
-		#frappe.msgprint(self.docstatus)
-		old_invoice = self.get_doc_before_save()
-		added_items, removed_items = self.get_created_or_deleted_items(old_invoice.items, self.items)
-		manage_invoice_submit_cancel(self, "on_update_after_submit", removed_items, added_items)
-		if self.docstatus == 1:
-			#frappe.msgprint('aaaaaaaaaaaaa')
-			#self.docstatus == 1
-			self.make_gl_entries(inv_modify=True)
+	# def on_update_after_submit(self):
+	# 	#frappe.msgprint('bbbbbbbb')
+	# 	#frappe.msgprint(self.docstatus)
+	# 	old_invoice = self.get_doc_before_save()
+	# 	added_items, removed_items = self.get_created_or_deleted_items(old_invoice.items, self.items)
+	# 	if len(removed_items) > 0 or len(added_items) > 0:
+	# 		sample_status = frappe.db.get_value("Sample Collection", {"sales_invoice": self.name}, "docstatus")
+	# 		if sample_status == 1:
+	# 			frappe.throw(_("The invoice could not be updated because the sample was collected"))
+	# 		manage_invoice_submit_cancel(self, "on_update_after_submit", removed_items, added_items)
+	# 	if self.docstatus == 1:
+	# 		#frappe.msgprint('aaaaaaaaaaaaa')
+	# 		#self.docstatus == 1
+	# 		self.make_gl_entries(inv_modify=True)
 
 	def get_created_or_deleted_items(self, old_items, new_items):
 		old_items_code, new_items_code = [item.item_code for item in old_items], [item.item_code for item in new_items]
