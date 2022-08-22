@@ -274,6 +274,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
    "fieldname": "rate_with_margin",
    "fieldtype": "Currency",
@@ -308,6 +309,7 @@
    "options": "currency"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
    "fieldname": "base_rate_with_margin",
    "fieldtype": "Currency",
@@ -397,6 +399,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "net_amount",
    "fieldtype": "Currency",
    "label": "Net Amount",
@@ -417,6 +420,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_net_amount",
    "fieldtype": "Currency",
    "label": "Net Amount (Company Currency)",
@@ -856,6 +860,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "columns": 1,
    "fieldname": "patient_share",
    "fieldtype": "Currency",
@@ -865,6 +870,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_patient_share",
    "fieldtype": "Currency",
    "label": "Patient Share (Company Currency)",
@@ -934,6 +940,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "columns": 1,
    "fieldname": "cash_discount",
    "fieldtype": "Currency",
@@ -946,6 +953,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_cash_discount",
    "fieldtype": "Currency",
    "label": "Cash Discount (Company Currency)",
@@ -956,7 +964,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-08-20 00:17:39.517587",
+ "modified": "2022-08-20 23:02:47.168895",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
