@@ -352,7 +352,6 @@
    "options": "Bottom\nTop\nBoth"
   },
   {
-   "depends_on": "eval:!in_list([\"Date\", \"Yes or No\", \"Drop Down List\",\"Nil\",\"Upload File\"], doc.control_type)",
    "fieldname": "secondary_uom",
    "fieldtype": "Link",
    "label": "Conventional Unit",
@@ -761,7 +760,8 @@
   }
  ],
  "links": [],
- "modified": "2022-08-17 05:44:31.668214",
+ "migration_hash": "9c3722d923e6a32c976d20eb6d27333f",
+ "modified": "2022-08-23 06:47:28.534255",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
