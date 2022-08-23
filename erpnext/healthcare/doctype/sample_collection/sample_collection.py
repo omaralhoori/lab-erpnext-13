@@ -58,3 +58,8 @@ def unrelease_selected(tests):
 	UPDATE `tabSample Collection` SET record_status="Draft"
 	WHERE name in ({tests}) AND record_status IN ('Released')
 	""".format(tests=",".join(tests)))
+
+
+@frappe.whitelist()
+def uncollect_sample(sample):
+	frappe.db.set_value("Sample Collection", sample, "docstatus", 0)
