@@ -265,14 +265,13 @@ def create_multiple(doctype, docname):
 def create_or_delete_items(sales_invoice, removed_items, added_items):
 	# if lab not created create lab test
 	lab_test = frappe.db.exists("Lab Test", {"sales_invoice": sales_invoice.name}, "name")
-	print("ssssssssssssssssssssssssssssssssssssssssssssssssss")
-	print(removed_items)
 	if not lab_test:
 		create_lab_test_from_invoice(sales_invoice.name)
 		return
 	# else delete or add new items
-	add_new_items_lab_test(lab_test, added_items, sales_invoice)
 	remove_items_lab_test(lab_test, removed_items)
+	add_new_items_lab_test(lab_test, added_items, sales_invoice)
+	
 
 def add_new_items_lab_test(lab_test, new_items, invoice):
 	add_new_items_lab_test_joined(invoice, new_items)
