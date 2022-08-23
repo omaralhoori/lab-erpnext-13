@@ -283,17 +283,19 @@ def remove_items_lab_test(lab_test, removed_items):
 	for rmv_item in removed_items:
 		template = get_lab_test_template(rmv_item.item_code)
 		print(template.name, template.lab_test_template_type)
-		print(f"""
-				UPDATE `tabNormal Test Result` as ntr
-				 set status='Rejected'
-				WHERE ntr.parent='{lab_test.name}' AND ntr.report_code IN (SELECT lab_test_name FROM `tabNormal Test Template` WHERE parent='{template.name}')
-			""")
+
 		if not template: continue
 		if template.lab_test_template_type == "Grouped":
 			frappe.db.sql(f"""
 				UPDATE `tabNormal Test Result` as ntr
 				 set status='Rejected'
-				WHERE ntr.parent='{lab_test.name}' AND ntr.report_code IN (SELECT lab_test_name FROM `tabNormal Test Template` WHERE parent='{template.name}')
+				WHERE ntr.parent='{lab_test.name}' AND ntr.report_code IN (SELECT lab_test_template  FROM `tabLab Test Group Template` WHERE parent='{template.name}')
+			""")
+		else:
+			frappe.db.sql(f"""
+				UPDATE `tabNormal Test Result` as ntr
+				 set status='Rejected'
+				WHERE ntr.parent='{lab_test.name}' AND ntr.template IN (SELECT lab_test_template  FROM `tabLab Test Group Template` WHERE parent='{template.name}')
 			""")
 
 def create_lab_test_from_encounter(encounter):
