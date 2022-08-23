@@ -342,7 +342,7 @@ def create_lab_test_joined(sales_invoice):
 						rad_test = create_rad_test_doc(patient, template, invoice)
 						rad_created = True
 					else:
-						template_row = lab_test.append("template")
+						template_row = rad_test.append("template")
 						template_row.template = template.name
 				elif template.lab_test_group == "Lab Test Packages" and template.has_radiology():
 					if not rad_created:

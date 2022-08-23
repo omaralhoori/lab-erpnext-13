@@ -160,8 +160,6 @@ def print_all_xray_report(invoices):
     writer = None
     expectedValue = 0
     for idx, sales_invoice in enumerate(invoices):
-        print("0000000000000000000000000000000000000000")
-        print(idx, sales_invoice)
         xray = get_xray_report(sales_invoice, return_html=True)
         if xray == "": 
             expectedValue +=1
@@ -994,7 +992,7 @@ def get_normal_xray_tbody(reports, header):
     html = ""
     for report in reports:
         if len(html) > 0:
-            body += get_break()
+            html += get_break()
         body = f"""
         <tr class="center fb"><td> {report} </td></tr>
             <tr><td>
