@@ -234,6 +234,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "price_list_rate",
    "fieldtype": "Currency",
    "label": "Price List Rate",
@@ -244,6 +245,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_price_list_rate",
    "fieldtype": "Currency",
    "label": "Price List Rate (Company Currency)",
@@ -259,6 +261,7 @@
    "label": "Discount and Margin"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "price_list_rate",
    "fieldname": "margin_type",
    "fieldtype": "Select",
@@ -267,6 +270,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.margin_type && doc.price_list_rate",
    "fieldname": "margin_rate_or_amount",
    "fieldtype": "Float",
@@ -288,6 +292,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "columns": 1,
    "depends_on": "price_list_rate",
    "fieldname": "discount_percentage",
@@ -300,6 +305,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "columns": 1,
    "depends_on": "price_list_rate",
    "fieldname": "discount_amount",
@@ -323,6 +329,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "bold": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
@@ -333,6 +340,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
@@ -349,6 +357,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_rate",
    "fieldtype": "Currency",
    "label": "Rate (Company Currency)",
@@ -360,6 +369,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_amount",
    "fieldtype": "Currency",
    "label": "Full Charge (Company Currency)",
@@ -391,6 +401,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "net_rate",
    "fieldtype": "Currency",
    "label": "Net Rate",
@@ -412,6 +423,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_net_rate",
    "fieldtype": "Currency",
    "label": "Net Rate (Company Currency)",
@@ -837,6 +849,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval: doc.uom != doc.stock_uom",
    "fieldname": "stock_uom_rate",
    "fieldtype": "Currency",
@@ -852,6 +865,7 @@
    "options": "Account"
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "discount_updated",
    "fieldtype": "Int",
@@ -918,6 +932,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "bold": 1,
    "fieldname": "patient_rate",
    "fieldtype": "Currency",
@@ -926,6 +941,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_patient_rate",
    "fieldtype": "Currency",
    "label": "Patient Rate (Company Currency)",
@@ -964,7 +980,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-08-20 23:02:47.168895",
+ "modified": "2022-08-23 13:11:01.560375",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

@@ -759,9 +759,16 @@
    "label": "Is Microscopy"
   }
  ],
- "links": [],
- "migration_hash": "9c3722d923e6a32c976d20eb6d27333f",
- "modified": "2022-08-23 06:47:28.534255",
+ "links": [
+  {
+   "is_child_table": 1,
+   "link_doctype": "Radiology Test Result",
+   "link_fieldname": "test_template",
+   "parent_doctype": "Radiology Test",
+   "table_fieldname": "test_results"
+  }
+ ],
+ "modified": "2022-08-23 12:09:43.314360",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
