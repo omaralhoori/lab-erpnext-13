@@ -28,8 +28,8 @@ class LabTest(Document):
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
 
-		if not frappe.local.conf.is_embassy and (not self.sms_sent or self.sms_sent == 0):
-			self.send_result_sms()
+		# if not frappe.local.conf.is_embassy and (not self.sms_sent or self.sms_sent == 0):
+		# 	self.send_result_sms()
 	
 	def validate_sample_released(self):
 		if not self.status == "Released":
@@ -178,8 +178,9 @@ class LabTest(Document):
 				try:
 					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
 				except Exception:
-					item.secondary_uom_result = ''
-					frappe.msgprint(_('Row #{0}: Result for Secondary UOM not calculated').format(item.idx), title = _('Warning'))
+					pass
+					# item.secondary_uom_result = ''
+					# frappe.msgprint(_('Row #{0}: Result for Secondary UOM not calculated').format(item.idx), title = _('Warning'))
 
 	def validate_result_values(self):
 		if self.normal_test_items:

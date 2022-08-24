@@ -236,7 +236,11 @@ const setup_input_listeners = (frm) => {
 	$('.refresh-btn').click(function(){
 		frm.doc.normal_test_items.forEach(item => {
 			if (item.conversion_factor && item.secondary_uom && item.result_value){
-				var res = Number(item.result_value) * Number(item.conversion_factor)				
+				var res = item.result_value;
+				if (Number(item.result_value)){
+					res = Number(item.result_value) * Number(item.conversion_factor)
+				}
+								
 				frappe.model.set_value("Normal Test Result", item.name, "secondary_uom_result", res)
 			}
 			// if (item.result_percentage){
@@ -301,6 +305,9 @@ frappe.ui.form.on('Lab Test', {
 		];
 	},
 	refresh: function (frm) {
+		if (frappe.user.name == "Administrator"){
+			frm.toggle_display('normal_test_items', true);
+		}
 		if (!frm.is_new()){
 			frm.add_custom_button(__('Print'), function(){
 				//let url = `/printview?doctype=Lab%20Test&name=${frm.doc.name}&trigger_print=1&format=Lab%20Test%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`;

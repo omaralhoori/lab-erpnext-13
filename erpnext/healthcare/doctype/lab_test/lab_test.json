@@ -333,6 +333,7 @@
    "label": "Test Template",
    "options": "Lab Test Template Table",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1,
    "reqd": 1
   },
@@ -362,6 +363,7 @@
    "depends_on": "eval:doc.sample_collected || !doc.sample",
    "fieldname": "normal_test_items",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Normal Test Result",
    "options": "Normal Test Result",
    "print_hide": 1
@@ -590,7 +592,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-23 19:28:46.091011",
+ "modified": "2022-08-24 07:49:10.311877",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
