@@ -136,6 +136,7 @@ class LabTest(Document):
 		old_doc = self.get_doc_before_save()
 		if old_doc:
 			added_items, removed_items = self.get_created_or_deleted_items(old_doc.template, self.template)
+			#remove_test_from_template(self, removed_items)
 			add_test_from_template(self, added_items)
 	def get_created_or_deleted_items(self, old_items, new_items):
 		old_items_code, new_items_code = [item.template for item in old_items], [item.template for item in new_items]
@@ -225,7 +226,14 @@ def create_test_from_template(lab_test):
 		sample_created = True
 		lab_test = load_result_format(lab_test, template, None, None)
 
-
+def remove_test_from_template(lab_test, removed_items):
+	templates = removed_items
+	# if lab_test.sample:
+	# 	frappe.db.set_value("Sample Collection", lab_test.sample, {"docstatus": 0})
+	sample_collection = frappe.get_doc("Sample Collection", lab_test.sample)
+	for template_name in templates:
+		template = frappe.get_doc('Lab Test Template', template_name.template)
+		remove_sample_collection(sample_collection, template)
 
 def add_test_from_template(lab_test,  added_items):
 	templates = added_items
@@ -700,6 +708,21 @@ def create_sample_collection(lab_test, template, patient, invoice, depth=1, samp
 				frappe.msgprint(_('Sample Collection {0} has been created').format(sample_collection_doc),
 					title=_('Sample Collection'), indicator='green')
 	return lab_test
+
+def remove_sample_collection(sample_collection, template, depth=1):
+	if depth < 4:
+		if template.lab_test_template_type == "Grouped":
+			for group_item in template.lab_test_groups:
+				group_template = frappe.get_doc("Lab Test Template", group_item.lab_test_template)
+				remove_sample_collection(sample_collection, group_template, depth + 1)#create_sample_doc(group_template, patient, invoice, lab_test.company)
+				#sample_created = True
+		
+		else:
+			for sample_template in sample_collection.lab_test_templates:
+				print(sample_template.template, template.name)
+				if sample_template.template == template.name:
+					print("Match---------------------------------")
+					sample_collection.remove(sample_template)
 
 def load_result_format(lab_test, template, prescription, invoice, depth=1):
 	if depth > 3 : return lab_test
