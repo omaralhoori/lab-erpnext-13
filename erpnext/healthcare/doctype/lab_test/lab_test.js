@@ -19,7 +19,7 @@ const create_tests_result_type =  (childTest) => {
 `
 if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest['result_percentage']){
 	result_type += `
-	<input ${disable_input(childTest['status'])} type="number"  class="test-input-control percentage-input" name="${childTest['name']}" value="${childTest['result_percentage'] || ""}"/>
+	<input ${disable_input(childTest['status'])} type="number" step="any" class="test-input-control percentage-input" name="${childTest['name']}" value="${childTest['result_percentage'] || ""}"/>
 	<label>
 		%
 	</label>
@@ -89,18 +89,16 @@ const disable_input = (status) => {
 }
 const format_tests_html = (tests) => {
 	var html = "";
+	//	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
+
 	var buttons = `<div> 
-	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
-		<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
 		</div>`
 	if (frappe.user.has_role('LabTest Approver')){
 		buttons = `<div> 
-		<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
-		<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
 		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
@@ -173,9 +171,9 @@ const setup_input_listeners = (frm) => {
 	})
 	$('.child-tests .percentage-input').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
-		var rounded = round_result($(this).val())
-		$(this).val(rounded)
-		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "result_percentage", rounded);
+		// var rounded = round_result($(this).val())
+		// $(this).val(rounded)
+		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "result_percentage", $(this).val());
 	})
 	$('.child-tests .freetext-select').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
@@ -241,14 +239,50 @@ const setup_input_listeners = (frm) => {
 				var res = Number(item.result_value) * Number(item.conversion_factor)				
 				frappe.model.set_value("Normal Test Result", item.name, "secondary_uom_result", res)
 			}
-			if (item.result_percentage){
-				frappe.model.set_value("Normal Test Result", item.name, "result_percentage", round_result(item.result_percentage))
-			}
+			// if (item.result_percentage){
+			// 	frappe.model.set_value("Normal Test Result", item.name, "result_percentage", round_result(item.result_percentage))
+			// }
 		})
+
+		round_percentge(frm)
+
 		frm.refresh()
 	})
 	
 }
+const round_percentge = (frm) => {
+	var values = []
+	$('input.percentage-input').each(function(idx) { values.push( $(this).val()) })
+	var rounded = round_to_hundred(values);
+	$('input.percentage-input').each(function(idx) { 
+		frappe.model.set_value("Normal Test Result", $(this).attr("name"), "result_percentage", rounded[idx])
+		$(this).val(rounded[idx])
+	 })
+}
+const round_to_hundred = (result_list) => {
+    var  total = 0;
+    for(var result of result_list){
+        total += parseInt(result);
+    }
+    var remain = 100 - total;
+    var point_list = result_list.map(s => (
+        //s.toString().split('.')[1] || '0' 
+        (parseInt(s * 10) % 10)
+        ));
+    var indices = new Array(result_list.length);
+    for (var i = 0; i < result_list.length; ++i) indices[i] = i;
+    indices.sort(function (a, b) { return point_list[a] > point_list[b] ? -1 : point_list[a] < point_list[b] ? 1 : 0; });
+    for (var idx in indices){
+        var elm = indices[idx];
+        if (idx <  remain){
+            result_list[parseInt(elm)] = Math.ceil(result_list[parseInt(elm)]);
+        }else{
+            result_list[parseInt(elm)] = Math.floor(result_list[parseInt(elm)]);
+        }
+    }
+    return result_list;   
+}
+
 const toggle_test_selected_buttons = (value) => {
 	$('.test-selected-btn').prop('disabled', !value);
 }
@@ -273,6 +307,28 @@ frappe.ui.form.on('Lab Test', {
 				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}`
 				window. open(url, '_blank')
 			})
+
+			if (frappe.user.has_role('Lab Test Users')){
+				frm.page.add_menu_item(__('Reject Selected'), function () {
+					var searchIDs = $(".result-checkbox:checked").map(function(){
+						//frappe.model.set_value('Normal Test Result', $(this).val(), "status", button) ;
+						return $(this).val();
+					  }).get();
+					frappe.call({
+						method: "erpnext.healthcare.doctype.lab_test.lab_test.apply_test_button_action",
+						args: {
+							action: "Rejected",
+							tests: searchIDs,
+							sample: frm.doc.sample,
+							test_name: frm.doc.name
+						},
+						callback: () =>
+						{
+							frm.reload_doc();
+						}
+					})
+				});
+			}
 
 			frappe.call({
 				method: "erpnext.healthcare.utils.is_embassy",
@@ -766,9 +822,9 @@ var calculate_age = function (dob) {
 frappe.ui.form.on("Normal Test Result", "result_percentage", function(frm, cdt, cdn) { 
 	
 	//var item = locals[cdt][cdn]; var result = a + b + c; item.result_field = result; 
-	var percentage = frappe.model.get_value("Normal Test Result", cdn, "result_percentage")
-	percentage = round_result(percentage);
-	frappe.model.set_value("Normal Test Result", cdn, "result_percentage", percentage)
+	// var percentage = frappe.model.get_value("Normal Test Result", cdn, "result_percentage")
+	// percentage = round_result(percentage);
+	// frappe.model.set_value("Normal Test Result", cdn, "result_percentage", percentage)
 });
 
 const round_result = (result, point=0) => {

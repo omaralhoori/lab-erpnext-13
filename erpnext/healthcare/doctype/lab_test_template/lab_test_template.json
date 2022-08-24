@@ -18,32 +18,30 @@
   "lab_test_template_type",
   "is_billable",
   "lab_test_rate",
-  "section_break_description",
-  "lab_test_description",
   "section_break_normal",
+  "control_type",
   "default_value",
   "required",
-  "lab_test_uom",
   "secondary_uom",
+  "lab_test_uom",
   "formula",
   "symbol",
   "column_break_10",
   "conventional_round_digits",
+  "round_conventional_digits",
   "si_round_digits",
-  "control_type",
+  "round_si_digits",
   "conversion_factor",
   "conv_integer_decimal_places",
   "si_integer_decimal_places",
   "lab_test_normal_range",
+  "section_break_group",
+  "lab_test_groups",
   "normal_range_section",
   "attribute_normal_range",
-  "section_break_compound",
-  "normal_test_templates",
   "section_break_special",
   "sensitivity",
   "descriptive_test_templates",
-  "section_break_group",
-  "lab_test_groups",
   "sb_sample_collection",
   "sample",
   "container_type",
@@ -51,8 +49,20 @@
   "sample_qty",
   "column_break_33",
   "sample_details",
+  "test_options_section",
+  "printing_order",
+  "alias",
+  "column_break_45",
+  "order",
+  "is_microscopy",
+  "print_all_normal_ranges",
+  "group_tests",
+  "section_break_compound",
+  "normal_test_templates",
   "lab_test_attribute_section",
   "lab_test_attribute",
+  "section_break_description",
+  "lab_test_description",
   "medical_coding_section",
   "medical_code",
   "medical_code_standard",
@@ -67,7 +77,6 @@
   "is_consultation",
   "service_type",
   "code",
-  "alias",
   "standard_code",
   "is_standard",
   "needs_upload",
@@ -75,7 +84,6 @@
   "speciality",
   "process_hours",
   "minimum_amount",
-  "printing_order",
   "expected_tat",
   "expected_tat_unit",
   "is_published_online",
@@ -89,7 +97,6 @@
   "accept_multi_results",
   "is_culture_test",
   "is_histo_test",
-  "order",
   "mandatory",
   "visible",
   "is_printed",
@@ -99,7 +106,6 @@
   "hide_if_empty",
   "font_name",
   "is_bold",
-  "print_all_normal_ranges",
   "effective_date",
   "expiry_date",
   "mapping_code",
@@ -112,8 +118,7 @@
   "form_name",
   "medical_test_id",
   "medical_service_id",
-  "attribute_options",
-  "is_microscopy"
+  "attribute_options"
  ],
  "fields": [
   {
@@ -386,8 +391,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_41",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Other Options"
   },
   {
    "default": "0",
@@ -459,7 +466,7 @@
   {
    "fieldname": "printing_order",
    "fieldtype": "Data",
-   "label": "Printing Order"
+   "label": "Order"
   },
   {
    "fieldname": "expected_tat",
@@ -548,7 +555,7 @@
   {
    "fieldname": "order",
    "fieldtype": "Int",
-   "label": "Order"
+   "label": "Printing Order"
   },
   {
    "default": "0",
@@ -627,11 +634,13 @@
    "depends_on": "eval:!in_list([\"Date\", \"Yes or No\", \"Drop Down List\",\"Nil\",\"Upload File\"], doc.control_type)",
    "fieldname": "conv_integer_decimal_places",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Conv Integer Decimal Places"
   },
   {
    "fieldname": "si_integer_decimal_places",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "SI Integer Decimal Places"
   },
   {
@@ -665,11 +674,13 @@
   {
    "fieldname": "default_value",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Default Value"
   },
   {
    "fieldname": "required",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Required"
   },
   {
@@ -757,6 +768,33 @@
    "fieldname": "is_microscopy",
    "fieldtype": "Check",
    "label": "Is Microscopy"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_conventional_digits",
+   "fieldtype": "Check",
+   "label": "Round Conventional Digits"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_si_digits",
+   "fieldtype": "Check",
+   "label": "Round SI Digits"
+  },
+  {
+   "fieldname": "test_options_section",
+   "fieldtype": "Section Break",
+   "label": "Test Options"
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "group_tests",
+   "fieldtype": "Check",
+   "label": "Group Tests"
   }
  ],
  "links": [
@@ -768,7 +806,7 @@
    "table_fieldname": "test_results"
   }
  ],
- "modified": "2022-08-23 12:09:43.314360",
+ "modified": "2022-08-24 06:05:08.591972",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

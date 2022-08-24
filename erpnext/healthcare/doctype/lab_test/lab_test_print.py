@@ -405,7 +405,7 @@ def format_embassy_tests(tests, header, previous_tests={}):
                 normal_crit = test['template'][0]['criteria_text'] or ''
             normal_range = test['template'][0]['range_text']
         if test['conv_result']:
-            result = format_float_result(test['conv_result'], test['conventional_round_digits'])
+            result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
             test_html = f"""
                 <tr >
                 <td class="width-40">{test['lab_test_name']}</td>
@@ -489,7 +489,7 @@ def format_routine_page_tests(tests, header, test_name):
                 test_html = f"""
                     <tr>
                     <td class="width-20">{test['lab_test_name']}</td>
-                    <td class="{'width-15' if test['conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['conv_result'], test['conventional_round_digits'])}</strong></td>
+                    <td class="{'width-15' if test['conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])}</strong></td>
                     <td class="width-10"> {test['conv_uom'] or ''} </td>
                      <td class="width-50"> {test['template'][0]['range_text'] if test['template'] else ''} </td>
                     </tr>
@@ -567,7 +567,7 @@ def format_hematology_tests(tests, header):
     diff= 0
     for test in tests:
         if test['conv_result']:
-            result = format_float_result(test['conv_result'], test['conventional_round_digits'])
+            result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
             precentage = ""
             secondary_result = ""
             test_title = ""
@@ -579,11 +579,11 @@ def format_hematology_tests(tests, header):
                 """
                 diff=2
             if test['result_percentage']:
-                secondary_result = format_float_result(test['conv_result'], test['conventional_round_digits'])
+                secondary_result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
                 precentage = "%"
                 result = format_float_result(test['result_percentage'], 0)
             elif diff == 2:
-                result = format_float_result(test['conv_result'], test['conventional_round_digits'])
+                result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
             test_class = ""
             if test['lab_test_name'] == "Leukocytes":
                 test_class = "border-line"
@@ -711,53 +711,113 @@ def format_uploaded_tests(test_doc,tests, header=""):
     </table>"""
     return html
 
-def format_float_result(result, point=2):
+def format_float_result(result, point=2, round_digits=False):
+    result = str(result)
     try:
         if result.startswith("+") or result.startswith("-"): return result
-        if point != 0:
-            return f"%.{point}f" % float(result)
+        if round_digits:
+            if point != 0:
+                return f"%.{point}f" % round(float(result), point)
+            else:
+                return int(round(float(result), point))
         else:
-            return int(float(result))
+            if point != 0:
+                return f"%.{point}f" % float(result)
+            else:
+                return int(float(result))
     except ValueError:
         return result
 
 def format_chemistry_tests(tests, header=""):
     tests_html = ""
+    counter = 0
+    grouped_tests = []
     for test in tests:
-        test_html = ""
-        si = ""
-        conv = ""
-        if test['si_result'] and test['si_uom']:
-            si =str(format_float_result(test['si_result'], test['si_round_digits']))+ ' ' + test['si_uom']
-        if test['conv_result'] and test['conv_uom']:
-            conv = str(format_float_result(test['conv_result'], test['conventional_round_digits'])) + ' ' + test['conv_uom']
-        if (test['si_result'] or test['conv_result'] ):
-
-            test_html += f"""
-                <tr>
-                    <td class="width-50">
-                       &emsp;{test['lab_test_name']}
-                    </td>
-                    <td class="width-25">{si}</td>
-                    <td class="width-25">{conv}</td>
-                </tr>
-            """
-            for idx, normal in enumerate(test["template"]):
-                si_range = normal['si_range_text'] if test['si_uom'] else ''
-                conv_range = normal['range_text'] if test['conv_uom'] else ''
+        if test['group_tests']:
+            idx = next((index for (index, d) in enumerate(grouped_tests) if (type(d) == list and d[0]["parent_template"] == test['parent_template'])), -1)
+            if idx >= 0:
+                print(idx)
+                grouped_tests[idx].append(test)
+            else:
+                grouped_tests.append( [test])
+        else:
+            grouped_tests.append( test)
+    for test in grouped_tests:
+        if type(test) == list:
+            test_html = ""
+            for idx, child_test in enumerate(test):
                 if idx == 0:
-                    test_html += """<tr><td>&emsp;Normal Ranges: </td><td></td><td></td></tr>"""
-                test_html += f"""
-                    <tr>
-                        <td>&emsp;&emsp;{normal['criteria_text'] or ''}</td>
-                        <td>{si_range or ''}</td>
-                        <td>{conv_range or ''}</td>
-                    </tr>
-                """
-            if test['comment']:
-                test_html += f"<tr><td colspan='3' class='red'><strong>Comment: </strong>{test['comment']}</td></tr>"
+                    test_html = f"<tr><td colspan='3' >{child_test['parent_template']}</td></tr>" +test_html
+                si = ""
+                conv = ""
+                if child_test['si_result'] and child_test['si_uom']:
+                    si =str(format_float_result(child_test['si_result'], child_test['si_round_digits'], child_test['round_si_digits']))+ ' ' + child_test['si_uom']
+                if child_test['conv_result'] and child_test['conv_uom']:
+                    conv = str(format_float_result(child_test['conv_result'], child_test['conventional_round_digits'], child_test['round_conventional_digits'])) + ' ' + child_test['conv_uom']
+                if (child_test['si_result'] or child_test['conv_result'] ):
+
+                    test_html += f"""
+                        <tr>
+                            <td class="width-50">
+                            &emsp;&emsp;{child_test['lab_test_name']}
+                            </td>
+                            <td class="width-25">{si}</td>
+                            <td class="width-25">{conv}</td>
+                        </tr>
+                    """
+                    for idx, normal in enumerate(child_test["template"]):
+                        si_range = normal['si_range_text'] if child_test['si_uom'] else ''
+                        conv_range = normal['range_text'] if child_test['conv_uom'] else ''
+                        if idx == 0:
+                            test_html += """<tr><td>&emsp;&emsp;&emsp;Normal Ranges: </td><td></td><td></td></tr>"""
+                        test_html += f"""
+                            <tr>
+                                <td>&emsp;&emsp;&emsp;{normal['criteria_text'] or ''}</td>
+                                <td>{si_range or ''}</td>
+                                <td>{conv_range or ''}</td>
+                            </tr>
+                        """
+                    if child_test['comment']:
+                        test_html += f"<tr><td colspan='3' class='red'><strong>Comment: </strong>{child_test['comment']}</td></tr>"
             test_html = "<tr><td class='b-bottom' style='padding-bottom: 20px;'><table>" + test_html + "</table></td></tr>"
             tests_html += test_html
+
+        else:
+            test_html = ""
+            si = ""
+            conv = ""
+            if test['si_result'] and test['si_uom']:
+                si =str(format_float_result(test['si_result'], test['si_round_digits'], test['round_si_digits']))+ ' ' + test['si_uom']
+            if test['conv_result'] and test['conv_uom']:
+                conv = str(format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])) + ' ' + test['conv_uom']
+            if (test['si_result'] or test['conv_result'] ):
+
+                test_html += f"""
+                    <tr>
+                        <td class="width-50">
+                        &emsp;{test['lab_test_name']}
+                        </td>
+                        <td class="width-25">{si}</td>
+                        <td class="width-25">{conv}</td>
+                    </tr>
+                """
+                for idx, normal in enumerate(test["template"]):
+                    si_range = normal['si_range_text'] if test['si_uom'] else ''
+                    conv_range = normal['range_text'] if test['conv_uom'] else ''
+                    if idx == 0:
+                        test_html += """<tr><td>&emsp;Normal Ranges: </td><td></td><td></td></tr>"""
+                    test_html += f"""
+                        <tr>
+                            <td>&emsp;&emsp;{normal['criteria_text'] or ''}</td>
+                            <td>{si_range or ''}</td>
+                            <td>{conv_range or ''}</td>
+                        </tr>
+                    """
+                if test['comment']:
+                    test_html += f"<tr><td colspan='3' class='red'><strong>Comment: </strong>{test['comment']}</td></tr>"
+                test_html = "<tr><td class='b-bottom' style='padding-bottom: 20px;'><table>" + test_html + "</table></td></tr>"
+                tests_html += test_html
+        
     html = f"""<table class="f-s">
         <thead>
         <tr>
@@ -793,8 +853,8 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         item_group = f"IN ('{item_group}')"
     return frappe.db.sql("""
         SELECT  
-        lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits,  lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+        lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name,ltt.group_tests, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
+        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.round_conventional_digits, tltt.round_si_digits, tltt.conventional_round_digits, tltt.si_round_digits,  lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
@@ -834,7 +894,7 @@ def get_embassy_tests_items(test_name, only_finalized=False):
     return frappe.db.sql("""
         SELECT  
         lt.template, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.round_si_digits, tltt.round_conventional_digits,tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
