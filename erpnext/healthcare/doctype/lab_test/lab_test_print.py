@@ -730,13 +730,11 @@ def format_float_result(result, point=2, round_digits=False):
 
 def format_chemistry_tests(tests, header=""):
     tests_html = ""
-    counter = 0
     grouped_tests = []
     for test in tests:
         if test['group_tests']:
             idx = next((index for (index, d) in enumerate(grouped_tests) if (type(d) == list and d[0]["parent_template"] == test['parent_template'])), -1)
             if idx >= 0:
-                print(idx)
                 grouped_tests[idx].append(test)
             else:
                 grouped_tests.append( [test])
