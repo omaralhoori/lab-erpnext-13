@@ -59,6 +59,12 @@ def get_columns( additional_table_columns=[]):
 			'fieldtype': 'Data',
 			'width': 120
 		},
+		{
+			'label': _("Passport"),
+			'fieldname': 'passport_no',
+			'fieldtype': 'Data',
+			'width': 120
+		},
 			{
 			'label': _("Birth Date"),
 			'fieldname': 'birth_date',
@@ -105,7 +111,7 @@ def get_tests(filters, additional_query_columns=[]):
 	with_header = filters.get("with_header") or ''
 	conditions = get_conditions(filters)
 	invoices = frappe.db.sql("""
-		select si.name as sales_invoice, si.creation as visiting_date, si.insurance_party, si.patient, si.mobile_no as mobile,
+		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Test</button>'), '' )as print_btn,
 		IF(rt.record_status IN ('Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', si.name ,''' onClick=''print_xray(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Xray</button>'), '' ) as xray_btn

@@ -639,6 +639,7 @@
    "width": "50%"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "selling_price_list",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -651,6 +652,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "price_list_currency",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -662,6 +664,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "description": "Rate at which Price list currency is converted to customer's base currency",
    "fieldname": "plc_conversion_rate",
    "fieldtype": "Float",
@@ -2053,6 +2056,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "total_discount_provider",
    "fieldtype": "Float",
@@ -2060,6 +2064,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "insurance_party_type",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -2067,6 +2072,7 @@
    "options": "\nPayer\nInsurance Company"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.insurance_party_type)",
    "fieldname": "insurance_party",
    "fieldtype": "Link",
@@ -2078,6 +2084,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.insurance_party_type)",
    "fieldname": "coverage_percentage",
    "fieldtype": "Float",
@@ -2145,6 +2152,7 @@
    "label": "Passport No."
   },
   {
+   "allow_on_submit": 1,
    "default": "100",
    "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\"], doc.insurance_party_type)",
    "fieldname": "charged_percentage",
@@ -2153,6 +2161,7 @@
    "precision": "1"
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "insurance_party.coverage_type",
    "fieldname": "coverage_type",
    "fieldtype": "Select",
@@ -2165,6 +2174,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_total_discount_provider",
    "fieldtype": "Currency",
    "label": "Total Discount (Payer/Insurance) (Company Currency)",
@@ -2191,6 +2201,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "insurancepayer_account",
    "fieldtype": "Link",
    "label": "Insurance/Payer Account",
@@ -2313,7 +2324,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-22 15:30:09.773226",
+ "modified": "2022-08-23 13:05:19.783029",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -313,7 +313,7 @@ def is_embassy_order(order):
     return order[0] == "E"
 
 def get_patient_results_infinty(res_msg):
-    res_msg = re.sub(b'\x17..\r\n\x02', b'', res_msg)
+    res_msg = re.sub(b'\x17..\r\n\x02.', b'', res_msg)
     res_msg = res_msg.decode()
     p = 1
     results, embassy_results = [], []

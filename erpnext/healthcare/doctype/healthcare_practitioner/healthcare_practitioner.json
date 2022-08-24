@@ -19,6 +19,7 @@
   "image",
   "column_break_7",
   "status",
+  "external_practitioner",
   "mobile_phone",
   "residence_phone",
   "office_phone",
@@ -278,11 +279,17 @@
    "fieldname": "address_and_contacts_section",
    "fieldtype": "Section Break",
    "label": "Address and Contacts"
+  },
+  {
+   "default": "0",
+   "fieldname": "external_practitioner",
+   "fieldtype": "Check",
+   "label": "External Practitioner"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2022-07-29 08:31:54.622824",
+ "modified": "2022-08-23 11:07:43.208365",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",

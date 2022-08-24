@@ -1003,7 +1003,7 @@ def apply_test_button_action(action, tests, test_name, sample):
 	elif action == 'Finalized':
 		where_stmt = "status='Released'"
 	elif action == 'Rejected':
-		where_stmt = "status='Released'"
+		where_stmt = "(status is NULL or status not in ('Finalized'))"
 	elif action == 'definalize':
 		where_stmt = "status='Finalized'"
 		action = 'Released'
