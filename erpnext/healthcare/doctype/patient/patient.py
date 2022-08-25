@@ -23,6 +23,7 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
 	send_registration_sms,
 )
 
+from erpnext.healthcare.doctype.embassy_report.embassy_report import calculate_patient_age
 
 class Patient(Document):
 	def onload(self):
@@ -77,9 +78,81 @@ class Patient(Document):
 				create_customer(self)
 
 		self.set_contact() # add or update contact
-
+		self.update_patient_fields()
 		if not self.user_id and self.email and self.invite_user:
 			self.create_website_user()
+
+	
+	def update_patient_fields(self):
+		old_doc = self.get_doc_before_save()
+		if not old_doc: return
+		if old_doc.patient_name != self.patient_name: self.update_patient_name()
+		if old_doc.social_status != self.social_status: self.update_social_status()
+		if old_doc.passport_no != self.passport_no: self.update_passport_no()
+		if old_doc.passport_issue_date != self.passport_issue_date: self.update_passport_issue_date()
+		if old_doc.passport_place != self.passport_place: self.update_passport_place()
+		if old_doc.passport_expiry_date != self.passport_expiry_date: self.update_passport_expiry_date()
+		if old_doc.mobile != self.mobile: self.update_mobile()
+		if old_doc.dob != self.dob: self.update_dob()
+		if old_doc.sex != self.sex: self.update_gender()
+		if old_doc.country != self.country: self.update_country()
+
+	def update_country(self):
+		frappe.db.set_value("Embassy Report", {"patient": self.name}, "nationality", self.country)
+	
+	
+	def update_gender(self):
+		frappe.db.set_value("Lab Test", {"patient": self.name}, "patient_sex", self.sex)
+		frappe.db.set_value("Radiology Test", {"patient": self.name}, "patient_sex", self.sex)
+		frappe.db.set_value("Sample Collection", {"patient": self.name}, "patient_sex", self.sex)
+		frappe.db.set_value("Embassy Report", {"patient": self.name}, "gender", self.sex)
+
+	def update_dob(self):
+		frappe.db.set_value("Lab Test", {"patient": self.name}, "patient_age", self.get_age())
+		frappe.db.set_value("Radiology Test", {"patient": self.name}, "patient_age", self.get_age())
+		frappe.db.set_value("Sample Collection", {"patient": self.name}, "patient_age", self.get_age())
+		frappe.db.set_value("Embassy Report", {"patient": self.name}, "age", calculate_patient_age(self))
+
+	def update_mobile(self):
+		frappe.db.set_value("Sales Invoice", {"patient": self.name}, "mobile_no", self.mobile)
+		frappe.db.set_value("Customer", self.name, "customer_mobile_no", self.mobile)
+		frappe.db.set_value("Lab Test", {"patient": self.name}, "patient_mobile", self.mobile)
+		frappe.db.set_value("Radiology Test", {"patient": self.name}, "patient_mobile", self.mobile)
+
+	def update_passport_expiry_date(self):
+		frappe.db.set_value("Sales Invoice", {"patient": self.name}, "passport_expiry_date", self.passport_expiry_date)
+
+	def update_passport_place(self):
+		frappe.db.set_value("Sales Invoice", {"patient": self.name}, "passport_place", self.passport_place)
+		frappe.db.set_value("Embassy Report", {"patient": self.name}, "passport_place_of_issue", self.passport_place)
+
+	def update_passport_issue_date(self):
+		frappe.db.set_value("Sales Invoice", {"patient": self.name}, "passport_issue_date", self.passport_issue_date)
+		frappe.db.set_value("Embassy Report", {"patient": self.name}, "passport_date_of_issue", self.passport_issue_date)
+
+	def update_passport_no(self):
+		frappe.db.set_value("Sales Invoice", {"patient": self.name}, "passport_no", self.passport_no)
+		frappe.db.set_value("Embassy Report", {"patient": self.name}, "passport_no", self.passport_no)
+
+	def update_social_status(self):
+		frappe.db.set_value("Sales Invoice", {"patient": self.name}, "social_status", self.social_status)
+		frappe.db.set_value("Embassy Report", {"patient": self.name}, "status", self.social_status)
+
+	def update_patient_name(self):
+		old_name = self.name
+		frappe.db.set_value("Sales Invoice", {"patient": old_name}, "patient_name", self.patient_name)
+		frappe.db.set_value("Sales Invoice", {"patient": old_name}, "customer_name", self.patient_name)
+		frappe.db.set_value("Sales Invoice", {"patient": old_name}, "title", self.patient_name)
+		frappe.db.set_value("Customer", old_name, "customer_name", self.patient_name)
+		frappe.db.set_value("Lab Test", {"patient": old_name}, "patient_name", self.patient_name)
+		frappe.db.set_value("Sample Collection", {"patient":old_name}, "patient_name", self.patient_name)
+		frappe.db.set_value("Radiology Test", {"patient": old_name}, "patient_name", self.patient_name)
+		frappe.db.set_value("Embassy Report", {"patient":old_name}, "patient_name", self.patient_name)
+		frappe.db.set_value("GL Entry", {"against":old_name}, "against", self.patient_name)
+		frappe.db.set_value("Payment Entry", {"party":old_name}, "party_name", self.patient_name)
+		frappe.db.set_value("Payment Entry", {"party":old_name}, "title", self.patient_name)
+		frappe.rename_doc("Patient", old_name, self.patient_name)
+		frappe.rename_doc("Customer", old_name, self.patient_name)
 
 	def load_dashboard_info(self):
 		if self.customer:

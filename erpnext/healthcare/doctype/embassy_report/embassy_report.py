@@ -36,6 +36,11 @@ def calculate_age(patient):
 	age = dateutil.relativedelta.relativedelta(getdate(), dob)
 	return str(age.years) + ' ' + "Years(s)"
 
+def calculate_patient_age(patient_doc):
+	dob = getdate(patient_doc.dob)
+	age = dateutil.relativedelta.relativedelta(getdate(), dob)
+	return str(age.years) + ' ' + "Years(s)"
+
 @frappe.whitelist()
 def has_cover(sales_invoice):
 	destination = frappe.db.get_value("Sales Invoice", sales_invoice, "destination_country")
