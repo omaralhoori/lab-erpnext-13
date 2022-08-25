@@ -1012,10 +1012,10 @@ def format_xray_header(xray_test, with_header=False, url=""):
         </tr>
         """
     return f"""
-    <table class="b-bottom header f-s">
+    <table class="b-bottom header">
         {header}
-        <tr class="center fb"><td colspan="6">Radiology Report</td> </tr>
-        <tr class="fb">
+        <tr class="center"><td colspan="6">Radiology Report</td> </tr>
+        <tr class="">
             <td >
                  Patient Name
             </td>
