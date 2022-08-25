@@ -549,6 +549,8 @@ class SalesInvoice(SellingController):
 		#frappe.msgprint(self.docstatus)
 		old_invoice = self.get_doc_before_save()
 		added_items, removed_items = self.get_created_or_deleted_items(old_invoice.items, self.items)
+		print("Sales invoice------------------------------------------00")
+		print(added_items, removed_items )
 		if len(removed_items) > 0 or len(added_items) > 0:
 			sample_status = frappe.db.get_value("Sample Collection", {"sales_invoice": self.name}, "docstatus")
 			if sample_status == 1:

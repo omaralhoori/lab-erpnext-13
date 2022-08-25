@@ -60,6 +60,7 @@ def get_normal_ranges(lab_test_template):
     FROM `tabAttribute Normal Range` as anr
     INNER JOIN `tabNormal Range` as nr ON nr.name = anr.normal_range_id
     WHERE anr.parent="{lab_test_template}" AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (nr.effective_date IS NULL OR now() >nr.effective_date) AND (nr.expiry_date IS NULL OR now() < nr.expiry_date)
+    ORDER BY nr.range_order
     """.format(lab_test_template=lab_test_template), as_dict=True)
 
 def filter_range_by_gender(range, patient):

@@ -136,6 +136,8 @@ class LabTest(Document):
 		old_doc = self.get_doc_before_save()
 		if old_doc:
 			added_items, removed_items = self.get_created_or_deleted_items(old_doc.template, self.template)
+			print("lab------------------------")
+			print(added_items)
 			#remove_test_from_template(self, removed_items)
 			add_test_from_template(self, added_items)
 	def get_created_or_deleted_items(self, old_items, new_items):
@@ -278,6 +280,11 @@ def create_or_delete_items(sales_invoice, removed_items, added_items):
 		create_lab_test_from_invoice(sales_invoice.name)
 		return
 	# else delete or add new items
+	# sample = frappe.db.get_value("Lab Test", lab_test, "sample")
+	# if sample:
+	# 	if len(removed_items) > 0 or len(added_items) > 0:
+	# 		frappe.db.set_value("Sample Collection", sample, {"docstatus": 0})
+
 	remove_items_lab_test(lab_test, removed_items)
 	add_new_items_lab_test(lab_test, added_items, sales_invoice)
 	
@@ -390,8 +397,10 @@ def add_new_items_lab_test_joined(invoice, new_items):
 	if invoice and invoice.patient:
 		patient = frappe.get_doc('Patient', invoice.patient)
 		for item in new_items:
+			print("line 400-------------------------")
 			print(item.item_code)
 			template = get_lab_test_template(item.item_code)
+			print("template", template)
 			if template:
 				if template.lab_test_group == "Radiology Services":
 					rad_test = add_or_create_rad_test_doc(patient, template, invoice)
@@ -484,11 +493,14 @@ def create_lab_test_doc(invoiced, practitioner, patient, template, company):
 
 
 def add_or_create_lab_test_doc(invoiced, practitioner, patient, template, company, sales_invoice):
+	print("Start Creating")
 	lab_test = frappe.db.get_value('Lab Test', {"sales_invoice": sales_invoice}, ['name'])
 	if not lab_test: return create_lab_test_doc(invoiced, practitioner, patient, template, company)
 	lab_test = frappe.get_doc('Lab Test', {"sales_invoice": sales_invoice})
 	template_row = lab_test.append("template")
 	template_row.template = template.name
+	lab_test.save(ignore_permissions=True)
+	print("Done Creating")
 	return lab_test
 
 def create_normals(template, lab_test, group_template=None):
