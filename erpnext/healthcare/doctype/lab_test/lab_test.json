@@ -584,15 +584,15 @@
   },
   {
    "fetch_from": "patient.mobile",
+   "fetch_if_empty": 1,
    "fieldname": "patient_mobile",
    "fieldtype": "Data",
-   "label": "Patient Mobile",
-   "read_only": 1
+   "label": "Patient Mobile"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-24 07:49:10.311877",
+ "modified": "2022-08-27 13:29:00.267265",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

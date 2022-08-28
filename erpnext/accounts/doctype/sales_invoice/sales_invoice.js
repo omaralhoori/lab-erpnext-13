@@ -1344,6 +1344,8 @@ frappe.ui.form.on('Sales Invoice', {
 	refresh: function (frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code");
 		frm.toggle_reqd("ref_practitioner", true);
+		frm.set_df_property("ref_practitioner", "read_only", false);
+		frm.set_df_property("ref_practitioner", "allow_on_submit", true);
 		if (frm.doc.docstatus === 0 && !frm.doc.is_return) {
 			frm.add_custom_button(__("Fetch Timesheet"), function () {
 				let d = new frappe.ui.Dialog({
