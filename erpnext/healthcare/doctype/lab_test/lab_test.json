@@ -590,17 +590,14 @@
    "read_only": 1
   }
  ],
- "is_submittable": 1,
  "links": [],
- "modified": "2022-08-24 07:49:10.311877",
+ "modified": "2022-08-25 18:58:50.608721",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
  "owner": "Administrator",
  "permissions": [
   {
-   "amend": 1,
-   "cancel": 1,
    "create": 1,
    "email": 1,
    "print": 1,
@@ -608,7 +605,6 @@
    "report": 1,
    "role": "Laboratory User",
    "share": 1,
-   "submit": 1,
    "write": 1
   },
   {

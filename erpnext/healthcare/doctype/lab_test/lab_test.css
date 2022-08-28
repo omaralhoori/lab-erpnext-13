@@ -34,6 +34,11 @@
 .test-comment{
     height: 80px;
 }
+
+.free-text-area{
+    height: 80px;
+}
+
 .freetext-select{
     width: 300px;
 }

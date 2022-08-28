@@ -252,7 +252,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	columns = ''
 	extra_searchfields = [field for field in searchfields
-		if not field in ["name", "item_group", "description", "item_name"]]
+		if not field in ["name", "item_group", "description", "item_name", "alias"]]
 
 	if extra_searchfields:
 		columns = ", " + ", ".join(extra_searchfields)
@@ -295,7 +295,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			concat(substr(tabItem.description, 1, 40), "..."), description) as description
 		{columns}
 		from tabItem
-		INNER JOIN ( SELECT item as template_item, lab_test_template_type from `tabLab Test Template` ) as ltt ON ltt.template_item=name
+		INNER JOIN ( SELECT item as template_item, lab_test_template_type, alias from `tabLab Test Template` ) as ltt ON ltt.template_item=name
 		where tabItem.docstatus < 2
 
 			and tabItem.disabled=0
@@ -305,6 +305,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				{description_cond})
 			{fcond} {mcond}
 		order by
+			alias,
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
 			idx desc,

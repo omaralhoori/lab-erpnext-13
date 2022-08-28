@@ -63,7 +63,7 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 		// var attributes = attributes_list['attribute_options']
 		result_type = `
 
-	<input ${disable_input(childTest['status'])}  class="input test-input-control" name="${childTest['name']}" value="${childTest['result_value'] || ""}"/>
+	<textarea ${disable_input(childTest['status'])}  class="input test-input-control free-text-area" name="${childTest['name']}" value="${childTest['result_value'] || ""}">${childTest['result_value'] || ""}</textarea>
 
 	<label>Default Option</label>
 	<select ${disable_input(childTest['status'])} class="test-input-control freetext-select">

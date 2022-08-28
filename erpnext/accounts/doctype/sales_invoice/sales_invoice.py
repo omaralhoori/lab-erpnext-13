@@ -556,7 +556,7 @@ class SalesInvoice(SellingController):
 			if sample_status == 1:
 				frappe.throw(_("The invoice could not be updated because the sample was collected"))
 			manage_invoice_submit_cancel(self, "on_update_after_submit", removed_items, added_items)
-		self.update_destination()
+		#self.update_destination()
 		if self.docstatus == 1:
 			#frappe.msgprint('aaaaaaaaaaaaa')
 			#self.docstatus == 1
@@ -571,7 +571,7 @@ class SalesInvoice(SellingController):
 	def on_update(self):
 		self.set_paid_amount()
 		self.update_patient_info()
-		self.update_destination()
+		#self.update_destination()
 	
 	def update_destination(self):
 		old_doc = self.get_doc_before_save()
