@@ -100,7 +100,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "RV/.YYYY./\nCN-.YYYY.-.MM.-\nDN-.YYYY.-.MM.-\nJV-.YYYY.-.MM.-\nPV-.YYYY.-.MM.-\nRV-.YYYY.-.MM.-\nJV-.YYYY.-",
+   "options": "JV-.YYYY.-\nRV/.YYYY./\nCN-.YYYY.-.MM.-\nDN-.YYYY.-.MM.-\nJV-.YYYY.-.MM.-\nPV-.YYYY.-.MM.-\nRV-.YYYY.-.MM.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -543,7 +543,7 @@
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-16 06:42:50.771330",
+ "modified": "2022-08-25 13:49:54.544589",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

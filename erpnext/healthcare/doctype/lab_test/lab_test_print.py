@@ -1052,8 +1052,9 @@ def get_normal_xray_tbody(reports, header):
     for report in reports:
         if len(html) > 0:
             html += get_break()
+        #         <tr class="center fb"><td> {report} </td></tr>
+
         body = f"""
-        <tr class="center fb"><td> {report} </td></tr>
             <tr><td>
                 {reports[report]}
             </td></tr>

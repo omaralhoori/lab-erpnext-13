@@ -9,6 +9,10 @@
   "customer_section",
   "title",
   "naming_series",
+  "patient",
+  "patient_name",
+  "ref_practitioner",
+  "practitioner_name",
   "social_status",
   "destination_country",
   "referred_by",
@@ -267,7 +271,6 @@
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_standard_filter": 1,
    "label": "Customer",
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
@@ -285,6 +288,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "in_global_search": 1,
+   "in_standard_filter": 1,
    "label": "Customer Name",
    "oldfieldname": "customer_name",
    "oldfieldtype": "Data",
@@ -380,7 +384,6 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_standard_filter": 1,
    "label": "Date",
    "no_copy": 1,
    "oldfieldname": "posting_date",
@@ -1109,6 +1112,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "base_discount_amount",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1135,6 +1139,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -2270,7 +2275,6 @@
    "fieldname": "destination_country",
    "fieldtype": "Link",
    "hidden": 1,
-   "in_standard_filter": 1,
    "label": "Destination",
    "options": "Country"
   },
@@ -2314,6 +2318,36 @@
    "fieldname": "add_item_group_btn",
    "fieldtype": "Button",
    "label": "Add Item Group"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ref_practitioner",
+   "fieldtype": "Link",
+   "label": "Referring Practitioner",
+   "options": "Healthcare Practitioner",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "ref_practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Practitioner Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2326,7 +2360,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-08-24 13:15:35.681888",
+ "modified": "2022-08-27 08:42:10.253542",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

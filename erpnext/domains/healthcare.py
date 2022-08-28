@@ -26,24 +26,7 @@ data = {
 		'Patient'
 	],
 	'custom_fields': {
-		'Sales Invoice': [
-			{
-				'fieldname': 'patient', 'label': 'Patient', 'fieldtype': 'Link', 'options': 'Patient',
-				'insert_after': 'naming_series',"reqd": True
-			},
-			{
-				'fieldname': 'patient_name', 'label': 'Patient Name', 'fieldtype': 'Data', 'fetch_from': 'patient.patient_name',
-				'insert_after': 'patient', 'read_only': True
-			},
-			{
-				'fieldname': 'ref_practitioner', 'label': 'Referring Practitioner', 'fieldtype': 'Link', 'options': 'Healthcare Practitioner',
-				'insert_after': 'patient_name',"reqd": True , "allow_on_submit": True
-			},
-			{
-				'fieldname': 'practitioner_name', 'label': 'Practitioner Name', 'fieldtype': 'Data', 'fetch_from': 'ref_practitioner.practitioner_name','read_only': 1,
-				'insert_after': 'patient_name', 'read_only': True
-			}
-		],
+	
 		'Sales Invoice Item': [
 			{
 				'fieldname': 'reference_dt', 'label': 'Reference DocType', 'fieldtype': 'Link', 'options': 'DocType',
