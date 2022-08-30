@@ -10,6 +10,8 @@
   "patient_name_by",
   "link_customer_to_patient",
   "default_medical_code_standard",
+  "add_test_uncollect",
+  "remove_test_uncollect",
   "column_break_9",
   "collect_registration_fee",
   "registration_fee",
@@ -422,11 +424,23 @@
    "fieldname": "use_branch_code",
    "fieldtype": "Check",
    "label": "Use Branch Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "add_test_uncollect",
+   "fieldtype": "Check",
+   "label": "Uncollection Required for Adding Test"
+  },
+  {
+   "default": "1",
+   "fieldname": "remove_test_uncollect",
+   "fieldtype": "Check",
+   "label": "Uncollection Required for Removing Test"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-08-05 22:42:16.872949",
+ "modified": "2022-08-29 13:46:46.676325",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

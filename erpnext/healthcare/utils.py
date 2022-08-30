@@ -427,6 +427,18 @@ def manage_invoice_submit_cancel(doc, method, removed_item=[], added_items=[]):
 	elif method=='on_update_after_submit' and frappe.db.get_single_value('Healthcare Settings', 'create_lab_test_on_si_submit'):
 		create_or_delete_items(doc, removed_item, added_items)
 
+def are_items_tests(items):
+	for item in items:
+		tests = frappe.db.sql(f"""
+			SELECT count(ltt.name) FROM `tabLab Test Template` as ltt
+			INNER JOIN `tabLab Test Group Template` as ltgt ON ltgt.parent=ltt.name
+			WHERE ltt.item="{item.item_code}"
+		""")
+		if tests:
+			if tests[0][0] > 0:
+				return True
+
+
 def set_invoiced(item, method, ref_invoice=None):
 	invoiced = False
 	if method=='on_submit':

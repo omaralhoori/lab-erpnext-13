@@ -29,7 +29,8 @@
   "report_code",
   "host_code",
   "host_name",
-  "status"
+  "status",
+  "item"
  ],
  "fields": [
   {
@@ -210,11 +211,17 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nReceived\nReleased\nFinalized\nRejected"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-08-27 17:16:50.367260",
+ "modified": "2022-08-28 11:16:35.861506",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Result",

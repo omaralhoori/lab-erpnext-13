@@ -40,7 +40,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 )
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.healthcare.utils import manage_invoice_submit_cancel
+from erpnext.healthcare.utils import are_items_tests, manage_invoice_submit_cancel
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
@@ -552,10 +552,20 @@ class SalesInvoice(SellingController):
 		print("Sales invoice------------------------------------------00")
 		print(added_items, removed_items )
 		if len(removed_items) > 0 or len(added_items) > 0:
-			sample_status = frappe.db.get_value("Sample Collection", {"sales_invoice": self.name}, "docstatus")
-			if sample_status == 1:
-				frappe.throw(_("The invoice could not be updated because the sample was collected"))
+			if are_items_tests(removed_items):
+					if frappe.db.get_single_value('Healthcare Settings', 'remove_test_uncollect'):
+						sample_status = frappe.db.get_value("Sample Collection", {"sales_invoice": self.name}, "docstatus")
+						if sample_status == 1:
+							frappe.throw(_("The invoice could not be updated because the sample was collected"))
+			
+			if are_items_tests(added_items):
+					if frappe.db.get_single_value('Healthcare Settings', 'add_test_uncollect'):
+						sample_status = frappe.db.get_value("Sample Collection", {"sales_invoice": self.name}, "docstatus")
+						if sample_status == 1:
+							frappe.throw(_("The invoice could not be updated because the sample was collected"))
+
 			manage_invoice_submit_cancel(self, "on_update_after_submit", removed_items, added_items)
+			
 		#self.update_destination()
 		if self.docstatus == 1:
 			#frappe.msgprint('aaaaaaaaaaaaa')
