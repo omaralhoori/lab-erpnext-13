@@ -164,3 +164,12 @@ def get_package_items(test_template):
 		WHERE ntt.parent='{test_template}' AND ltt.is_billable=1
 
 	""", as_dict=True)
+
+
+@frappe.whitelist()
+def get_package_templates(test_template):
+	#template = frappe.get_doc("Lab Test Template", lab_test_template)
+	return frappe.db.sql(f"""
+		   SELECT ntt.lab_test_template as template FROM `tabLab Test Group Template` as ntt 
+		WHERE ntt.parent='{test_template}'
+	""", as_dict=True)

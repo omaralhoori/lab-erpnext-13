@@ -8,6 +8,25 @@ frappe.ui.form.on('Lab Test Template', {
 		if (!frm.doc.lab_test_description)
 			frm.set_value('lab_test_description', frm.doc.lab_test_name);
 	},
+	add_item_group_btn: function(frm){
+		frappe.call({
+			method: "erpnext.healthcare.doctype.lab_test_template.lab_test_template.get_package_templates",
+			args:{
+				test_template: frm.doc.custom_group_item
+			},
+			callback: (res) => {
+				if (res.message){
+					for (var item of res.message){
+						var row = frm.add_child("lab_test_groups");
+						frappe.model.set_value(row.doctype, row.name, "lab_test_template", item.template);
+					}
+
+					frm.set_value("custom_group_item", "")
+					frm.refresh_fields("lab_test_groups");
+				}
+			}
+		})
+	},
 	refresh : function(frm) {
 		// Restrict Special, Grouped type templates in Child Test Groups
 		if (frm.doc.lab_test_template_type == 'Multiline'){

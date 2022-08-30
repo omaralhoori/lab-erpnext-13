@@ -35,7 +35,7 @@ frappe.ui.form.on('Radiology Test', {
 		}
 		if(frappe.user.has_role('Xray Technician')){
 			
-			frm.add_custom_button("Realese",  () => {
+			frm.add_custom_button("Release",  () => {
 				frappe.call({
 					method: "erpnext.healthcare.doctype.radiology_test.radiology_test.release_selected",
 					args: {
@@ -47,7 +47,7 @@ frappe.ui.form.on('Radiology Test', {
 				})
 			})
 
-			frm.add_custom_button("Unrealese",  () => {
+			frm.add_custom_button("Unrelease",  () => {
 				frappe.call({
 					method: "erpnext.healthcare.doctype.radiology_test.radiology_test.unrelease_selected",
 					args: {

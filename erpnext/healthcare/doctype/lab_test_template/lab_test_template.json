@@ -37,6 +37,10 @@
   "lab_test_normal_range",
   "section_break_group",
   "lab_test_groups",
+  "add_item_group_section",
+  "custom_group_item",
+  "column_break_32",
+  "add_item_group_btn",
   "normal_range_section",
   "attribute_normal_range",
   "section_break_special",
@@ -795,6 +799,27 @@
    "fieldname": "group_tests",
    "fieldtype": "Check",
    "label": "Group Tests"
+  },
+  {
+   "depends_on": "eval:doc.lab_test_template_type == 'Grouped'",
+   "fieldname": "add_item_group_section",
+   "fieldtype": "Section Break",
+   "label": "Add Item Group"
+  },
+  {
+   "fieldname": "custom_group_item",
+   "fieldtype": "Link",
+   "label": "Group Item",
+   "options": "Lab Test Template"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "add_item_group_btn",
+   "fieldtype": "Button",
+   "label": "Add Item Group"
   }
  ],
  "links": [
@@ -806,7 +831,7 @@
    "table_fieldname": "test_results"
   }
  ],
- "modified": "2022-08-24 06:05:08.591972",
+ "modified": "2022-08-30 06:44:52.673653",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
