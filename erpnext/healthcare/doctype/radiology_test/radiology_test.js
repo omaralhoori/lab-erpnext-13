@@ -66,3 +66,14 @@ frappe.ui.form.on('Radiology Test', {
 		
 	}
 });
+
+
+frappe.ui.form.on("Radiology Test Result", {
+	get_template: async function(frm, cdt, cdn) {
+		var template_name = frappe.model.get_value("Radiology Test Result", cdn, "radiology_template")
+		if (!template_name) return;
+		var res = await frappe.db.get_value("Radiology Template", template_name, "template")
+		if (!res.message.template) return;
+		frappe.model.set_value("Radiology Test Result", cdn, "test_result", res.message.template)
+	}
+	});

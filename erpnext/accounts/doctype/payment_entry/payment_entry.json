@@ -15,6 +15,7 @@
   "posting_date",
   "company",
   "mode_of_payment",
+  "mode_of_payment_type",
   "card_number",
   "party_section",
   "party_type",
@@ -735,12 +736,22 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Card Number"
+  },
+  {
+   "fetch_from": "mode_of_payment.type",
+   "fetch_if_empty": 1,
+   "fieldname": "mode_of_payment_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Mode of Payment Type",
+   "options": "Cash\nCard\nBank\nGeneral\nPhone",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-22 06:57:44.518511",
+ "modified": "2022-08-29 13:13:04.224278",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
