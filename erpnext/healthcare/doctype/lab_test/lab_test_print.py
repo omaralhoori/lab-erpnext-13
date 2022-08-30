@@ -644,7 +644,7 @@ def format_hematology_tests(tests, header):
 
 def get_chemistry_tests(test_doc, only_finalized=False):
     tests = get_tests_by_item_group(test_doc.name, "Chemistry", only_finalized)
-    tests.sort(key=lambda x: x['order'])
+    #tests.sort(key=lambda x: x['order'])
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -865,6 +865,7 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         ON stu.name=lt.secondary_uom
 
         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
+        ORDER BY ltt.order, tltt.order
         """.format(test_name=test_name, order= order, item_group=item_group, where_stmt=where_stmt), as_dict=True)
 
 def get_embassy_previous_tests(test_name, patient):
