@@ -105,7 +105,7 @@ const format_tests_html = (tests) => {
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
 		`
-		defultOption = 'only_released';
+		defultOption = 'received_released';
 		//<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 	}
 	buttons = `<div> 
@@ -115,7 +115,7 @@ const format_tests_html = (tests) => {
 		<option value="only_released" ${defultOption == "only_released" ? "selected" : ""}>Only Released</option>
 		<option value="only_finalized">Only Finalized</option>
 		<option value="only_rejected">Only Rejected</option>
-		<option value="received_released">Received/Released</option>
+		<option value="received_released" ${defultOption == "received_released" ? "selected" : ""}>Received/Released</option>
 		<option value="received_released_finalized">Received/Released/Finalized</option>
 		<option value="all">All</option>
 	</select>
