@@ -64,3 +64,8 @@
 div[data-fieldname="patient_mobile"]  .control-value{
     font-weight: bold;
 }
+.tests-display-filter{
+    width: 200px;
+    display: inline-block;
+    margin: 5px;
+}

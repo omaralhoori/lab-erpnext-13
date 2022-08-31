@@ -91,22 +91,35 @@ const format_tests_html = (tests) => {
 	var html = "";
 	//	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
 
-	var buttons = `<div> 
+	var buttons = `
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
-		</div>`
+		`
+	var defultOption = 'only_received';
 	if (frappe.user.has_role('LabTest Approver')){
-		buttons = `<div> 
+		buttons = `
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
 		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
-		</div>`
+		`
+		defultOption = 'only_released';
 		//<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 	}
-	
+	buttons = `<div> 
+	${buttons}
+	<select class='form-control tests-display-filter'>
+		<option value="only_received">Only Received</option>
+		<option value="only_released" ${defultOption == "only_released" ? "selected" : ""}>Only Released</option>
+		<option value="only_finalized">Only Finalized</option>
+		<option value="only_rejected">Only Rejected</option>
+		<option value="received_released">Received/Released</option>
+		<option value="received_released_finalized">Received/Released/Finalized</option>
+		<option value="all">All</option>
+	</select>
+	</div>`
 	// var options = attr_options.reduce((obj, item) => (obj[item.template] = item.attribute_options, obj) ,{});
 	// var units = test_units.reduce((obj, item) => (obj[item.name] = {"si": item.si_unit, "conv": item.conv_unit}, obj) ,{});
 	for (var testTemplate in tests){
@@ -131,7 +144,7 @@ const format_tests_html = (tests) => {
 						
 						</div>
 					</span>
-					<span><label>${childTest['status'] || ""} </label>&nbsp;<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" /></span>
+					<span><label class="test-status">${childTest['status'] || ""} </label>&nbsp;<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" /></span>
 					
 				</div>
 			`;
@@ -159,6 +172,40 @@ const format_tests_html = (tests) => {
 	}
 	html = buttons + html;
 	return html
+}
+const toggle_test_display = () => {
+	var filter = $('.tests-display-filter').val();
+	console.log(filter);
+	if(! filter) return;
+
+	var filters = [];
+	if (filter == "only_received") filters.push("Received");
+	else if (filter == "only_released") filters.push("Released");
+	else if (filter == "only_finalized") filters.push("Finalized");
+	else if (filter == "only_rejected") filters.push("Rejected");
+	else if (filter == "received_released") {
+		filters.push("Received");
+		filters.push("Released");
+	}
+	else if (filter == "received_released_finalized") {
+		filters.push("Received");
+		filters.push("Released");
+		filters.push("Finalized");
+	}
+	else if (filter == "all") {
+		filters.push("Received");
+		filters.push("Released");
+		filters.push("Finalized");
+		filters.push("Rejected");
+	}
+	console.log(filters);
+	$('.child-test-container').each(function(){
+		var status = $(this).find(".test-status").html();
+		$(this).show();
+		if (!status || !filters.includes(status.trim())){
+			$(this).hide();
+		}
+	})
 }
 const setup_input_listeners = (frm) => {
 	$('.child-tests .input').change(function(value) {
@@ -227,7 +274,9 @@ const setup_input_listeners = (frm) => {
 			}
 		})
 	})
-
+	$('.tests-display-filter').change(function(){
+		toggle_test_display();
+	})
 	$('.select-all-btn').click(function(){
 		$(".result-checkbox").prop('checked', true)
 		toggle_test_selected_buttons(true);
@@ -304,6 +353,7 @@ frappe.ui.form.on('Lab Test', {
 			{ fieldname: 'result_value', columns: 7 }
 		];
 	},
+
 	refresh: function (frm) {
 		if (frappe.user.name == "Administrator"){
 			frm.toggle_display('normal_test_items', true);
@@ -401,6 +451,7 @@ frappe.ui.form.on('Lab Test', {
 
 				$(frm.fields_dict.lab_test_html.wrapper).html( format_tests_html(tests))
 				setup_input_listeners(frm);
+				toggle_test_display()
 			})
 			
 
@@ -504,7 +555,7 @@ frappe.ui.form.on('Lab Test', {
 		// 		});
 		// 	});
 		// }
-
+	
 	}
 });
 
