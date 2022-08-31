@@ -23,6 +23,7 @@ frappe.listview_settings['Sales Invoice'] = {
 	},
 	right_column: "grand_total",
 	onload: function (listview) {
+		$('.content.page-container').css("background-color", "#E1F5FE")
 		//ibrahim	
 		//listview.page.add_menu_item(__("Clear Error Logs"), function() {
 		//	frappe.call({
