@@ -19,20 +19,23 @@ class RadiologyTest(Document):
 def create_rad_test_from_template(rad_test):
 	templates = rad_test.template if isinstance(rad_test.template, list) else [rad_test.template]
 	for template_name in templates:
+		item = None
+		if template_name.get("item"):
+			item = template_name.item
 		if template_name.get("template"):
 			template_name = template_name.get("template")
 		template = frappe.get_doc('Lab Test Template', template_name)
 
-		rad_test = load_result_format(rad_test, template)
+		rad_test = load_rad_result_format(rad_test, template, item=item)
 
 
-def load_result_format(lab_test, template, depth=1):
+def load_rad_result_format(lab_test, template, depth=1, item=None):
 	if depth > 3 : return lab_test
 	if template.lab_test_template_type == 'Single'  and template.lab_test_group == "Radiology Services":
-		create_results(template, lab_test)
+		create_results(template, lab_test, item=item)
 
 	elif template.lab_test_template_type == 'Multiline':
-		create_multiline_normals(template, lab_test)
+		create_multiline_normals(template, lab_test, item=item)
 
 	elif template.lab_test_template_type == 'Grouped':
 		# Iterate for each template in the group and create one result for all.
@@ -40,12 +43,12 @@ def load_result_format(lab_test, template, depth=1):
 			if lab_test_group.lab_test_template:
 				template_in_group = frappe.get_doc('Lab Test Template', lab_test_group.lab_test_template)
 				#create_multiline_normals(template_in_group, lab_test)
-				lab_test = load_result_format(lab_test, template_in_group, depth + 1)
+				lab_test = load_rad_result_format(lab_test, template_in_group, depth + 1, item=item)
 
 	lab_test.save(ignore_permissions=True) # Insert the result
 	return lab_test
 
-def create_multiline_normals(template, lab_test):
+def create_multiline_normals(template, lab_test, item=None):
 		if len(template.lab_test_groups)> 0:
 			for lab_test_group in template.lab_test_groups:
 				# Template_in_group = None
@@ -53,16 +56,18 @@ def create_multiline_normals(template, lab_test):
 					template_in_group = frappe.get_doc('Lab Test Template', lab_test_group.lab_test_template)
 					if template_in_group:
 						if template_in_group.lab_test_template_type == 'Single' and template_in_group.lab_test_group == "Radiology Services":
-							create_results(template_in_group, lab_test)
+							create_results(template_in_group, lab_test, item=item)
 		else:
 			if template.lab_test_group == "Radiology Services" :
-				create_results(template, lab_test)
+				create_results(template, lab_test, item=item)
 
 
-def create_results(template, lab_test):
+def create_results(template, lab_test, item=None):
 	result = lab_test.append('test_results')
 	result.test_template = template.name
 	result.test_result = template.result_legend
+	if item:
+		result.item = item
 
 
 import json

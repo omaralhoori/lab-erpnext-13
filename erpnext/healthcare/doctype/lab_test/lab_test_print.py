@@ -983,7 +983,7 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         if not xray_test: frappe.throw("No Radiology Test created with this invoice.")
         if xray_test.record_status != "Finalized" and xray_test.record_status != "Released": frappe.throw("Radiology test not finalized.")
         if len(xray_test.test_results) == 0: frappe.throw("Radiology test has no test result.")
-        reports = { result.test_name: result.test_result for result in xray_test.test_results }
+        reports = { result.test_name: result.test_result for result in xray_test.test_results  if result.status != "Rejected"  }
         url = frappe.local.request.host
         header = format_xray_header(xray_test, with_header, url)
         html = get_print_html_base()
