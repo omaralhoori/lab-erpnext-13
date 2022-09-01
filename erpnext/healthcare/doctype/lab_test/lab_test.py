@@ -251,7 +251,10 @@ def add_test_from_template(lab_test,  added_items):
 	if sample:
 		#sample.save(ignore_permissions=True)
 		#sample.submit()
+		print("sssssssssssssssssssssssssssssssssssssssssss")
 		frappe.db.set_value("Sample Collection", lab_test.sample, {"docstatus": 1})
+		get_receive_sample( lab_test.sample,  lab_test.name)
+		
 
 @frappe.whitelist()
 def update_status(status, name):
@@ -941,10 +944,12 @@ def get_receive_sample(sample, test_name=None):
 	# 		print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
 	# 		sent = send_msg_order(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), tests, 107)
 		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
-	frappe.db.sql("""
+	query = """
 				UPDATE `tabNormal Test Result` SET status='Received'
-			WHERE parent='{test_name}' AND status NOT IN ('Released', 'Finalized', 'Rejected')
-			""".format(test_name=test_name))
+			WHERE parent='{test_name}' AND (status IS NULL or status NOT IN ('Released', 'Finalized', 'Rejected') )
+			""".format(test_name=test_name)
+	print(query)
+	frappe.db.sql(query)
 	return str(sample_docstatus)
 def send_received_msg_order(sample, test_name):
 	sent = False
