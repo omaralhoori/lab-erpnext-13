@@ -280,7 +280,7 @@ def embassy_test_result(lab_test, return_html = False, selected_tests=[]):
     frappe.local.response.filecontent = pdf_content#get_pdf(html)
     frappe.local.response.type = "pdf"
 
-def get_lab_result_footer(test_doc):
+def get_lab_result_footer(test_doc=None):
     html = f"""
         <table style="width:90%; margin: 0 auto; border-top: 1px solid;"><tr>
         <td style="width:20%;">
@@ -1032,6 +1032,9 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         options = { "--margin-left" : "0","--margin-right" : "0",  "quiet":""}
         if not with_header:
             options["--margin-top" ] ="50mm"
+        if xray_test.record_status == "Finalized":
+            options["--footer-html"] = "templates/xray_footer.html"
+            options["--margin-bottom"] = "20mm"
         pdf_content =  pdfkit.from_string( html, False, options)  or ''
         if return_html : return pdf_content
         frappe.local.response.filename = "Test.pdf"
