@@ -105,7 +105,7 @@ const format_tests_html = (tests) => {
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
 		`
-		defultOption = 'received_released';
+		defultOption = 'all';
 		//<button class='btn test-selected-btn' name='Rejected' disabled>Reject Selected</button>
 	}
 	buttons = `<div> 
@@ -117,7 +117,7 @@ const format_tests_html = (tests) => {
 		<option value="only_rejected">Only Rejected</option>
 		<option value="received_released" ${defultOption == "received_released" ? "selected" : ""}>Received/Released</option>
 		<option value="received_released_finalized">Received/Released/Finalized</option>
-		<option value="all">All</option>
+		<option value="all" ${defultOption == "all" ? "selected" : ""}>All</option>
 	</select>
 	</div>`
 	// var options = attr_options.reduce((obj, item) => (obj[item.template] = item.attribute_options, obj) ,{});
