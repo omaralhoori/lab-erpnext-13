@@ -364,28 +364,44 @@ frappe.ui.form.on('Lab Test', {
 				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}`
 				window. open(url, '_blank')
 			})
+			frm.page.add_menu_item(__('Print Selected'), function () {
+				var searchIDs = $(".result-checkbox:checked").map(function(){
+					//frappe.model.set_value('Normal Test Result', $(this).val(), "status", button) ;
+					return `'${$(this).val()}'`;
+				  }).get();
+				  let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result_selected?lab_test=${frm.doc.name}&selected_tests=${JSON.stringify(searchIDs)}`
+				window. open(url, '_blank')
+			});
 
 			if (frappe.user.has_role('Lab Test Users')){
 				frm.page.add_menu_item(__('Reject Selected'), function () {
-					var searchIDs = $(".result-checkbox:checked").map(function(){
-						//frappe.model.set_value('Normal Test Result', $(this).val(), "status", button) ;
-						return $(this).val();
-					  }).get();
-					frappe.call({
-						method: "erpnext.healthcare.doctype.lab_test.lab_test.apply_test_button_action",
-						args: {
-							action: "Rejected",
-							tests: searchIDs,
-							sample: frm.doc.sample,
-							test_name: frm.doc.name
-						},
-						callback: () =>
-						{
-							frm.reload_doc();
-						}
+					frappe.confirm('Are you sure you want to reject selected tests?',
+					() => {
+						var searchIDs = $(".result-checkbox:checked").map(function(){
+							//frappe.model.set_value('Normal Test Result', $(this).val(), "status", button) ;
+							return $(this).val();
+						  }).get();
+						frappe.call({
+							method: "erpnext.healthcare.doctype.lab_test.lab_test.apply_test_button_action",
+							args: {
+								action: "Rejected",
+								tests: searchIDs,
+								sample: frm.doc.sample,
+								test_name: frm.doc.name
+							},
+							callback: () =>
+							{
+								frm.reload_doc();
+							}
+						})
+					}, () => {
+						// action to perform if No is selected
 					})
+					
 				});
 			}
+
+			
 
 			frappe.call({
 				method: "erpnext.healthcare.utils.is_embassy",

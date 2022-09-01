@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from asyncore import write
+import json
 
 import frappe
 from frappe.permissions import get_valid_perms
@@ -207,6 +208,34 @@ def print_report_result(lab_test, with_header=False):
 
 
 @frappe.whitelist()
+def lab_test_result_selected(lab_test, selected_tests):
+    # f = open("test-print.html", "r")
+    # html  = f.read()
+    # f.close()
+    if selected_tests:
+        selected_tests = json.loads(selected_tests)
+    else: selected_tests = []
+    if frappe.local.conf.is_embassy:
+        embassy_test_result(lab_test, selected_tests=selected_tests)
+        return
+    test_doc = frappe.get_doc("Lab Test", lab_test)
+    if not test_doc:
+        frappe.throw("Lab Test not found")
+    html = get_print_html_base()
+    header = get_print_header(test_doc)
+    tbody = get_print_tbody(test_doc, header, selected_tests=selected_tests)
+    body = get_print_body(header, tbody)
+    html = html.format(body=body,style=get_print_style())
+    footer = get_lab_result_footer(test_doc)
+    options = {"--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
+   "--footer-html" : footer, "footer-center": "Page [page]/[topage]",
+    "quiet":""}
+    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
+    frappe.local.response.type = "pdf"
+
+
+@frappe.whitelist()
 def lab_test_result(lab_test):
     # f = open("test-print.html", "r")
     # html  = f.read()
@@ -232,13 +261,13 @@ def lab_test_result(lab_test):
 
 
 @frappe.whitelist()
-def embassy_test_result(lab_test, return_html = False):
+def embassy_test_result(lab_test, return_html = False, selected_tests=[]):
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
     html = get_print_html_base()
     header = get_print_header_embassy(test_doc)
-    tbody = get_print_tbody_embassy(test_doc, header)
+    tbody = get_print_tbody_embassy(test_doc, header, selected_tests= selected_tests)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
     footer = get_lab_result_footer(test_doc)
@@ -345,23 +374,23 @@ def get_print_body(header, tbody):
     </table>
     """
 
-def get_print_tbody(test_doc, header, only_finalized=False):
+def get_print_tbody(test_doc, header, only_finalized=False, selected_tests=[]):
     body = ""
-    hematology_tests = get_hematology_tests(test_doc, only_finalized)
+    hematology_tests = get_hematology_tests(test_doc, only_finalized, selected_tests=selected_tests )
     if len(hematology_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_hematology_tests(hematology_tests, header)
-    chemistry_tests = get_chemistry_tests(test_doc, only_finalized)
+    chemistry_tests = get_chemistry_tests(test_doc, only_finalized, selected_tests=selected_tests)
     if len(chemistry_tests) > 0:
         if len(body) > 0: body += get_break()
         chemistry_table = format_chemistry_tests(chemistry_tests, header)
         body += chemistry_table
-    routine_tests = get_routine_tests(test_doc, only_finalized)
+    routine_tests = get_routine_tests(test_doc, only_finalized, selected_tests=selected_tests)
     if len(routine_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_routine_tests(routine_tests, header)
     if only_finalized:
-        uploaded_tests = get_uploaded_tests(test_doc, only_finalized)
+        uploaded_tests = get_uploaded_tests(test_doc, only_finalized, selected_tests=selected_tests)
         if len(uploaded_tests) > 0:
             
             html = format_uploaded_tests(test_doc,uploaded_tests, header)
@@ -369,9 +398,9 @@ def get_print_tbody(test_doc, header, only_finalized=False):
             body +=  html
     return body
 
-def get_print_tbody_embassy(test_doc, header, only_finalized=False):
+def get_print_tbody_embassy(test_doc, header, only_finalized=False, selected_tests=[]):
     body = ""
-    embassy_tests = get_embassy_tests(test_doc, only_finalized)
+    embassy_tests = get_embassy_tests(test_doc, only_finalized, selected_tests=selected_tests)
     
     if len(embassy_tests) > 0:
         embassy_table = format_embassy_tests(embassy_tests, header)
@@ -379,8 +408,8 @@ def get_print_tbody_embassy(test_doc, header, only_finalized=False):
 
     return body
 
-def get_embassy_tests(test_doc, only_finalized=False):
-    tests = get_embassy_tests_items(test_doc.name, only_finalized)
+def get_embassy_tests(test_doc, only_finalized=False, selected_tests=[]):
+    tests = get_embassy_tests_items(test_doc.name, only_finalized, selected_tests=selected_tests)
     previous_tests = get_embassy_previous_tests(test_doc.name, test_doc.patient)
     #tests.sort(key=lambda x: x['order'])
     patient = frappe.get_doc("Patient", test_doc.patient)
@@ -456,8 +485,8 @@ def format_embassy_tests(tests, header, previous_tests={}):
 
 
     
-def get_routine_tests(test_doc, only_finalized=False):
-    tests = get_tests_by_item_group(test_doc.name, "Routine", only_finalized)
+def get_routine_tests(test_doc, only_finalized=False, selected_tests=[]):
+    tests = get_tests_by_item_group(test_doc.name, "Routine", only_finalized, selected_tests=selected_tests)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -552,8 +581,8 @@ def format_routine_page_tests(tests, header, test_name):
     </table>"""
     return html
 
-def get_hematology_tests(test_doc, only_finalized=False):
-    tests = get_tests_by_item_group(test_doc.name, "Hematology", only_finalized)
+def get_hematology_tests(test_doc, only_finalized=False, selected_tests=[]):
+    tests = get_tests_by_item_group(test_doc.name, "Hematology", only_finalized ,selected_tests=selected_tests)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -642,8 +671,8 @@ def format_hematology_tests(tests, header):
     return html
 
 
-def get_chemistry_tests(test_doc, only_finalized=False):
-    tests = get_tests_by_item_group(test_doc.name, "Chemistry", only_finalized)
+def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[]):
+    tests = get_tests_by_item_group(test_doc.name, "Chemistry", only_finalized, selected_tests=selected_tests)
     #tests.sort(key=lambda x: x['order'])
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
@@ -655,9 +684,12 @@ def get_chemistry_tests(test_doc, only_finalized=False):
     else: test['template'] = []
     return tests
     
-def get_uploaded_tests(test_doc, only_finalized=False):
+def get_uploaded_tests(test_doc, only_finalized=False, selected_tests=[]):
     where_stmt = " lt.status IN ('Finalized', 'Released')"
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
+    if len(selected_tests)> 0:
+        selected_tests = ",".join(selected_tests)
+        where_stmt += f" AND lt.name IN ({selected_tests})"
     tests = frappe.db.sql("""
         SELECT  lt.name as test_id, lt.lab_test_name, lt.result_value , lt.lab_test_comment as comment 
         FROM `tabNormal Test Result` as lt
@@ -841,7 +873,7 @@ def format_chemistry_tests(tests, header=""):
     </table>"""
     return html
 
-def get_tests_by_item_group(test_name, item_group, only_finalized=False):
+def get_tests_by_item_group(test_name, item_group, only_finalized=False, selected_tests=[]):
     where_stmt = " lt.status IN ('Finalized', 'Released')"
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     order = "tltt.order"
@@ -850,6 +882,9 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False):
         order = "ltt.order"
     else:
         item_group = f"IN ('{item_group}')"
+    if len(selected_tests)> 0:
+        selected_tests = ",".join(selected_tests)
+        where_stmt += f" AND lt.name IN ({selected_tests})"
     return frappe.db.sql("""
         SELECT  
         lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name,ltt.group_tests, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
@@ -886,11 +921,13 @@ def get_embassy_previous_tests(test_name, patient):
     tests = {template: result for template, result in zip(test_templates, test_results) }
     print(tests)
     return tests
-def get_embassy_tests_items(test_name, only_finalized=False):
+def get_embassy_tests_items(test_name, only_finalized=False, selected_tests=[]):
     where_stmt = " lt.status IN ('Finalized', 'Released')"
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     order = "tltt.order"
-    
+    if len(selected_tests)> 0:
+        selected_tests = ",".join(selected_tests)
+        where_stmt += f" AND lt.name IN ({selected_tests})"
     return frappe.db.sql("""
         SELECT  
         lt.template, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
