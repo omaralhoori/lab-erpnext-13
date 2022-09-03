@@ -355,7 +355,7 @@ frappe.ui.form.on('Lab Test', {
 	},
 
 	refresh: function (frm) {
-		if (frappe.user.name == "Administrator"){
+		if (frappe.user.has_role('Test Modifier')){
 			frm.toggle_display('normal_test_items', true);
 		}
 		if (!frm.is_new()){
