@@ -301,7 +301,7 @@ table td div {
                                 <br/>
                                 Patient: {{ doc.patient }}
                                 <br/>
-                                Referring Dr.:{{ doc.ref_practitioner or "" }}
+                                Referring Dr.:{{ doc.practitioner_name or "" }}
                             </td>
                             <td class="width-30"  >
                                 Visit Date: {{ frappe.utils.get_datetime(doc.creation).strftime("%d/%m/%Y",) }} 
