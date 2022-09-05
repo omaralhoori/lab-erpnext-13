@@ -1035,6 +1035,8 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         if xray_test.record_status == "Finalized":
             options["--footer-html"] = "templates/xray_footer.html"
             options["--margin-bottom"] = "20mm"
+        with open("xray.html", "w") as f:
+            f.write(html)
         pdf_content =  pdfkit.from_string( html, False, options)  or ''
         if return_html : return pdf_content
         frappe.local.response.filename = "Test.pdf"
@@ -1105,7 +1107,7 @@ def get_normal_xray_tbody(reports, header):
             <thead>
                 <tr><td>{header}</td></tr>
             </thead>
-            <tbody class="fh-2">
+            <tbody class="norm-line">
                 {body}
             </tbody>
             </table>
@@ -1272,6 +1274,9 @@ def get_print_style():
     }
     .b-bottom{
         border-bottom: 1px solid;
+    }
+    .norm-line p{
+       margin: 5px;
     }
     .f-s{
          
