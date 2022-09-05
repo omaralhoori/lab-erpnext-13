@@ -416,7 +416,7 @@ def create_lab_test_joined(sales_invoice, added_items=[]):
 						template_row.item = item.item_code
 						if len(added_items)> 0 :
 							load_rad_result_format(rad_test, template, item=item.item_code)
-				elif template.lab_test_group == "Lab Test Packages" and template.has_radiology():
+				elif (template.lab_test_group == "Lab Test Packages" or template.lab_test_group == "Package" ) and template.has_radiology():
 					if not rad_created:
 						rad_test = create_rad_test_doc(patient, template, invoice, item=item.item_code)
 						if len(added_items)> 0 :
@@ -468,7 +468,7 @@ def add_new_items_lab_test_joined(invoice, new_items):
 				if template.lab_test_group == "Radiology Services":
 					rad_test = add_or_create_rad_test_doc(patient, template, invoice, item=item.item_code)
 						
-				elif template.lab_test_group == "Lab Test Packages" and template.has_radiology():
+				elif (template.lab_test_group == "Lab Test Packages" or template.lab_test_group == "Package" )  and template.has_radiology():
 					rad_test = add_or_create_rad_test_doc(patient, template, invoice, item=item.item_code)
 					lab_test = add_or_create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, invoice.name, item=item.item_code)
 					lab_templates.append({"template": template, "item": item.item_code})	
