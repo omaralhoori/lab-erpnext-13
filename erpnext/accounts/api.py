@@ -34,7 +34,7 @@ def claimrep(sales_invoice):
 
 		if cur_doc.insurance_party_type == 'Payer':
 			template = "erpnext/accounts/doctype/sales_invoice/insurance_payer_claim.html"
-
+			print(template)
 		base_template_path = "frappe/www/printview.html"
 		
 		add_letterhead = frappe.db.get_value("Letter Head", {"is_default": 1}, ["content", "footer"], as_dict=True) or {}
