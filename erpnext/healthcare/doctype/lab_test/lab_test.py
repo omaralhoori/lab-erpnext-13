@@ -1133,6 +1133,9 @@ def apply_test_button_action(action, tests, test_name, sample):
 	elif action == 'definalize':
 		where_stmt = "status='Finalized'"
 		action = 'Released'
+	elif action == 'unrelease':
+		where_stmt = "status='Released'"
+		action = 'Received'
 	else: frappe.throw("Undefined action: " + action)
 	tests = json.loads(tests)
 	tests = [f"'{s}'" for s in tests]

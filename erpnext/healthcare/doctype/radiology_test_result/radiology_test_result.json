@@ -59,14 +59,13 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nReleased\nFinalized\nRejected",
-   "read_only": 1
+   "options": "\nReleased\nFinalized\nRejected"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-08-31 05:13:17.371981",
+ "modified": "2022-09-04 19:37:37.763329",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test Result",

@@ -93,6 +93,7 @@ const format_tests_html = (tests) => {
 
 	var buttons = `
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+		<button class='btn test-selected-btn' name='unrelease' disabled>Unrelease</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
 		`
@@ -100,6 +101,7 @@ const format_tests_html = (tests) => {
 	if (frappe.user.has_role('LabTest Approver')){
 		buttons = `
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
+		<button class='btn test-selected-btn' name='unrelease' disabled>Unrelease</button>
 		<button class='btn test-selected-btn' name='Finalized' disabled>Finalize Selected</button>
 		<button class='btn test-selected-btn definalize' name='definalize' disabled>Definalize Selected</button>
 		<button class='btn select-all-btn btn-primary'>Select All</button>
