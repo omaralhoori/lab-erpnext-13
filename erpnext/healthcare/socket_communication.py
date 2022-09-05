@@ -9,74 +9,8 @@ import re, json
 import time
 import sqlite3
 
-def start_socket():
-    print( "------------------------------------------------------------------")
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(("10.123.4.150", 9090))
-        print("Binded")
-        s.listen()
-        while True:
-            try:
-                conn, addr = s.accept()
-                print("accept")
-                with conn:
-                    print(f"Connected by {addr}")
-                    msg = b''
-                    while True:
-                        data = conn.recv(1024)
-                        msg += data
-                        print("msg_received-----------------------------------------------------------------")
-                        print(msg)
-                        if data == tcode("ENQ"):
-                            s.sendall(tcode("ACK"))
-                        elif  tcode("EOT") in data:
-                            parsed = parse_result_message(msg)
-                            msg = b''
-                            if not parsed:
-                                s.sendall(tcode("NAK"))
-                            else:
-                                s.sendall(tcode("ACK"))
-                        else:
-                            s.sendall(tcode("ACK"))
-                        if not data:
-                            break
-                        
-            except socket.error as e:
-                print(e)
-                continue
-    except socket.error as e:
-        if e.errno == errno.EADDRINUSE:
-            print("Port is already in use")
-        else:
-            print(e)
-            start_socket()
 
-
-def parse_result_message(result_msg):
-    print("Parssing===============================")
-    result_msg = result_msg.decode()
-    p_info = patient_info(result_msg)
-    if not p_info : return False
-    results = results_info(result_msg)
-    if len(results) == 0: return False
-    frappe.init(site='lab.erp')
-    frappe.connect()
-    for test in results:
-        query = """ UPDATE `tabNormal Test Result` as ntr 
-            INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
-            INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-            INNER JOIN `tabPatient` as p ON p.name=lt.patient
-            SET ntr.secondary_uom_result='{result}'
-            WHERE sc.collection_serial LIKE '%{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}'
-                            """.format(result=test['result'], test_code=test['code'], order_id=p_info[0], file_no=p_info[1])
-        frappe.db.sql(query)
-    frappe.db.commit()
-    frappe.clear_cache()
-    frappe.db.close()
-    frappe.destroy()
-
+#------------------------------------------infinty-----------------------------------------
 def patient_info(result):
     p_start = result.find("P|1|")
     if p_start < 0 : return False
@@ -343,23 +277,29 @@ def start_infinty_listener(ip_address, port):
                 with conn:
                     print(f"Connected by {addr}")
                     log_result("infinty",str(addr))
+                    conn.settimeout(3600)
                     msg = b""
                     while True:
-                        data = conn.recv(63000)
+                        try:
+                            data = conn.recv(63000)
+                        except:
+                            send_check_msg(conn)
+                            continue
                         print("data received-------------------------------------------------------")
                         print(data)
                         log_result("infinty",str(data))
-                        if not data:
-                            break
-                        msg += data
-                        if data.endswith(chr(4).encode()):                    
+                        if data:
+                            msg += data
+                        if msg.endswith(chr(4).encode()):                    
                             results, embassy_results = get_patient_results_infinty(msg)
                             if len(results) > 0:
                                 requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(results))
                             if len(embassy_results) > 0:
                                 requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(embassy_results))
-                            msg = b""
+                            msg = b""   
                         conn.sendall(chr(6).encode())
+                        if not data:
+                            break
         except socket.error:
             print("Socket cannot connect")
             log_result("infinty", "Socket cannot connect")
@@ -409,6 +349,16 @@ def delete_or_mark_order(order_id, machine):
     """)
     conn.commit()
     conn.close()
+from datetime import datetime
+
+
+def send_check_msg(sock):
+    now = datetime.now()
+
+    current_time = now.strftime("%H:%M:%S")
+    log_result("check", "checking:" + current_time)
+    sock.sendall(tcode("ENQ"))
+    sock.sendall(tcode("EOT"))
 
 #------------------------infinty orders-------------------
 def start_infinty_order_listener(ip_address, port, local_ip, local_port):
@@ -420,12 +370,17 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
                 try:
                     s.connect((ip_address, port))
                     print(f"Connected")
+                    start_time = 0
                     while True:
+                        if start_time > 60:
+                            send_check_msg(s)
+                            start_time = 0
                         orders = read_orders_from_db("infinity")
                         print(orders)
                         for order in orders:
                             msg = order[1]
                             if msg:
+                                start_time = 0
                                 log_result("infinty_order",msg)
                                 s.sendall(msg.encode())
                                 result = s.recv(1024)
@@ -436,7 +391,7 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
                                     delete_or_mark_order(order[0], 'infinity')
                                     time.sleep(2)
                         time.sleep(60)
-
+                        start_time += 1
                 except socket.error:
                     print('Unable to connect')
                     log_result("infinty_order",'Unable to connect')
@@ -471,12 +426,14 @@ def start_infinty_order_listener_old(ip_address, port, local_ip, local_port):
                                     print(f"Connected inner by {addr}")
                                     log_result("infinty_order",f"Connected inner by {addr}")
                                     msg = b''
+                                    conn.settimeout(3600)
                                     while True:
                                         print("Data receiving")
                                         data = conn.recv(63000)
                                         print("Data Received-----------------------------------------------")
                                         log_result("infinty_order","Data Received-----------------------------------------------")
-                                        msg += data
+                                        if data:
+                                            msg += data
                                         conn.sendall(chr(6).encode())
                                         print(msg)
                                         if msg.endswith(tcode("EOT")):
@@ -558,16 +515,19 @@ def start_sysmex_listener(ip_address, port):
                 with conn:
                     print(f"Connected by {addr}")
                     log_result("sysmex", "Connected by " + str(addr))
-
+                    conn.settimeout(3600)
                     msg = b""
                     while True:
-                        data = conn.recv(63000)
+                        try:
+                            data = conn.recv(63000)
+                        except:
+                            send_check_msg(conn)
+                            continue
                         print("Data Received-----------------------------------------------")
                         log_result("sysmex", "data received---------------------")
                         log_result("sysmex",str(data))
-                        msg += data
-                        if not data:
-                            break
+                        if data:
+                            msg += data
                         if msg.endswith(b'L|1|N\r'):
                             results, embassy_results = parse_sysmex_msg(msg)
                             msg = b''
@@ -578,6 +538,8 @@ def start_sysmex_listener(ip_address, port):
                             if len(embassy_results) > 0:
                                 requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(embassy_results))
                         conn.sendall(chr(6).encode())
+                        if not data:
+                            break
             except socket.error:
                 print("Socket cannot connect")
                 log_result("sysmex", "Socket cannot connect to:" + ip_address +":" + str(port))
