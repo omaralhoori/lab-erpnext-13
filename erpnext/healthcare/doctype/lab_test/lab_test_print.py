@@ -186,7 +186,7 @@ def print_report_result(lab_test, with_header=False):
     html = get_print_html_base()
     url = frappe.local.request.host
     #url = frappe.local.request.host
-    head = f'<img class="img-header" src="http://{url}/files/josante-logo.png" />' if with_header else None
+    head = f'<img class="img-header" src="http://josante-outpatient.erp:8085/files/josante-logo.png" />' if with_header else None
     if frappe.local.conf.is_embassy:
         header = get_print_header_embassy(test_doc, head)
         tbody = get_print_tbody_embassy(test_doc, header, True)
