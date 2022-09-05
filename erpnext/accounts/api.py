@@ -134,8 +134,12 @@ def get_formatted_result_for_invoice_items(doc):
 			if not formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"]:
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = defaultdict(dict)
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = 0
-				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = lab_test.patient_share + lab_test.cash_discount
-				formatted_result["item_group",item.item_group]["patient_share"] += (lab_test.patient_share + lab_test.cash_discount)
+				lab_test_patient_sharel = lab_test.patient_share + lab_test.cash_discount
+				lab_test_patient_sharel = flt(lab_test_patient_sharel,lab_test.precision("patient_share"))
+				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = lab_test_patient_sharel
+				formatted_result["item_group",item.item_group]["patient_share"] += lab_test_patient_sharel
+				#formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["patient_share"] = lab_test.patient_share + lab_test.cash_discount
+				#formatted_result["item_group",item.item_group]["patient_share"] += (lab_test.patient_share + lab_test.cash_discount)
 
 			if not formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["contract_discount"]:
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["contract_discount"] = defaultdict(dict)
@@ -151,8 +155,11 @@ def get_formatted_result_for_invoice_items(doc):
 			if not formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["discount_amount"]:
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["discount_amount"] = defaultdict(dict)
 				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["discount_amount"] = 0
-				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["discount_amount"] = lab_test.discount_amount
-				formatted_result["item_group",item.item_group]["discount_amount"] += lab_test.discount_amount
+				lab_test_discount_amt = flt(lab_test.amount) - (flt(lab_test.patient_share) + flt(lab_test.cash_discount)) - flt(lab_test.contract_discount)
+				lab_test_discount_amt = flt(lab_test_discount_amt , lab_test.precision("patient_share"))
+				#lab_test_discount_amt = flt(lab_test.patient_share) + flt(lab_test.cash_discount) - flt(lab_test.contract_discount)
+				formatted_result["item_group",item.item_group]["item_name",lab_test.item_name]["discount_amount"] = lab_test_discount_amt
+				formatted_result["item_group",item.item_group]["discount_amount"] += lab_test_discount_amt
 
 		else:
 			org_test_price = 0
@@ -212,7 +219,9 @@ def get_formatted_result_for_invoice_items(doc):
 				new_amount =flt(price_list_for_res * diff_percentage, lab_test.precision("amount"))
 				patient_share = flt(new_amount * doc.charged_percentage / 100 , lab_test.precision("patient_share"))
 				contract_discount= flt(new_amount * doc.additional_discount_percentage / 100 , lab_test.precision("contract_discount"))
-				discount_amount= flt(new_amount * doc.coverage_percentage / 100 , lab_test.precision("discount_amount"))
+				
+				#discount_amount= flt(new_amount * doc.coverage_percentage / 100 , lab_test.precision("discount_amount"))
+				discount_amount= flt(new_amount) - flt(patient_share) - flt(contract_discount)
 
 				new_amount = round(new_amount,3)
 				patient_share = round(patient_share,3)
