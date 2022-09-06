@@ -31,12 +31,6 @@ frappe.query_reports["Lab Test Results Report"] = {
 			}
 		},
 		{
-			"fieldname":"patient",
-			"label": __("Patient"),
-			"fieldtype": "Link",
-			"options": "Patient"
-		},
-		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",

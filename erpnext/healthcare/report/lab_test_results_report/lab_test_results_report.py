@@ -84,6 +84,13 @@ def get_columns( additional_table_columns=[]):
 			'width': 120
 		}
 	]
+	if frappe.local.conf.is_embassy:
+		columns += [{
+			'label': "Print Cover",
+			'fieldname': "cover_btn",
+			'fieldtype': 'html',
+			'width': 120
+		}]
 
 	if additional_table_columns:
 		columns += additional_table_columns
@@ -96,6 +103,7 @@ def get_conditions(filters):
 	conditions = ""
 
 	if filters.get("company"): conditions += " lt.company=%(company)s"
+	else: conditions = " True"
 	if filters.get("patient"): conditions += " and lt.patient = %(patient)s"
 	if filters.get("insurance_party"): conditions += " and si.insurance_party = %(insurance_party)s"
 
@@ -110,6 +118,11 @@ def get_tests(filters, additional_query_columns=[]):
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 	with_header = filters.get("with_header") or ''
 	conditions = get_conditions(filters)
+	cover_btn = ''
+	if frappe.local.conf.is_embassy:
+		cover_btn = """
+		,  CONCAT('<a target="_blank" class=''btn btn-sm'' href="/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=',si.name,'">Print Cover</a>') as cover_btn
+		"""
 	invoices = frappe.db.sql("""
 		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
@@ -120,6 +133,6 @@ def get_tests(filters, additional_query_columns=[]):
 		LEFT JOIN  `tabLab Test` as lt  ON si.name=lt.sales_invoice
 		INNER JOIN `tabPatient` as p ON p.name=si.patient
 		LEFT JOIN `tabRadiology Test` as rt ON rt.sales_invoice=si.name
-		where %s order by si.creation""".format(additional_query_columns or '', with_header) %
+		where %s order by si.creation""".format(cover_btn or '', with_header) %
 		conditions, filters, as_dict=1)
 	return invoices
