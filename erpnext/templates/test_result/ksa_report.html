@@ -95,6 +95,10 @@
             width: 65%;
             padding-top: 5px;
         }
+        .rtl{
+    direction: rtl;
+        display: inline-block;
+}
     </style>
 </head>
 <body>
@@ -110,7 +114,7 @@
                     <div class="patient-info">
                         <div class="info-title">MEDICAL REPORT</div>
                         <div>
-                            Name: {{patient_name}} <br />
+                            Name: <span class="rtl">{{patient_name}}</span> <br />
                         Sex: {{gender}} &emsp;&emsp; Age: {{age}}  &emsp;&emsp; Statue: {{status}}  &emsp;&emsp; Nationality: {{nationality}} <br />
                         Passport No: {{passport_no}} &emsp; Place & Date of Issue: &emsp; {{passport_date}} &emsp; {{passport_place}} <br />
                         Position Applied for <br />

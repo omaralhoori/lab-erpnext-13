@@ -328,7 +328,7 @@ def get_print_header(test_doc, head=None):
                  Patient Name
             </td>
             <td class="width-35 red">
-                : { test_doc.patient_name }
+                : <span class="rtl">{ test_doc.patient_name }</span>
             </td>
             <td>Age</td>
             <td class="width-35">: {test_doc.patient_age}</td>
@@ -1063,7 +1063,7 @@ def format_xray_header(xray_test, with_header=False, url=""):
                  Patient Name
             </td>
             <td >
-                : <span class="red">{ xray_test.patient_name }</span>
+                : <span class="red rtl">{ xray_test.patient_name }</span>
             </td>
             <td>Age</td>
             <td >: {" ".join(xray_test.patient_age.split(" ")[:2])}</td>
@@ -1172,7 +1172,7 @@ def get_print_header_embassy(test_doc, head=None):
                  Patient Name
             </td>
             <td class="width-35">
-                : <span class="red">{ test_doc.patient_name }</span>
+                : <span class="red rtl">{ test_doc.patient_name }</span>
             </td>
             <td>Age</td>
             <td class="width-35">: {test_doc.patient_age}</td>
@@ -1327,6 +1327,10 @@ def get_print_style():
      .mt-20{
         margin-top: 20px;
      }
+     .rtl{
+    direction: rtl;
+        display: inline-block;
+}
         </style>
     """
 
