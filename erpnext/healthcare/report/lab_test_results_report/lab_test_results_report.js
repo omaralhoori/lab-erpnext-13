@@ -18,6 +18,12 @@ frappe.query_reports["Lab Test Results Report"] = {
 			"default": frappe.datetime.get_today()
 		},
 		{
+			"fieldname":"patient",
+			"label": __("Patient"),
+			"fieldtype": "Link",
+			"options": "Patient"
+		},
+		{
 			"fieldname":"insurance_party",
 			"label": __("Insurance/Payer"),
 			"fieldtype": "Link",
