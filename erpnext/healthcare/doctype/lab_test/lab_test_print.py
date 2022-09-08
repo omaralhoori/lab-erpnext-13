@@ -389,13 +389,13 @@ def get_print_tbody(test_doc, header, only_finalized=False, selected_tests=[]):
     if len(routine_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_routine_tests(routine_tests, header)
-    if only_finalized:
-        uploaded_tests = get_uploaded_tests(test_doc, only_finalized, selected_tests=selected_tests)
-        if len(uploaded_tests) > 0:
+    # if only_finalized:
+    #     uploaded_tests = get_uploaded_tests(test_doc, only_finalized, selected_tests=selected_tests)
+    #     if len(uploaded_tests) > 0:
             
-            html = format_uploaded_tests(test_doc,uploaded_tests, header)
-            if len(body) > 0 and len(html) > 0: body += get_break()
-            body +=  html
+    #         html = format_uploaded_tests(test_doc,uploaded_tests, header)
+    #         if len(body) > 0 and len(html) > 0: body += get_break()
+    #         body +=  html
     return body
 
 def get_print_tbody_embassy(test_doc, header, only_finalized=False, selected_tests=[]):
@@ -1327,10 +1327,7 @@ def get_print_style():
      .mt-20{
         margin-top: 20px;
      }
-     .rtl{
-    direction: rtl;
-        display: inline-block;
-}
+     
         </style>
     """
 
