@@ -78,6 +78,7 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 		</label>
 		
 		<span  ${disable_input(childTest['status'])}  class="upload-btn" name="${childTest['name']}" value="${childTest['result_value'] || ''}"></span>
+		<a class="btn" target="_blank" href="/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.preview_test_uploaded_files?test_name=${childTest['name']}">Preview</a>
 		`
 		
 	}

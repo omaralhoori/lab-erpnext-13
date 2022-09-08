@@ -945,6 +945,22 @@ def get_embassy_tests_items(test_name, only_finalized=False, selected_tests=[]):
         ORDER BY ltt.order,tltt.order
         """.format(test_name=test_name, order= order, where_stmt=where_stmt), as_dict=True)
 
+@frappe.whitelist()
+def preview_test_uploaded_files(test_name):
+    file_link = frappe.db.sql(f"""
+    SELECT tntr.result_value  FROM `tabNormal Test Result` tntr WHERE name="{test_name}" AND tntr.result_value IS NOT NULL AND tntr.result_value != ""
+    """,as_dict=True)
+
+    if len(file_link) > 0: file_link = file_link[0]['result_value']
+    file_content = ""
+    sub_dir =  ""  if file_link.startswith("/private") else "/public"
+    with open(frappe.local.site + sub_dir + file_link, "rb") as f:
+        file_content = f.read()
+    #print(file_content)
+    frappe.local.response.filename = file_link.split("/")[-1]
+    frappe.local.response.filecontent = file_content  or ''#get_pdf(html)
+    frappe.local.response.type = "download"#file_link.split(".")[-1]
+
 @frappe.whitelist(allow_guest=True)
 def get_test_uploaded_files(lab_test, password, test_name):
     patient = frappe.db.get_value("Lab Test", lab_test, ["patient"])
