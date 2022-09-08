@@ -146,8 +146,8 @@ class LabTest(Document):
 		all_finalized, all_released = True, True
 		partially_finalized, partially_released = False, False
 		for item in self.normal_test_items:
-			if item.status!='Finalized': all_finalized=False
-			if item.status!='Released': all_released= False
+			if item.status!='Finalized' and not item.allow_blank: all_finalized=False
+			if item.status!='Released' and not item.allow_blank: all_released= False
 			if item.status=='Finalized': partially_finalized=True
 			if item.status=='Released': partially_released= True
 		if all_finalized: status = 'Finalized'
@@ -605,7 +605,7 @@ def create_normals(template, lab_test, group_template=None, item=None):
 		normal.conversion_factor = group_template.conversion_factor
 	normal.normal_range = template.lab_test_normal_range
 	normal.require_result_value = 1
-	normal.allow_blank = 0
+	#normal.allow_blank = 0
 	normal.template = template.name
 	normal.report_code = template.name
 	if group_template :

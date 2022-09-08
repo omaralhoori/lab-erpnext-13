@@ -56,11 +56,13 @@
   "test_options_section",
   "printing_order",
   "alias",
+  "default_comment",
   "column_break_45",
   "order",
   "is_microscopy",
   "print_all_normal_ranges",
   "group_tests",
+  "left_blank",
   "section_break_compound",
   "normal_test_templates",
   "lab_test_attribute_section",
@@ -95,7 +97,6 @@
   "worksheet_report_code",
   "test_timing",
   "manual_test_method",
-  "default_comment",
   "instructions",
   "medical_test_questions",
   "accept_multi_results",
@@ -820,6 +821,12 @@
    "fieldname": "add_item_group_btn",
    "fieldtype": "Button",
    "label": "Add Item Group"
+  },
+  {
+   "default": "0",
+   "fieldname": "left_blank",
+   "fieldtype": "Check",
+   "label": "Allow Blank"
   }
  ],
  "links": [
@@ -831,7 +838,7 @@
    "table_fieldname": "test_results"
   }
  ],
- "modified": "2022-08-30 06:44:52.673653",
+ "modified": "2022-09-06 08:03:13.857337",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
