@@ -583,6 +583,17 @@ class SalesInvoice(SellingController):
 		self.update_patient_info()
 		#self.update_destination()
 	
+	def get_patient_age(self):
+		try:
+			patient = frappe.get_doc("Patient", self.patient)
+			age = patient.get_age()
+			age_list = age.split(" ")
+			if int(age_list[0]): return "Age: " + age_list[0] + " " + age_list[1]
+			elif int(age_list[2]): return "Age: " +  age_list[2] + " " + age_list[3]
+			else: return "Age: " +  age_list[4] + " " + age_list[5]
+		except:
+			return ""
+	
 	def update_destination(self):
 		old_doc = self.get_doc_before_save()
 		if old_doc.destination_country != self.destination_country:

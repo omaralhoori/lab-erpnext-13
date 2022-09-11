@@ -1,0 +1,54 @@
+{
+ "add_total_row": 0,
+ "columns": [
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "width": 0
+  },
+  {
+   "fieldname": "destination",
+   "fieldtype": "Data",
+   "label": "Destination",
+   "width": 0
+  },
+  {
+   "fieldname": "invoice_status",
+   "fieldtype": "Data",
+   "label": "Invoice Status",
+   "width": 0
+  }
+ ],
+ "creation": "2022-09-11 05:29:08.272959",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "",
+ "modified": "2022-09-11 05:41:51.908684",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Embassy Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "",
+ "ref_doctype": "Embassy Report",
+ "report_name": "Embassy Report",
+ "report_script": "",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Cashier Users"
+  },
+  {
+   "role": "Lab Test Users"
+  }
+ ]
+}

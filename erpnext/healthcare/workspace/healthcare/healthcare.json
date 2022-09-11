@@ -571,7 +571,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-08-20 10:58:09.509824",
+ "modified": "2022-09-11 06:02:16.732721",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -628,6 +628,12 @@
    "doc_view": "",
    "label": "Lab Result Report",
    "link_to": "Lab Test Results Report",
+   "type": "Report"
+  },
+  {
+   "doc_view": "",
+   "label": "Embassy Report",
+   "link_to": "Embassy Report",
    "type": "Report"
   }
  ]
