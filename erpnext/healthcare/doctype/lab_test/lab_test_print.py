@@ -1067,7 +1067,7 @@ def format_xray_header(xray_test, with_header=False, url=""):
     if with_header:
         header = f"""
             <tr>
-            <td colspan="6" style="text-align: center"><img class="img-header" src="http://{url}/files/josante-logo.png" /></td>
+            <td colspan="6" style="text-align: center"><img class="img-header" src="http://josante-outpatient.erp:8085/files/josante-logo.png" /></td>
         </tr>
         """
     return f"""
