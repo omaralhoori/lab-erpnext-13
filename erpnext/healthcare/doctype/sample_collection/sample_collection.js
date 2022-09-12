@@ -26,8 +26,28 @@ frappe.ui.form.on('Sample Collection', {
 			
 			frm.add_custom_button(__('Print'), function(){
 				//let url = `/printview?doctype=Lab%20Test&name=${frm.doc.name}&trigger_print=1&format=Lab%20Test%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`;
-				let url = `/printview?doctype=Sample%20Collection&name=${frm.doc.name}&trigger_print=1&format=Sample%20ID%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en`
-				window. open(url, '_blank')
+				// let url = `/printview?doctype=Sample%20Collection&name=${frm.doc.name}&trigger_print=1&format=Sample%20ID%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en`
+				// window. open(url, '_blank')
+				let barcode = frm.doc.collection_serial.split("-")[1]
+				let date_list = frm.doc.creation.replaceAll("-", "/").split(":")
+				let visit_date = date_list[0] + ":" + date_list[1];
+				let url = `http://localhost:57179/api/barcode?patient=${frm.doc.patient_name}&vist_no=${frm.doc.sales_invoice}&vist_date=${visit_date}&barcode=${barcode}&count=${frm.doc.num_print}`;
+				//window. open(url, '_blank')
+				fetch(url).then(response => response.text())
+        		.then(data => {
+					if (data){
+						frappe.show_alert({
+							message:__('Printing barcode...'),
+							indicator:'green'
+						}, 2);
+					}else{
+						frappe.show_alert({
+							message:__('Something went wrong!'),
+							indicator:'red'
+						}, 4);
+					}
+				});
+			
 			})
 
 			frappe.call({

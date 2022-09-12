@@ -9,6 +9,7 @@ frappe.listview_settings['Radiology Test'] = {
 			return [__("Released"), "orange", "record_status,=,Released"];
 		}
 	},
+	hide_name_column: true,
 	onload: function (listview) {
 		let disabled = false;
 		let query = "";
