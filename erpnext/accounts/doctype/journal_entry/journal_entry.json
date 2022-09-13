@@ -76,10 +76,10 @@
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "default": "Journal Entry",
@@ -100,8 +100,9 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "JV-.YYYY.-\nRV/.YYYY./\nCN-.YYYY.-.MM.-\nDN-.YYYY.-.MM.-\nJV-.YYYY.-.MM.-\nPV-.YYYY.-.MM.-\nRV-.YYYY.-.MM.-",
+   "options": "JV-.YYYY.-\nRV/.YYYY./\nCN-.YYYY.-.MM.-\nDN-.YYYY.-.MM.-\nJV-.YYYY.-.MM.-",
    "print_hide": 1,
+   "read_only": 1,
    "reqd": 1,
    "set_only_once": 1
   },
@@ -543,7 +544,7 @@
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-30 12:59:51.226982",
+ "modified": "2022-09-13 07:05:38.024121",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

@@ -4,7 +4,16 @@
 frappe.provide("erpnext.accounts.dimensions");
 
 cur_frm.cscript.tax_table = "Advance Taxes and Charges";
-
+const payment_type_updated = function(frm){
+	if (frm.doc.payment_type == 'Internal Transfer'){
+		frm.set_value("mode_of_payment", "")
+	}
+	if (frm.doc.payment_type == 'Pay'){
+		frm.set_value("naming_series", "PV-.YYYY.-")
+	}else{
+		frm.set_value("naming_series", "RV-.YYYY.-")
+	}
+}
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
 		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice'];
@@ -160,13 +169,13 @@ frappe.ui.form.on('Payment Entry', {
 			};
 		});
 	},
-
+	
 	refresh: function(frm) {
 		erpnext.hide_company();
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
-
+		payment_type_updated(frm)
 		if (frm.doc.mode_of_payment ){
 			frappe.db.get_value("Mode of Payment", cur_frm.doc.mode_of_payment , "has_card_number").then(res => {
 				if(res.message.has_card_number){
@@ -294,6 +303,7 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	payment_type: function(frm) {
+		payment_type_updated(frm);
 		if(frm.doc.payment_type == "Internal Transfer") {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"references", "total_allocated_amount"], function(i, field) {
