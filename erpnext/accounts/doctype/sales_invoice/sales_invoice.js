@@ -1108,10 +1108,11 @@ frappe.ui.form.on('Sales Invoice', {
 						});
 
 						frm.toggle_display("insurance_party_child", true)
-
+						frm.toggle_reqd("insurance_party_child", true);
 					} else {
 						frm.set_value("insurance_party_child", "")
 						frm.toggle_display("insurance_party_child", false)
+						frm.toggle_reqd("insurance_party_child", false);
 					}
 				}
 			})

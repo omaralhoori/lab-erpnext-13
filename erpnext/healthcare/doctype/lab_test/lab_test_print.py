@@ -1100,7 +1100,7 @@ def format_xray_header(xray_test, with_header=False, url=""):
             <td >
                 Report Date
             </td>
-            <td colspan="5">: {  frappe.utils.get_datetime().strftime("%d/%m/%Y %r",)   }</td>
+            <td colspan="5">: {  frappe.utils.get_datetime(xray_test.modified).strftime("%d/%m/%Y %r",)   }</td>
         <tr>
     </table>
     """
