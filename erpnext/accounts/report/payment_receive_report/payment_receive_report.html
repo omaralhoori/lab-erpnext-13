@@ -1,0 +1,49 @@
+<div width="200" class="text-center"><img  src="/files/josante-logo.png" /></div>
+<h3>{%= __("Payment Entry") %}</h3>
+{% if (filters.posting_date) { %}
+<h4>{%= __("Posting Date") %}: {%= filters.posting_date %}</h4>
+{% } %}
+{% if (filters.mode_of_payment_type) { %}
+<h4>{%= __("Mode of Payment Type") %}: {%= filters.mode_of_payment_type %}</h4>
+{% } %}
+{% if (filters.mode_of_payment) { %}
+<h4>{%= __("Mode of Payment") %}: {%= filters.mode_of_payment %}</h4>
+{% } %}
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>
+                {%= __("Payment Type") %}
+            </th>
+            <th>
+                {%= __("Sum of Paid Amount") %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for(var i=0; i < data.length; i++)  { %}
+        {% if (!data[i].payment_type){ %}
+            <tr>
+                <td>1</td>
+                <td>Total Received</td>
+                <td>{%=  data[i].paid_amount %}</td>
+            </tr>
+        {% } %}
+    {% } %}
+    </tbody>
+</table>
+
+{% if (data.length > 2){ %}
+<ul>
+{% for(var i=data.length - 1; i >= 0; i--)  { %}
+        {% if (data[i].payment_type){ %}
+            {% if (data[i].payment_type == "Pay") { %}
+                <li>Refund: {%= data[i].paid_amount %}</li>
+            {% }else{ %}
+            <li>{%= data[i].payment_type %}: {%= data[i].paid_amount %}</li>
+            {% } %}
+        {% } %}
+    {% } %}
+</ul>
+{% } %}

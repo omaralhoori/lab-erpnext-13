@@ -20,10 +20,23 @@ def execute(filters=None):
 			"width": 120
 		},
 	]
-
-	data = frappe.db.sql("""
+	conditions = get_conditions(filters)
+	payments = frappe.db.sql(f"""
 		SELECT payment_type, SUM(paid_amount) FROM `tabPayment Entry`
-		WHERE docstatus=1 AND payment_type<>'Internal Transfer'
+		{conditions}
 		GROUP BY payment_type
 	""")
+	for payment in payments:
+		if payment[0] == "Pay":
+			data.append((payment[0], -1 * payment[1]))
+		else:
+			data.append(payment)
 	return columns, data
+
+
+def get_conditions(filters):
+	where_stmt = "WHERE docstatus=1 AND payment_type<>'Internal Transfer'"#", AND True"
+	if filters.get("posting_date"): where_stmt += f""" AND posting_date='{filters.get("posting_date")}'"""
+	if filters.get("mode_of_payment"): where_stmt += f""" AND mode_of_payment='{filters.get("mode_of_payment")}'"""
+	if filters.get("mode_of_payment_type"): where_stmt += f""" AND mode_of_payment_type='{filters.get("mode_of_payment_type")}'"""
+	return where_stmt

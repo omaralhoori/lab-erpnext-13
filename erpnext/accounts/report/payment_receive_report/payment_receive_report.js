@@ -16,5 +16,11 @@ frappe.query_reports["Payment Receive Report"] = {
 			"fieldtype": "Link",
 			"options": "Mode of Payment"
 		},
+		{
+			"fieldname":"mode_of_payment_type",
+			"label": __("Mode of Payment Type"),
+			"fieldtype": "Select",
+			"options": "\nCash\nCard\nBank\nGeneral\nPhone"
+		}
 	]
 };
