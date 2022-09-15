@@ -1,71 +1,66 @@
-<h2 class="text-center">{%= __("Statement of Account") %}</h2>
-<h4 class="text-center">
-	{% if (filters.party_name) { %}
-		{%= filters.party_name %}
-	{% } else if (filters.party && filters.party.length) { %}
-		{%= filters.party %}
-	{% } else if (filters.account) { %}
-		{%= filters.account %}
-	{% } %}
-</h4>
-
-<h6 class="text-center">
-	{% if (filters.tax_id) { %}
-	{%= __("Tax Id: ")%}	{%= filters.tax_id %}
-	{% } %}
-</h6>
-
-<h5 class="text-center">
-	{%= frappe.datetime.str_to_user(filters.from_date) %}
-	{%= __("to") %}
-	{%= frappe.datetime.str_to_user(filters.to_date) %}
-</h5>
+<div width="200" class="text-center"><img  src="/files/josante-logo.png" /></div>
+<h2 class="text-center">{%= __("Supplier Statement of Account") %}</h2>
+<table class="" style="width: 100%;">
+	<tr>
+		<td style="width: 10%">{% if (filters.party_type) { %} {%= filters.party_type %}  {% }else { %} {%= __("Supplier") %} {% } %}</td>
+		<td style="width: 50%">
+			: {% if (filters.party_name) { %}
+			{%= filters.party_name %} {% } %}
+		</td>
+		<td style="width: 10%">{%= __("Branch") %}</td>
+		<td >: {% if (filters.company) { %}
+			{%= filters.company %} {% } %}</td>
+	</tr>
+	<tr>
+		<td style="width: 10%"> {%= __("From Date") %}</td>
+		<td style="width: 50%">
+			: {% if (filters.from_date) { %}
+			{%=  frappe.datetime.str_to_user(filters.from_date) %} {% } %}
+		</td>
+		<td style="width: 10%">{%= __("To Date") %}</td>
+		<td >: {% if (filters.to_date) { %}
+			{%=  frappe.datetime.str_to_user(filters.to_date) %} {% } %}</td>
+	</tr>
+	<tr>
+		<td style="width: 10%"> </td>
+		<td style="width: 50%">
+		</td>
+		<td style="width: 10%">{%= __("Printed By") %}</td>
+		<td >: {%= frappe.user.full_name() %}</td>
+	</tr>
+</table>
 <hr>
 <table class="table table-bordered">
 	<thead>
 		<tr>
 			<th style="width: 12%">{%= __("Date") %}</th>
-			<th style="width: 15%">{%= __("Ref") %}</th>
-			<th style="width: 25%">{%= __("Party") %}</th>
+			<th style="width: 12%">{%= __("Journal No.") %}</th>
+			<th style="width: 12%">{%= __("Type") %}</th>
+			<th style="width: 18%">{%= __("Description") %}</th>
 			<th style="width: 15%">{%= __("Debit") %}</th>
 			<th style="width: 15%">{%= __("Credit") %}</th>
-			<th style="width: 18%">{%= __("Balance (Dr - Cr)") %}</th>
+			<th style="width: 16%">{%= __("Balance (Dr - Cr)") %}</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
-			{% if(data[i].posting_date) { %}
-				<td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
-				<td>{%= data[i].voucher_type %}
-					<br>{%= data[i].voucher_no %}</td>
+			
+				<td>{% if(data[i].posting_date) { %} {%= frappe.datetime.str_to_user(data[i].posting_date) %} {% } %}</td>
 				<td>
-					{% if(!(filters.party || filters.account)) { %}
-						{%= data[i].party || data[i].account %}
-						<br>
-					{% } %}
-
-					{{ __("Against") }}: {%= data[i].against %}
-					<br>{%= __("Remarks") %}: {%= data[i].remarks %}
-					{% if(data[i].bill_no) { %}
-						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+					{%= data[i].voucher_no %}</td>
+				<td>{%= data[i].voucher_type %}</td>
+				<td>
+					{% if (data[i].remarks) { %}
+					{%= data[i].remarks %}
+					{% }else { %}
+					{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}
 					{% } %}
 					</td>
 					<td style="text-align: right">
 						{%= format_currency(data[i].debit, filters.presentation_currency) %}</td>
 					<td style="text-align: right">
 						{%= format_currency(data[i].credit, filters.presentation_currency) %}</td>
-			{% } else { %}
-				<td></td>
-				<td></td>
-				<td><b>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
-				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}
-				</td>
-				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}
-				</td>
-			{% } %}
 				<td style="text-align: right">
 					{%= format_currency(data[i].balance, filters.presentation_currency) %}
 				</td>

@@ -55,9 +55,10 @@ def execute(filters=None):
 def update_translations():
 	TRANSLATIONS.update(
 		dict(
-			OPENING = _('Opening'),
-			TOTAL = _('Total'),
-			CLOSING_TOTAL = _('Closing (Opening + Total)')
+			OPENING = _('Open Balance'),
+			TOTAL = _('Customer Total'),
+			PERIOD_TOTAL = _('Period Balance'),
+			CLOSING_TOTAL = _('Close Balance')
 		)
 	)
 
@@ -350,9 +351,17 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	# totals
 	data.append(totals.total)
 
+	totals['period'].debit = totals['opening'].debit - totals['closing'].debit
+	totals['period'].credit = totals['opening'].credit - totals['closing'].credit
+	totals['period'].debit_in_account_currency = totals['opening'].debit_in_account_currency - totals['closing'].debit_in_account_currency
+	totals['period'].credit_in_account_currency = totals['opening'].credit_in_account_currency - totals['closing'].credit_in_account_currency
+
+	data.append(totals.period)
+
 	# closing
 	data.append(totals.closing)
 
+	
 	return data
 
 def get_totals_dict():
@@ -367,6 +376,7 @@ def get_totals_dict():
 	return _dict(
 		opening = _get_debit_credit_dict(TRANSLATIONS.OPENING),
 		total = _get_debit_credit_dict(TRANSLATIONS.TOTAL),
+		period = _get_debit_credit_dict(TRANSLATIONS.PERIOD_TOTAL),
 		closing = _get_debit_credit_dict(TRANSLATIONS.CLOSING_TOTAL)
 	)
 
@@ -463,7 +473,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 		update_value_in_dict(totals, 'total', value)
 		update_value_in_dict(totals, 'closing', value)
 		entries.append(value)
-
+	#update_value_in_dict(totals, 'period', {})
 	return totals, entries
 
 def get_account_type_map(company):
