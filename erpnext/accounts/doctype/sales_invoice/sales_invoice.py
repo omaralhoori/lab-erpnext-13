@@ -549,8 +549,6 @@ class SalesInvoice(SellingController):
 		#frappe.msgprint(self.docstatus)
 		old_invoice = self.get_doc_before_save()
 		added_items, removed_items = self.get_created_or_deleted_items(old_invoice.items, self.items)
-		print("Sales invoice------------------------------------------00")
-		print(added_items, removed_items )
 		if len(removed_items) > 0 or len(added_items) > 0:
 			if are_items_tests(removed_items):
 					if frappe.db.get_single_value('Healthcare Settings', 'remove_test_uncollect'):
@@ -581,8 +579,20 @@ class SalesInvoice(SellingController):
 	def on_update(self):
 		self.set_paid_amount()
 		self.update_patient_info()
+		self.update_patient_insurance_detail()
 		#self.update_destination()
 	
+	def update_patient_insurance_detail(self):
+		if self.patient:
+			frappe.db.set_value("Patient", self.patient, {
+				"insurance_party_type": self.insurance_party_type,
+				"insurance_party": self.insurance_party,
+				"insurance_party_child": self.insurance_party_child,
+				"selling_price_list": self.selling_price_list,
+				"patient_card_no": self.patient_card_no,
+				"form_no": self.form_no
+				})
+
 	def get_patient_age(self):
 		try:
 			patient = frappe.get_doc("Patient", self.patient)
@@ -962,7 +972,7 @@ class SalesInvoice(SellingController):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
-		if gl_entries:
+		if gl_entries or gl_entries == []:
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"

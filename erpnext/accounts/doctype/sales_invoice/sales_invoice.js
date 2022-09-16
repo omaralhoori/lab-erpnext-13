@@ -1249,18 +1249,33 @@ frappe.ui.form.on('Sales Invoice', {
 						filters: {
 							"name": frm.doc.patient
 						},
-						fieldname: "customer"
+						fieldname: ["customer", "insurance_party_type","selling_price_list","insurance_party", "insurance_party_child", "form_no", "patient_card_no"]
 					},
-					callback: function (r) {
+					callback: async function (r) {
 						if (r && r.message.customer) {
+							console.log(r.message);
 							frm.set_value("customer", r.message.customer);
+							await frappe.model.set_value("Sales Invoice", frm.doc.name, "insurance_party_type", r.message.insurance_party_type);
+							await frappe.model.set_value("Sales Invoice", frm.doc.name, "insurance_party", r.message.insurance_party);
+							await frappe.model.set_value("Sales Invoice", frm.doc.name, "insurance_party_child", r.message.insurance_party_child);
+							frm.set_value("form_no", r.message.form_no);
+							frm.set_value("patient_card_no", r.message.patient_card_no);
+							if(r.message.selling_price_list){
+								setTimeout(() => {
+									frappe.model.set_value("Sales Invoice", frm.doc.name, "selling_price_list", r.message.selling_price_list);
+								  }, "2000")
+								
+							}
+							
 						}
 					}
 				});
 			}
 		}
 	},
-
+	selling_price_list: function(frm){
+		console.log("changed", frm.doc.selling_price_list);
+	},
 	project: function (frm) {
 		if (frm.doc.project) {
 			frm.events.add_timesheet_data(frm, {

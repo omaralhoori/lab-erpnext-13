@@ -66,6 +66,13 @@
   "default_currency",
   "default_price_list",
   "language",
+  "insurance_details_section",
+  "insurance_party_type",
+  "insurance_party",
+  "insurance_party_child",
+  "selling_price_list",
+  "patient_card_no",
+  "form_no",
   "personal_and_social_history",
   "occupation",
   "column_break_25",
@@ -617,13 +624,53 @@
    "fieldname": "passport_expiry_date",
    "fieldtype": "Date",
    "label": "Passport Expiry Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "insurance_details_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance Details"
+  },
+  {
+   "fieldname": "insurance_party_type",
+   "fieldtype": "Select",
+   "label": "Insurance/Payer Type",
+   "options": "\nPayer\nInsurance Company"
+  },
+  {
+   "fieldname": "insurance_party",
+   "fieldtype": "Link",
+   "label": "Insurance / Payer Party",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "insurance_party_child",
+   "fieldtype": "Link",
+   "label": "Party Child",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "selling_price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "patient_card_no",
+   "fieldtype": "Data",
+   "label": "Patient Card No"
+  },
+  {
+   "fieldname": "form_no",
+   "fieldtype": "Data",
+   "label": "Form No"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2022-08-25 06:52:30.034016",
+ "modified": "2022-09-16 06:28:05.396833",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
