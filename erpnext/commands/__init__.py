@@ -91,6 +91,21 @@ def start_sysmex_results(
 
 
 
+@click.command("start-sysmex-results")
+@click.option("--ip", default="10.123.4.150")
+@click.option("--port", default=9095)
+@click.option("--back", is_flag=True, default=True)
+@pass_context
+def start_sysmex_xp_results(
+	context, ip="10.123.4.150",port=9095, back=True
+):
+	"Start Test Command"
+	from erpnext.healthcare.socket_communication import start_sysmex_xp_listener
+	print(f"Starting Infinty results server on {ip}:{port}")
+	start_sysmex_xp_listener(ip, int(port))
+
+
+
 commands = [
-	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders
+	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders, start_sysmex_xp_results
 ]

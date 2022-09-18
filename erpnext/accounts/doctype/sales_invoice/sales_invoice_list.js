@@ -35,45 +35,45 @@ frappe.listview_settings['Sales Invoice'] = {
 		//});
 
 
-		let disabled = false;
-		let query = "";
-		let url = location.href;
-		document.body.addEventListener('click', ()=>{
-			requestAnimationFrame(()=>{
-			if(url!==location.href){
-				//$(document).find('*').off('keydown');
-				disabled = true;
-				query = "";
-				url = location.href
-			}
-			let urls = location.href.split("/");
-			if(urls[urls.length - 1] === "sales-invoice"){
-				disabled = false;
-			}
-			});
-		}, true);
+		// let disabled = false;
+		// let query = "";
+		// let url = location.href;
+		// document.body.addEventListener('click', ()=>{
+		// 	requestAnimationFrame(()=>{
+		// 	if(url!==location.href){
+		// 		//$(document).find('*').off('keydown');
+		// 		disabled = true;
+		// 		query = "";
+		// 		url = location.href
+		// 	}
+		// 	let urls = location.href.split("/");
+		// 	if(urls[urls.length - 1] === "sales-invoice"){
+		// 		disabled = false;
+		// 	}
+		// 	});
+		// }, true);
 		
-		$(document).keydown(function(e) {
-			if(abandonedChars(e.which) || disabled ) return; // || !frm.is_dirty()
-			query += String.fromCharCode(switchedChars(e.which));
-			//console.log(e.which)
-			if(e.which == 13) {
-				// ctrl+b pressed
-				frappe.call({
-					method: "erpnext.healthcare.barcode_query.find_sales_invoice",
-					args: {
-						"test_code": query
-					},
-					callback: (res) => {
-						if(res.message != null && res.message != ""){
-							window.location.href =  res.message;
-						}
-					}
-				})
-				query = "";
-			}
+		// $(document).keydown(function(e) {
+		// 	if(abandonedChars(e.which) || disabled ) return; // || !frm.is_dirty()
+		// 	query += String.fromCharCode(switchedChars(e.which));
+		// 	//console.log(e.which)
+		// 	if(e.which == 13) {
+		// 		// ctrl+b pressed
+		// 		frappe.call({
+		// 			method: "erpnext.healthcare.barcode_query.find_sales_invoice",
+		// 			args: {
+		// 				"test_code": query
+		// 			},
+		// 			callback: (res) => {
+		// 				if(res.message != null && res.message != ""){
+		// 					window.location.href =  res.message;
+		// 				}
+		// 			}
+		// 		})
+		// 		query = "";
+		// 	}
 			
-		});
+		// });
 			
 	}
 };

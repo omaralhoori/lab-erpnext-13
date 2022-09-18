@@ -276,6 +276,7 @@ class SalesInvoice(SellingController):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
+		self.update_sales()
 		self.validate_pos_paid_amount()
 
 		if not self.auto_repeat:
@@ -340,6 +341,12 @@ class SalesInvoice(SellingController):
 			manage_invoice_submit_cancel(self, "on_submit")
 
 		self.process_common_party_accounting()
+
+	def update_sales(self):
+		frappe.db.sql(f"""
+			UPDATE `tabItem` SET sales = sales + 1
+			WHERE name IN (SELECT item_code FROM `tabSales Invoice Item` WHERE parent='{self.name}');
+		""")
 
 	def validate_pos_return(self):
 

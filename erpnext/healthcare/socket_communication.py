@@ -545,3 +545,49 @@ def start_sysmex_listener(ip_address, port):
                 log_result("sysmex", "Socket cannot connect to:" + ip_address +":" + str(port))
                 sleep(5)
                 continue
+
+
+
+def start_sysmex_xp_listener(ip_address, port):
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind((ip_address, port))
+                s.listen()
+                print("listening")
+                log_result("sysmexxp", "listening")
+
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    log_result("sysmexxp", "Connected by " + str(addr))
+                    conn.settimeout(3600)
+                    msg = b""
+                    while True:
+                        try:
+                            data = conn.recv(63000)
+                        except:
+                            send_check_msg(conn)
+                            continue
+                        print("Data Received-----------------------------------------------")
+                        log_result("sysmexxp", "data received---------------------")
+                        log_result("sysmexxp",str(data))
+                        if data:
+                            msg += data
+                        if msg.endswith(b'L|1|N\r'):
+                            results, embassy_results = parse_sysmex_msg(msg)
+                            msg = b''
+                            print(results)
+                            log_result("sysmexxp", "Result " + json.dumps(results))
+                            if len(results) > 0:
+                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
+                            if len(embassy_results) > 0:
+                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(embassy_results))
+                        conn.sendall(chr(6).encode())
+                        if not data:
+                            break
+            except socket.error:
+                print("Socket cannot connect")
+                log_result("sysmex", "Socket cannot connect to:" + ip_address +":" + str(port))
+                sleep(5)
+                continue
