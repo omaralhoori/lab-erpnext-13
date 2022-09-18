@@ -91,7 +91,7 @@ def start_sysmex_results(
 
 
 
-@click.command("start-sysmex-results")
+@click.command("start-sysmex-xp-results")
 @click.option("--ip", default="10.123.4.150")
 @click.option("--port", default=9095)
 @click.option("--back", is_flag=True, default=True)
