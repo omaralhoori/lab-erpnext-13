@@ -29,6 +29,9 @@ frappe.ui.form.on('Lab Test Template', {
 	},
 	refresh : function(frm) {
 		// Restrict Special, Grouped type templates in Child Test Groups
+		if (frm.is_new()){
+			frm.set_value("company", "")
+		}
 		if (frm.doc.lab_test_template_type == 'Multiline'){
 			frm.set_query('lab_test_template', 'lab_test_groups', function() {
 				return {

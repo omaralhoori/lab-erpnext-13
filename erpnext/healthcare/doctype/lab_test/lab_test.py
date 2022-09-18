@@ -585,6 +585,7 @@ def add_or_create_lab_test_doc(invoiced, practitioner, patient, template, compan
 	return lab_test
 
 def create_normals(template, lab_test, group_template=None, item=None):
+	if template.company and template.company != lab_test.company: return
 	lab_test.normal_toggle = 1
 	normal = lab_test.append('normal_test_items')
 	normal.lab_test_name = template.lab_test_name

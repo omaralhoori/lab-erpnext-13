@@ -13,6 +13,7 @@
   "lab_test_code",
   "lab_test_group",
   "department",
+  "company",
   "column_break_3",
   "disabled",
   "lab_test_template_type",
@@ -63,6 +64,7 @@
   "print_all_normal_ranges",
   "group_tests",
   "left_blank",
+  "dont_print_title",
   "section_break_compound",
   "normal_test_templates",
   "lab_test_attribute_section",
@@ -827,6 +829,19 @@
    "fieldname": "left_blank",
    "fieldtype": "Check",
    "label": "Allow Blank"
+  },
+  {
+   "depends_on": "eval:doc.lab_test_template_type == 'Single'",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "dont_print_title",
+   "fieldtype": "Check",
+   "label": "Dont Print Title"
   }
  ],
  "links": [
@@ -838,7 +853,7 @@
    "table_fieldname": "test_results"
   }
  ],
- "modified": "2022-09-06 08:03:13.857337",
+ "modified": "2022-09-18 07:09:56.108375",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
