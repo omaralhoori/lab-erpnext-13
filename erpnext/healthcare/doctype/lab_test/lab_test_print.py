@@ -1070,6 +1070,14 @@ def format_xray_header(xray_test, with_header=False, url=""):
             <td colspan="6" style="text-align: center"><img class="img-header" src="http://josante-outpatient.erp:8085/files/josante-logo.png" /></td>
         </tr>
         """
+    ages = xray_test.patient_age.split(" ")
+    try:
+        if int(ages[0]) > 0: age = " ".join(ages[:2])
+        elif int(ages[2]) > 0: age = ages[2] + " " + ages[3]
+        elif int(ages[4]) > 0: age = ages[4] + " " + ages[5]
+        else:  age = " ".join(ages[:2])
+    except:
+        age = " ".join(ages[:2])
     return f"""
     <table class="b-bottom header">
         {header}
@@ -1082,7 +1090,7 @@ def format_xray_header(xray_test, with_header=False, url=""):
                 : <span class="red rtl">{ xray_test.patient_name }</span>
             </td>
             <td>Age</td>
-            <td >: {" ".join(xray_test.patient_age.split(" ")[:2])}</td>
+            <td >: {age}</td>
             <td>Gender</td>
             <td>: {xray_test.patient_sex}</td>
         <tr>
