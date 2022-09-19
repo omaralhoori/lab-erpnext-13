@@ -480,6 +480,7 @@ def get_sysmex_results(res_msg, order_start, second_order):
         if len(result_code) < 4: continue
         code = result_code[2].split("^")[4]
         result = result_code[3]
+        if result: result = result.replace(" ", "").replace("\n", "")
         results.append({"code": code, "result": result})
         
     return results
