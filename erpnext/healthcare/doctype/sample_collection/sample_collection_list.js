@@ -1,5 +1,5 @@
 frappe.listview_settings['Sample Collection'] = {
-
+	hide_name_column: true,
 	onload: function (listview) {
 		let disabled = false;
 		let query = "";
