@@ -165,9 +165,11 @@ const format_tests_html = (tests) => {
 		// }else{
 			
 		// }
+		var tests_checkbox =  tests[testTemplate].length > 1 ? `<span style="float: right;"><input class="select-test-all" name="${testTemplate}" type="checkbox" /></span>` : "";
+
 		html += `
 		<div class="test-container">
-			<h4>${testTemplate}</h4>
+			<h4>${testTemplate} ${tests_checkbox}</h4>
 			<div class="child-tests">
 			${child_tests_html}
 			</div>
@@ -247,6 +249,20 @@ const setup_input_listeners = (frm) => {
 	input.make_input()
 	})
 	$('.result-checkbox').change(function() {
+		if ($(".result-checkbox:checked").length > 0)
+			{
+				toggle_test_selected_buttons(true);
+			}
+			else
+			{
+				toggle_test_selected_buttons(false);
+			}
+	});
+
+	$('.select-test-all').change(function(){
+		let name = $(this).attr("name");
+		let prop = $(this).prop('checked')
+		$(`input[name="${name}"]`).parent().parent().parent().find(".result-checkbox:visible").prop('checked', prop)
 		if ($(".result-checkbox:checked").length > 0)
 			{
 				toggle_test_selected_buttons(true);
