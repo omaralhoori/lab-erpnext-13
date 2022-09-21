@@ -16,6 +16,8 @@
   "column_break_3",
   "template",
   "company",
+  "release_date",
+  "finalize_date",
   "patient_info_section",
   "patient",
   "patient_name",
@@ -156,11 +158,25 @@
    "fieldname": "invoice_date",
    "fieldtype": "Date",
    "label": "Invoice Date"
+  },
+  {
+   "fieldname": "release_date",
+   "fieldtype": "Datetime",
+   "label": "Release Date",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "finalize_date",
+   "fieldtype": "Datetime",
+   "label": "Finalize Date",
+   "read_only": 1,
+   "set_only_once": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-12 06:21:58.905508",
+ "modified": "2022-09-21 19:40:09.065889",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",

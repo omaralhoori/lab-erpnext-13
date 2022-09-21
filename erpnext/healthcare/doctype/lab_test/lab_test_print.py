@@ -1062,7 +1062,7 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         return ""
 
 def format_xray_header(xray_test, with_header=False, url=""):
-    visit_date = frappe.db.get_value("Sales Invoice", xray_test.sales_invoice, "creation")
+    #visit_date = frappe.db.get_value("Sales Invoice", xray_test.sales_invoice, "creation")
     header= ""
     if with_header:
         header = f"""
@@ -1078,6 +1078,14 @@ def format_xray_header(xray_test, with_header=False, url=""):
         else:  age = " ".join(ages[:2])
     except:
         age = " ".join(ages[:2])
+    
+    if xray_test.get("finalize_date"): finalize_date = xray_test.get("finalize_date")
+    elif xray_test.get("release_date"): finalize_date = xray_test.get("release_date")
+    else: finalize_date = xray_test.modified
+
+    if xray_test.get("release_date"): release_date = xray_test.get("release_date")
+    else: release_date = xray_test.creation
+
     return f"""
     <table class="b-bottom header">
         {header}
@@ -1099,7 +1107,7 @@ def format_xray_header(xray_test, with_header=False, url=""):
                  Visit Date
             </td>
             <td >
-                : { frappe.utils.get_datetime(visit_date).strftime("%d/%m/%Y %r",) }
+                : { frappe.utils.get_datetime(release_date).strftime("%d/%m/%Y %r",) }
             </td>
             <td >Referring Physician</td>
             <td colspan="3">: {xray_test.practitioner_name or "" }</td>
@@ -1108,7 +1116,7 @@ def format_xray_header(xray_test, with_header=False, url=""):
             <td >
                 Report Date
             </td>
-            <td colspan="5">: {  frappe.utils.get_datetime(xray_test.modified).strftime("%d/%m/%Y %r",)   }</td>
+            <td colspan="5">: {  frappe.utils.get_datetime(finalize_date).strftime("%d/%m/%Y %r",)   }</td>
         <tr>
     </table>
     """

@@ -4,6 +4,7 @@
 from erpnext.healthcare.doctype.lab_test.lab_test_print import print_all_xray_report
 import frappe
 from frappe.model.document import Document
+from frappe.utils import datetime
 
 class RadiologyTest(Document):
 	def after_insert(self):
@@ -74,10 +75,11 @@ import json
 @frappe.whitelist()
 def finalize_selected(tests):
 	tests = json.loads(tests)
+	now = datetime.datetime.now()
 	frappe.db.sql("""
-	UPDATE `tabRadiology Test` SET record_status="Finalized"
+	UPDATE `tabRadiology Test` SET record_status="Finalized" , finalize_date='{now}'
 	WHERE name in ({tests}) AND record_status IN ('Released')
-	""".format(tests=",".join(tests)))
+	""".format(tests=",".join(tests), now=str(now)))
 
 @frappe.whitelist()
 def definalize_selected(tests):
@@ -91,10 +93,11 @@ def definalize_selected(tests):
 @frappe.whitelist()
 def release_selected(tests):
 	tests = json.loads(tests)
+	now = datetime.datetime.now()
 	frappe.db.sql("""
-	UPDATE `tabRadiology Test` SET record_status="Released"
+	UPDATE `tabRadiology Test` SET record_status="Released", release_date="{now}"
 	WHERE name in ({tests}) AND record_status IN ('Draft')
-	""".format(tests=",".join(tests)))
+	""".format(tests=",".join(tests), now=str(now)))
 
 @frappe.whitelist()
 def unrelease_selected(tests):
