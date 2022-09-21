@@ -616,10 +616,9 @@ def create_normals(template, lab_test, group_template=None, item=None):
 	normal.control_type = template.control_type
 	test_code = None
 	query = """
-		SELECT mtt.parent, mtt.host_code FROM `tabMachine Type Lab Test Template` AS mtt
-		INNER JOIN `tabMachine Type` AS mt
-		ON mt.name=mtt.parent
+		SELECT mtlt.machine_type as parent, mtt.host_code FROM `tabMachine Type Lab Test Template` AS mtt
 		INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name
+		INNER JOIN `tabMachine Type` AS mt ON mt.name=mtlt.machine_type
 		WHERE mt.disable=0 AND mtt.lab_test_template="{template}" AND company="{company}"
 		"""
 	try:
