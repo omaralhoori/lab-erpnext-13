@@ -202,8 +202,12 @@ def print_report_result(lab_test, with_header=False):
    "--footer-html" : footer, "quiet":"", "footer-center": "Page [page]/[topage]"}
     if not with_header:
         options['--margin-top'] = '45mm'
+    output = pdfkit.from_string(html, False, options)
+    uploaded_tests = get_uploaded_tests(test_doc, True)
+    if len(uploaded_tests) > 0:
+        output = get_uploaded_tests_with_content(uploaded_tests, output)
     frappe.local.response.filename = "Test.pdf"
-    frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
+    frappe.local.response.filecontent =   output or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
 
@@ -230,8 +234,12 @@ def lab_test_result_selected(lab_test, selected_tests):
     options = {"--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
    "--footer-html" : footer, "footer-center": "Page [page]/[topage]",
     "quiet":""}
+    output = pdfkit.from_string(html, False, options)
+    uploaded_tests = get_uploaded_tests(test_doc, True, selected_tests)
+    if len(uploaded_tests) > 0:
+        output = get_uploaded_tests_with_content(uploaded_tests, output)
     frappe.local.response.filename = "Test.pdf"
-    frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
+    frappe.local.response.filecontent = output  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
 
@@ -255,8 +263,12 @@ def lab_test_result(lab_test):
     options = {"--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
    "--footer-html" : footer, "footer-center": "Page [page]/[topage]",
     "quiet":""}
+    output = pdfkit.from_string(html, False, options)
+    uploaded_tests = get_uploaded_tests(test_doc, True)
+    if len(uploaded_tests) > 0:
+        output = get_uploaded_tests_with_content(uploaded_tests, output)
     frappe.local.response.filename = "Test.pdf"
-    frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
+    frappe.local.response.filecontent = output  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
 
@@ -697,6 +709,19 @@ def get_uploaded_tests(test_doc, only_finalized=False, selected_tests=[]):
     """.format(test_name=test_doc.name, where_stmt=where_stmt), as_dict=True)
     return tests
 
+def get_uploaded_tests_with_content(tests, result_content=None):
+    writer = None
+    if result_content:
+        writer = get_pdf_writer(result_content)
+    for test in tests:
+        file_content = get_uploaded_test_content(test["result_value"])
+        if not file_content: continue
+        if not writer:
+            writer = get_pdf_writer(file_content)
+        reader = PdfFileReader(io.BytesIO(file_content))
+        writer.appendPagesFromReader(reader)
+    output = get_file_data_from_writer(writer)
+    return output
 
 def format_uploaded_tests(test_doc,tests, header=""):
     tests_html = ""
@@ -959,7 +984,7 @@ def preview_test_uploaded_files(test_name):
     #print(file_content)
     frappe.local.response.filename = file_link.split("/")[-1]
     frappe.local.response.filecontent = file_content  or ''#get_pdf(html)
-    frappe.local.response.type = "download"#file_link.split(".")[-1]
+    frappe.local.response.type = "pdf"#file_link.split(".")[-1]
 
 @frappe.whitelist(allow_guest=True)
 def get_test_uploaded_files(lab_test, password, test_name):
@@ -983,6 +1008,18 @@ def get_test_uploaded_files(lab_test, password, test_name):
     frappe.local.response.filename = file_link.split("/")[-1]
     frappe.local.response.filecontent = file_content  or ''#get_pdf(html)
     frappe.local.response.type = "download"#file_link.split(".")[-1]
+
+def get_uploaded_test_content(file_link):
+    file_content = ""
+    if not file_link.lower().endswith("pdf"): return False
+    sub_dir =  ""  if file_link.startswith("/private") else "/public"
+    try:
+        with open(frappe.local.site + sub_dir + file_link, "rb") as f:
+            file_content = f.read()
+        return file_content
+    except:
+        return False
+
 
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import io
