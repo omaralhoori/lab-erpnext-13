@@ -324,11 +324,21 @@ const setup_input_listeners = (frm) => {
 }
 const round_percentge = (frm) => {
 	var values = []
-	$('input.percentage-input').each(function(idx) { values.push( $(this).val()) })
-	var rounded = round_to_hundred(values);
 	$('input.percentage-input').each(function(idx) { 
-		frappe.model.set_value("Normal Test Result", $(this).attr("name"), "result_percentage", rounded[idx])
-		$(this).val(rounded[idx])
+		if(!$(this).parent().parent().parent().attr("class").includes("Rejected")){
+			values.push( $(this).val())
+		}
+	 })
+	var rounded = round_to_hundred(values);
+	var index =0;
+	$('input.percentage-input').each(function(idx) {
+		if(!$(this).parent().parent().parent().attr("class").includes("Rejected")){
+		console.log(rounded, idx);
+		console.log($(this));
+		frappe.model.set_value("Normal Test Result", $(this).attr("name"), "result_percentage", rounded[index])
+		$(this).val(rounded[index])
+		index += 1;
+		}
 	 })
 }
 const round_to_hundred = (result_list) => {
