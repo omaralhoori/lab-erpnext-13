@@ -20,7 +20,8 @@
   "cover_title",
   "section_break_10",
   "attribute_results",
-  "sales_invoice"
+  "sales_invoice",
+  "company"
  ],
  "fields": [
   {
@@ -54,6 +55,7 @@
    "fetch_if_empty": 1,
    "fieldname": "nationality",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Nationality"
   },
   {
@@ -102,6 +104,7 @@
    "fetch_from": "sales_invoice.destination_country",
    "fieldname": "destination",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Destination",
    "options": "Country"
   },
@@ -118,11 +121,18 @@
    "label": "Patient",
    "options": "Patient",
    "reqd": 1
+  },
+  {
+   "fetch_from": "sales_invoice.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-21 13:36:20.900950",
+ "modified": "2022-09-24 06:49:57.057273",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Embassy Report",
@@ -143,6 +153,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "patient_name",
  "track_changes": 1,
  "track_seen": 1
 }

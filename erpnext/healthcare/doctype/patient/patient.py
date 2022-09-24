@@ -487,6 +487,18 @@ def match_fingerprint_radiology():
 				return {"path": "/app/radiology-test/" + str(sample[0])}
 	return None
 
+@frappe.whitelist()
+def match_fingerprint_cover():
+	if frappe.request.files['file']:
+		file = frappe.request.files['file']
+		file_content = file.stream.read()
+		patient = verify_fingerprint(file_content)
+		if patient and patient != "":
+			sample = frappe.db.get_value("Embassy Report", {"patient": patient}, ["name"])
+			if sample:
+				return {"path": "/app/embassy-report/" + str(sample)}
+	return None
+
 def validate_invoice_paid(patient, invoice):
 	now = frappe.utils.now()
 	res = frappe.db.sql("""
