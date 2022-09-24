@@ -146,8 +146,8 @@ class LabTest(Document):
 		all_finalized, all_released = True, True
 		partially_finalized, partially_released = False, False
 		for item in self.normal_test_items:
-			if item.status!='Finalized' and not item.allow_blank: all_finalized=False
-			if item.status!='Released' and not item.allow_blank: all_released= False
+			if item.status!='Finalized' and not item.allow_blank and item.status != "Rejected": all_finalized=False
+			if item.status!='Released' and not item.allow_blank and item.status != "Rejected": all_released= False
 			if item.status=='Finalized': partially_finalized=True
 			if item.status=='Released': partially_released= True
 		if all_finalized: status = 'Finalized'
