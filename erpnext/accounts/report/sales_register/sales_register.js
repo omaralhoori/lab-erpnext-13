@@ -42,6 +42,18 @@ frappe.query_reports["Sales Register"] = {
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
 		},
+		{
+			fieldname: 'insurance_party_type',
+			label: __('Insurance Party Type'),
+			fieldtype: 'Select',
+			options: ['','Payer', 'Insurance Company'],
+		},
+		{
+			fieldname: 'coverage_type',
+			label: __('Coverage Type'),
+			fieldtype: 'Select',
+			options: ['','Receivable', 'Cash'],
+		},
 	]
 }
 

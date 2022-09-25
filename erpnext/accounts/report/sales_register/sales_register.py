@@ -31,7 +31,9 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			'invoice': inv.name,
 			'posting_date': inv.posting_date,
 			'customer': inv.customer,
-			'insurance_party': inv.insurance_party
+			'insurance_party': inv.insurance_party,
+			'insurance_party_child': inv.insurance_party_child,
+			'insurance_party_type': inv.insurance_party_type
 		}
 
 		if additional_query_columns:
@@ -83,6 +85,13 @@ def get_columns(invoice_list, additional_table_columns):
 		{
 			'label': _("Insurance Payer"),
 			'fieldname': 'insurance_party',
+			'fieldtype': 'Link',
+			'options': 'Customer',
+			'width': 120
+		},
+		{
+			'label': _("Insurance Payer Child"),
+			'fieldname': 'insurance_party_child',
 			'fieldtype': 'Link',
 			'options': 'Customer',
 			'width': 120
@@ -167,6 +176,8 @@ def get_conditions(filters):
 
 	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
+	if filters.get("coverage_type"): conditions += " and coverage_type = %(coverage_type)s"
+	if filters.get("insurance_party_type"): conditions += " and insurance_party_type = %(insurance_party_type)s"
 
 	return conditions
 
@@ -177,7 +188,7 @@ def get_invoices(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	invoices = frappe.db.sql("""
 		select name, posting_date, debit_to,  customer, total, total_discount_provider, total_patient,
-		insurance_party,  customer_group,
+		insurance_party,insurance_party_child, insurance_party_type, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount, discount_amount as company_discount,
 		is_internal_customer, represents_company, company {0}
 		from `tabSales Invoice`
