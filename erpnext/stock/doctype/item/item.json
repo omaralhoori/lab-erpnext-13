@@ -124,7 +124,9 @@
   "more_information_section",
   "published_in_website",
   "total_projected_qty",
-  "sales"
+  "sales",
+  "olditemcode",
+  "oldiemid"
  ],
  "fields": [
   {
@@ -949,6 +951,16 @@
    "fieldname": "sales",
    "fieldtype": "Int",
    "label": "Sales"
+  },
+  {
+   "fieldname": "olditemcode",
+   "fieldtype": "Data",
+   "label": "OldItemCode"
+  },
+  {
+   "fieldname": "oldiemid",
+   "fieldtype": "Data",
+   "label": "OldIemID"
   }
  ],
  "icon": "fa fa-tag",
@@ -957,7 +969,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2022-09-18 04:14:02.858310",
+ "modified": "2022-09-24 11:17:36.189121",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
