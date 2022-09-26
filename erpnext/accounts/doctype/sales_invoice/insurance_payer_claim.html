@@ -395,7 +395,9 @@ table td div {
                                 {{ row.get_formatted("contract_discount", doc) }}
                             </td>
                             <td style="border: 1px solid;text-align: right;">
-                                {{ row.get_formatted("discount_amount", doc) }}
+                                {% set net_bal  = row.amount - row.patient_share + row.cash_discount - row.contract_discount  %}
+                                {{ frappe.utils.fmt_money(net_bal,currency=doc.currency) }}
+                                
                             </td>
                         </tr>    
                         {% endif %} 
@@ -417,7 +419,8 @@ table td div {
                                 {{ frappe.utils.fmt_money(doc.discount_amount  ,currency=doc.currency) }}
                             </th>
                             <th style="border: 1px solid;text-align: right;">
-                                {{ frappe.utils.fmt_money(doc.total_discount_provider,currency=doc.currency) }}
+                                {% set net_bal  = doc.total - doc.total_patient + doc.total_cash_discount - doc.discount_amount  %}
+                                {{ frappe.utils.fmt_money(net_bal,currency=doc.currency) }}
                             </th>
                         </tr>    
         
