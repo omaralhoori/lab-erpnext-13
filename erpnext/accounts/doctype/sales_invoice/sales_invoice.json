@@ -2174,6 +2174,7 @@
    "fetch_from": "insurance_party.coverage_type",
    "fieldname": "coverage_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Coverage Type",
    "options": "\nCash\nReceivable",
    "read_only": 1
@@ -2362,7 +2363,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-09-15 16:04:41.498908",
+ "modified": "2022-09-26 16:57:50.532569",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
