@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-09-25 09:06:42.830380",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "radiology_reports_section",
+  "radiology_finalizer_name",
+  "radiology_finalizer_signature"
+ ],
+ "fields": [
+  {
+   "fieldname": "radiology_finalizer_name",
+   "fieldtype": "Table",
+   "label": "Radiology Finalizer Name",
+   "options": "Branch User Print Format"
+  },
+  {
+   "fieldname": "radiology_reports_section",
+   "fieldtype": "Section Break",
+   "label": "Radiology Reports"
+  },
+  {
+   "fieldname": "radiology_finalizer_signature",
+   "fieldtype": "Table",
+   "label": "Radiology Finalizer Signature",
+   "options": "Branch User Print Format Asset"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-09-25 09:13:54.267868",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Report Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
