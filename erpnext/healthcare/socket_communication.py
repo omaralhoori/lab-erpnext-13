@@ -98,6 +98,30 @@ def getCheckSumValue(frame):
     return "0" + upper if len(upper) == 1   else upper
 
 
+def save_order_msgs_db(machine_orders):
+    try:
+        for machine in machine_orders:
+            db_insert_msg(machine_orders[machine]["order"]["id"],json.dumps(machine_orders[machine]), machine)
+        return True
+    except:
+        frappe.msgprint("Unable to receive order")
+        return False
+
+
+def parse_inifinty_msg(msg_json):
+    try:
+        msg_dict = json.loads(msg_json)
+        tests_joined = "\\".join(list(map(map_test_code, msg_dict['order']['tests'])))
+        msg = tcode("ENQ") + get_msg(msg_dict['patient']['file_no'], msg_dict['patient']['dob'], msg_dict['patient']['gender'], msg_dict['order']['id'], msg_dict['order']['date'], tests_joined) + tcode("EOT")
+        # print("receiving msg")
+        # print(msg)
+        #db_insert_msg(sample_id, msg.decode(), "infinity")
+        return msg
+    except:
+        #frappe.msgprint("Unable to receive order")
+        return False
+
+
 def send_infinty_msg_order(file_no, dob, gender, sample_id, sample_date, tests, host_code):
     try:
         tests_joined = "\\".join(list(map(map_test_code, tests)))
@@ -337,7 +361,7 @@ def db_insert_msg(sample_id, msg, machine):
     conn = connect_db()
     conn.execute(f"""
         INSERT INTO orders(id, msg, machine)
-        VALUES("{sample_id}", "{msg}", "{machine}")
+        VALUES("{sample_id}", '{msg}', "{machine}")
     """)
     conn.commit()
     conn.close()
@@ -375,20 +399,22 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
                         if start_time > 60:
                             send_check_msg(s)
                             start_time = 0
-                        orders = read_orders_from_db("infinity")
+                            log_result("infinty_order", "send check")
+                        orders = read_orders_from_db("Inifinty")
                         print(orders)
                         for order in orders:
-                            msg = order[1]
+                            msg_json = order[1]
+                            msg = parse_inifinty_msg(msg_json)
                             if msg:
                                 start_time = 0
-                                log_result("infinty_order",msg)
-                                s.sendall(msg.encode())
+                                log_result("infinty_order",msg.decode())
+                                s.sendall(msg)
                                 result = s.recv(1024)
                                 print("recvvvv--------")
                                 print(result)
                                 if result.endswith(tcode("ACK")):
                                     print("DELETE ------------------", order[0])
-                                    delete_or_mark_order(order[0], 'infinity')
+                                    delete_or_mark_order(order[0], 'Inifinty')
                                     time.sleep(2)
                         time.sleep(60)
                         start_time += 1
@@ -592,3 +618,92 @@ def start_sysmex_xp_listener(ip_address, port):
                 log_result("sysmex", "Socket cannot connect to:" + ip_address +":" + str(port))
                 sleep(5)
                 continue
+
+#------------------------------------LISION--------------------------------
+def start_lision_listener(ip_address, port):
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind((ip_address, port))
+                print("listening")
+                log_result("lision", "listening")
+                s.listen()
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    log_result("lision",str(addr))
+                    conn.settimeout(3600)
+                    msg = b""
+                    while True:
+                        try:
+                            data = conn.recv(63000)
+                        except:
+                            send_check_msg(conn)
+                            continue
+                        print("data received-------------------------------------------------------")
+                        print(data)
+                        log_result("lision",str(data))
+                        if data:
+                            msg += data
+                        if msg.endswith(chr(4).encode()):                    
+                            results, embassy_results = get_patient_results_lision(msg)
+                            if len(results) > 0:
+                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
+                            if len(embassy_results) > 0:
+                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(embassy_results))
+                            msg = b""   
+                        conn.sendall(chr(6).encode())
+                        if not data:
+                            break
+        except socket.error:
+            print("Socket cannot connect")
+            log_result("infinty", "Socket cannot connect")
+            sleep(5)
+            continue
+
+def make_frame(msg, frame_count, s=None):
+    frame = tcode("STX") + str(frame_count).encode() + msg.encode() +  tcode("CR") + tcode("ETX")
+    checksum = getCheckSumValue(frame.decode())
+    frame = frame + checksum.encode() + tcode("CR") + tcode("LF")
+    if s:
+        s.sendall(frame)
+    return frame, (frame_count + 1) % 10
+    
+def make_lision_msg(orders, s=None):
+    frame_count = 1
+    patient_count = 1
+    
+    header, frame_count = make_frame("H|\^&|||LIS|||||LXL|||1|", frame_count, s)
+    msgq = header
+    for order in orders:
+        patient_frame, frame_count = make_frame(f'P|{patient_count}||||||||||||', frame_count, s)
+        patient_count += 1
+        msgq += patient_frame
+        tests = "\\".join(["^^^" + test + "^" for test in order["tests"]])
+        order_frame, frame_count= make_frame(f'O|1|{order["id"]}||{tests}|||||||||||N||||||||||O', frame_count, s)
+        msgq += order_frame
+    termination_end = "N" if len(orders) > 0  else "I"
+    msg_end, frame_count = make_frame(f"L|1|{termination_end}", frame_count, s)
+    msgq += msg_end
+    msgq  = tcode("ENQ") + msgq + tcode("EOT")
+    return msgq
+
+
+def get_patient_results_lision(res_msg):
+    res_msg = re.sub(b'\x17..\r\n\x02.', b'', res_msg)
+    res_msg = res_msg.decode()
+    p = 1
+    results, embassy_results = [], []
+    while True:
+        res = patient_info_infinty(res_msg, p)
+        if not res or res[2] < 0: break
+        test_reuslts = results_info_infinty(res_msg, res[2], res[3])
+        p += 1
+        if len(test_reuslts) == 0: continue
+        if is_embassy_order(res[0]):
+            embassy_results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
+        else:
+            results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
+        if p == 300:
+            return []
+    return results, embassy_results

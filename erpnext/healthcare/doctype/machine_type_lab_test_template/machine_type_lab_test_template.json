@@ -13,7 +13,8 @@
   "code",
   "lab_test_parent_parent",
   "interface_order",
-  "test_parent_code"
+  "test_parent_code",
+  "is_disabled"
  ],
  "fields": [
   {
@@ -75,14 +76,21 @@
    "columns": 1,
    "fieldname": "interface_order",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Interface Order"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "is_disabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Disabled"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-31 13:31:35.545646",
+ "modified": "2022-09-27 02:40:54.355983",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Machine Type Lab Test Template",

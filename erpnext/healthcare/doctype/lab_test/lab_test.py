@@ -619,7 +619,7 @@ def create_normals(template, lab_test, group_template=None, item=None):
 		SELECT mtlt.machine_type as parent, mtt.host_code FROM `tabMachine Type Lab Test Template` AS mtt
 		INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name
 		INNER JOIN `tabMachine Type` AS mt ON mt.name=mtlt.machine_type
-		WHERE mt.disable=0 AND mtt.lab_test_template="{template}" AND company="{company}"
+		WHERE mt.disable=0 AND mtt.lab_test_template="{template}" AND company="{company}" AND mtt.is_disabled=0
 		"""
 	try:
 		if group_template:
@@ -919,7 +919,7 @@ def get_lab_test_prescribed(patient):
 				and lp.lab_test_created=0
 		''', (patient))
 
-from erpnext.healthcare.socket_communication import send_infinty_msg_order
+from erpnext.healthcare.socket_communication import send_infinty_msg_order, save_order_msgs_db
 
 @frappe.whitelist()
 def get_receive_sample(sample, test_name=None):
@@ -956,11 +956,51 @@ def send_received_msg_order(sample, test_name):
 	sent = False
 	if frappe.get_cached_value("Healthcare Settings",None, "send_test_order"):
 		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name", "status"])
-		infinty_tests = list(set([code['host_code'] for code in tests if (code['host_name'] == "Inifinty" and code['status'] != 'Rejected' and code['host_code'] and code['host_code'] != "") ]))
-		print(infinty_tests)
-		if len(infinty_tests) > 0:
-			sent = send_infinty_msg_with_patient(test_name, sample, infinty_tests)
+		#infinty_tests = list(set([code['host_code'] for code in tests if (code['host_name'] == "Inifinty" and code['status'] != 'Rejected' and code['host_code'] and code['host_code'] != "") ]))
+		#print(infinty_tests)
+		tests_dict = get_tests_dict(tests)
+		if len(tests) > 0:
+			# sent = send_infinty_msg_with_patient(test_name, sample, tests_dict)
+			sent = send_order_msg_with_patient(test_name, sample, tests_dict)
 		#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.modified.strftime("%Y%m%d%H%M%S"), tests, 107)
+	return sent
+
+def get_tests_dict(tests):
+	dic = {}
+	for test_code in tests:
+		if test_code['host_code'] and test_code['host_code'] != "" and test_code.get("status") != "Rejected":
+			if dic.get(test_code['host_name']):
+				dic[test_code['host_name']].append(test_code['host_code'])
+			else:
+				dic[test_code['host_name']] = [test_code['host_code']]
+	dic = { k : list(set(dic[k])) for k in dic}
+	return dic#json.dumps(dic)
+
+def send_order_msg_with_patient(test_name,sample, tests_dict):
+	lab_test = frappe.get_doc("Lab Test", test_name)
+	patient = frappe.get_doc("Patient", lab_test.patient)
+	if not patient: frappe.throw("Patient not defiend")
+	dob = "19710101"
+	if patient.dob: dob = str(patient.dob).replace("-", "")
+	gender = "M" if patient.sex == "Male" else "F"
+	sample = frappe.get_doc("Sample Collection", sample)
+	patient_dict = {
+		"file_no": patient.patient_number,
+		"dob": dob,
+		"gender": gender,
+	}
+	machine_orders = {}
+	for machine in tests_dict:
+		machine_orders[machine] = {
+			"patient": patient_dict,
+			"order": {
+				"id": sample.collection_serial.split("-")[-1],
+				"date": sample.creation.strftime("%Y%m%d%H%M%S"),
+				"tests": tests_dict[machine]
+			}
+		}
+	#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), infinty_tests, 107)
+	sent = save_order_msgs_db(machine_orders)
 	return sent
 
 def send_infinty_msg_with_patient(test_name,sample, infinty_tests):
@@ -1049,6 +1089,25 @@ def receive_infinty_results():
 								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
 			frappe.db.sql(query)
 	frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def receive_lision_results():
+	lab_tests = json.loads(frappe.request.data)
+	print("results received---------------------------------------------")
+	print(len(lab_tests))
+	print(lab_tests)
+	for lab_test in lab_tests:
+		results = lab_test['results']
+		for test in results:
+			query = """ UPDATE `tabNormal Test Result` as ntr 
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				SET ntr.result_value='{result}'
+				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
+								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
+			frappe.db.sql(query)
+	frappe.db.commit()
+	
 from erpnext.healthcare.socket_communication import log_result
 @frappe.whitelist(allow_guest=True)
 def receive_sysmex_results():
