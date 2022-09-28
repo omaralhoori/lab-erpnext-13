@@ -645,14 +645,17 @@ def start_lision_listener(ip_address, port):
                         log_result("lision",str(data))
                         if data:
                             msg += data
-                        if msg.endswith(chr(4).encode()):                    
-                            results, embassy_results = get_patient_results_lision(msg)
-                            if len(results) > 0:
-                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
-                            if len(embassy_results) > 0:
-                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(embassy_results))
-                            msg = b""   
+                          
                         conn.sendall(chr(6).encode())
+                        if msg.endswith(chr(4).encode()):                    
+                            # results, embassy_results = get_patient_results_lision(msg)
+                            # if len(results) > 0:
+                            #     requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
+                            # if len(embassy_results) > 0:
+                            #     requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(embassy_results))
+                            orders = read_orders_from_db("Liaison XL")
+                            msg = b""
+
                         if not data:
                             break
         except socket.error:
@@ -679,8 +682,8 @@ def make_lision_msg(orders, s=None):
         patient_frame, frame_count = make_frame(f'P|{patient_count}||||||||||||', frame_count, s)
         patient_count += 1
         msgq += patient_frame
-        tests = "\\".join(["^^^" + test + "^" for test in order["tests"]])
-        order_frame, frame_count= make_frame(f'O|1|{order["id"]}||{tests}|||||||||||N||||||||||O', frame_count, s)
+        tests = "\\".join(["^^^" + test + "^" for test in order["order"]["tests"]])
+        order_frame, frame_count= make_frame(f'O|1|{order["order"]["id"]}||{tests}|||||||||||N||||||||||O', frame_count, s)
         msgq += order_frame
     termination_end = "N" if len(orders) > 0  else "I"
     msg_end, frame_count = make_frame(f"L|1|{termination_end}", frame_count, s)
