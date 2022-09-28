@@ -357,6 +357,16 @@ def read_orders_from_db(machine):
     conn.close()
     return result
 
+def read_orders_in_list_from_db(machine, ids=[]):
+    conn= connect_db()
+    tests = ",".join([f"'{_id}'" for _id in ids])
+    orders = conn.execute(f"""
+        SELECT * FROM orders WHERE machine='{machine}' AND is_sent=0 AND id in ({tests});
+    """)
+    result = [order for order in orders]
+    conn.close()
+    return result
+
 def db_insert_msg(sample_id, msg, machine):
     conn = connect_db()
     conn.execute(f"""
@@ -653,7 +663,24 @@ def start_lision_listener(ip_address, port):
                             #     requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
                             # if len(embassy_results) > 0:
                             #     requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(embassy_results))
-                            orders = read_orders_from_db("Liaison XL")
+                            query = get_liaison_query_orders(msg)
+                            if query:
+                                orders = read_orders_in_list_from_db("Liaison XL", query)
+                                order_msg = make_lision_msg(orders)
+                                print("order msg--------------------------")
+                                print(order_msg)
+                                conn.sendall(order_msg)
+                                data = conn.recv(1024)
+                                if data and data.endswith(tcode("ACK")):
+                                    print("ORder deleted")
+                                    for order in orders:
+                                        delete_or_mark_order(order[0], "Liaison XL")
+                            else:
+                                results = get_results_liaison(msg)
+                                print("results-----------------------------")
+                                print(results)
+                                if len(results) > 0:
+                                    requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
                             msg = b""
 
                         if not data:
@@ -678,10 +705,11 @@ def make_lision_msg(orders, s=None):
     
     header, frame_count = make_frame("H|\^&|||LIS|||||LXL|||1|", frame_count, s)
     msgq = header
-    for order in orders:
+    for order_json in orders:
         patient_frame, frame_count = make_frame(f'P|{patient_count}||||||||||||', frame_count, s)
         patient_count += 1
         msgq += patient_frame
+        order= json.loads(order_json[1])
         tests = "\\".join(["^^^" + test + "^" for test in order["order"]["tests"]])
         order_frame, frame_count= make_frame(f'O|1|{order["order"]["id"]}||{tests}|||||||||||N||||||||||O', frame_count, s)
         msgq += order_frame
@@ -691,22 +719,46 @@ def make_lision_msg(orders, s=None):
     msgq  = tcode("ENQ") + msgq + tcode("EOT")
     return msgq
 
+def get_liaison_query_orders(query_msg):
+    query_count = 1
+    query_msg = re.sub(b'\x17..\r\n\x02.', b'', query_msg)
+    orders = []
+    index = query_msg.find(b"Q|1|")
+    while index > 0:
+        query_count += 1
+        query_list = query_msg[index:index + 20].split(b"|")
+        if len(query_list) > 2:
+            orders.append(query_list[2].decode())
+        index = query_msg.find(b"Q|" + str(query_count).encode() + b"|")
+    return orders if len(orders) > 0 else False
 
-def get_patient_results_lision(res_msg):
-    res_msg = re.sub(b'\x17..\r\n\x02.', b'', res_msg)
-    res_msg = res_msg.decode()
-    p = 1
-    results, embassy_results = [], []
-    while True:
-        res = patient_info_infinty(res_msg, p)
-        if not res or res[2] < 0: break
-        test_reuslts = results_info_infinty(res_msg, res[2], res[3])
-        p += 1
-        if len(test_reuslts) == 0: continue
-        if is_embassy_order(res[0]):
-            embassy_results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
-        else:
-            results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
-        if p == 300:
-            return []
-    return results, embassy_results
+def get_results_liaison(liason_msg):
+    formated_result = []
+    result_list = []
+    result_msg_list = liason_msg.split(b'\x02')
+    result = {}
+    found = False
+    for res in result_msg_list:
+        if len(res) > 1 and res[1] == 79:
+            result['order'] = res
+            found = True
+        if len(res) > 1 and res[1] == 82 and found:
+            found = False
+            result['result'] = res
+            result_list.append(result)
+            result = {}
+    for result in result_list:
+        res = {}
+        order_list = result['order'].split(b"|")
+        if len(order_list)> 4:
+            res['order_id'] = order_list[2].decode()
+            test_list =  order_list[4].split(b"^")
+            if len(test_list) < 2:
+                continue
+            res['code'] = test_list[-2].decode()
+        else: continue
+        res_list = result['result'].split(b"|")
+        if len(res_list) > 3:
+            res['result'] = res_list[3].decode()
+            formated_result.append(res)
+    return formated_result
