@@ -406,8 +406,10 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
                     print(f"Connected")
                     start_time = 0
                     while True:
-                        if start_time > 60:
-                            send_check_msg(s)
+                        if start_time > 30:
+                            #send_check_msg(s)
+                            s.sendall(tcode("ENQ"))
+                            s.sendall(tcode("EOT"))
                             start_time = 0
                             log_result("infinty_order", "send check")
                         orders = read_orders_from_db("Inifinty")
