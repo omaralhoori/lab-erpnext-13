@@ -60,6 +60,7 @@ def start_infinty_results(
 	print(f"Starting Infinty results server on {ip}:{port}")
 	start_infinty_listener(ip, int(port))
 
+
 @click.command("start-infinty-orders")
 @click.option("--ip", default="10.123.4.12")
 @click.option("--port", default=9091)
@@ -106,6 +107,19 @@ def start_sysmex_xp_results(
 
 
 
+@click.command("start-lision-results")
+@click.option("--ip", default="10.123.4.150")
+@click.option("--port", default=9096)
+@click.option("--back", is_flag=True, default=True)
+@pass_context
+def start_lision_results(
+	context, ip="10.123.4.150",port=9096, back=True
+):
+	"Start Test Command"
+	from erpnext.healthcare.socket_communication import start_lision_listener
+	print(f"Starting Infinty results server on {ip}:{port}")
+	start_lision_listener(ip, int(port))
+
 commands = [
-	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders, start_sysmex_xp_results
+	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders, start_sysmex_xp_results, start_lision_results
 ]

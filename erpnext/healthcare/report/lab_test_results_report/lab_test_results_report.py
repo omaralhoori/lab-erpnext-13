@@ -124,7 +124,7 @@ def get_tests(filters, additional_query_columns=[]):
 		,  CONCAT('<a target="_blank" class=''btn btn-sm'' href="/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=',si.name,'">Print Cover</a>') as cover_btn
 		"""
 	invoices = frappe.db.sql("""
-		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient, si.mobile_no as mobile,
+		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.title as patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Test</button>'), '' )as print_btn,
 		IF(rt.record_status IN ('Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', si.name ,''' onClick=''print_xray(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Xray</button>'), '' ) as xray_btn

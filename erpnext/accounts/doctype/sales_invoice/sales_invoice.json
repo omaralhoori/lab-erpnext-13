@@ -259,7 +259,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "JO\nACC-SINV-RET-.YYYY.-",
+   "options": "JO-.YY.-.MM.-.####.\nACC-SINV-RET-.YYYY.-",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -2174,6 +2174,7 @@
    "fetch_from": "insurance_party.coverage_type",
    "fieldname": "coverage_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Coverage Type",
    "options": "\nCash\nReceivable",
    "read_only": 1
@@ -2362,7 +2363,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-09-15 16:04:41.498908",
+ "modified": "2022-10-01 07:18:10.487565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
