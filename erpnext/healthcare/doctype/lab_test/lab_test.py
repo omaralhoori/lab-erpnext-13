@@ -1097,15 +1097,15 @@ def receive_lision_results():
 	print(len(lab_tests))
 	print(lab_tests)
 	for lab_test in lab_tests:
-		results = lab_test['results']
-		for test in results:
-			query = """ UPDATE `tabNormal Test Result` as ntr 
-				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
-				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-				SET ntr.result_value='{result}'
-				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
-								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
-			frappe.db.sql(query)
+		#results = lab_test['results']
+		#for test in results:
+		query = """ UPDATE `tabNormal Test Result` as ntr 
+			INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+			INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+			SET ntr.result_value='{result}'
+			WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
+							""".format(result=lab_test['result'], test_code=lab_test['code'], order_id=lab_test['order_id'])
+		frappe.db.sql(query)
 	frappe.db.commit()
 	
 from erpnext.healthcare.socket_communication import log_result
