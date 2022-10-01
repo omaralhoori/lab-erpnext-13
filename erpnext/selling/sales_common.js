@@ -71,15 +71,17 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		// ibrahim filter for lab invoice
 		var add_filter_lab_inv = 0;
-		if (this.frm.doctype == 'Sales Invoice') {
+		//console.log(me.frm.doctype)
+		if (me.frm.doctype == 'Sales Invoice') {
 			add_filter_lab_inv = 1;
 		} else add_filter_lab_inv = 0;
 
 		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
-			this.frm.set_query("item_code", "items", function(add_filter_lab_inv) {
+			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_sales_item': 1, 'customer': cur_frm.doc.customer }
+					filters: {'is_sales_item': 1, 'customer': cur_frm.doc.customer ,'add_filter_lab_inv': add_filter_lab_inv},
+					
 				}
 			});
 		}
