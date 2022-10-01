@@ -9,9 +9,9 @@ const payment_type_updated = function(frm){
 		frm.set_value("mode_of_payment", "")
 	}
 	if (frm.doc.payment_type == 'Pay'){
-		frm.set_value("naming_series", "PV-.YYYY.-")
+		frm.set_value("naming_series", "PV-.YY.-.MM.-")
 	}else{
-		frm.set_value("naming_series", "RV-.YYYY.-")
+		frm.set_value("naming_series", "RV-.YY.-.MM.-")
 	}
 }
 frappe.ui.form.on('Payment Entry', {

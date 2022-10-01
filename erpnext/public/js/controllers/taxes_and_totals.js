@@ -58,7 +58,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
 		//ibrahim 
-		frappe.model.set_value(item.doctype, item.name, "patient_rate", item_patient_rate);
+		if (in_list(["Sales Invoice"], item.parenttype) ) {
+				frappe.model.set_value(item.doctype, item.name, "patient_rate", item_patient_rate);
+		}
 	},
 
 	calculate_taxes_and_totals: function(update_paid_amount) {
@@ -133,54 +135,75 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_item_values: function() {
 		let me = this;
-		if (!this.discount_amount_applied) {
-			
-			$.each(this.frm.doc["items"] || [], function(i, item) {
-				frappe.model.round_floats_in(item);
-				//ibrahim
-				//item.net_rate = item.rate;
-				item.net_rate = item.patient_rate;
-				// ibrahim	
-				if ((!item.qty) && me.frm.doc.is_return) {
-					item.amount = flt(item.rate * -1, precision("amount", item));
-					item.patient_share = flt(item.patient_rate * -1, precision("patient_share", item)) ;
-					item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
-
-					if (me.frm.doc.additional_discount_percentage>=0){
-						item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) * -1, precision("contract_discount", item));
-						item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
-						if (item.discount_amount == 0){
-							item.contract_discount = 0
-							item.base_contract_discount = 0
+		if (in_list(["Sales Invoice"], this.frm.doc.doctype)) {
+				if (!this.discount_amount_applied) {
+					$.each(this.frm.doc["items"] || [], function(i, item) {
+						frappe.model.round_floats_in(item);
+						//ibrahim
+						//item.net_rate = item.rate;
+						item.net_rate = item.patient_rate;
+						// ibrahim	
+						if ((!item.qty) && me.frm.doc.is_return) {
+							item.amount = flt(item.rate * -1, precision("amount", item));
+							item.patient_share = flt(item.patient_rate * -1, precision("patient_share", item)) ;
+							item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
+		
+							if (me.frm.doc.additional_discount_percentage>=0){
+								item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) * -1, precision("contract_discount", item));
+								item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
+								if (item.discount_amount == 0){
+									item.contract_discount = 0
+									item.base_contract_discount = 0
+								}
+							}
+						} else {
+							//console.log('1111')
+							item.amount = flt(item.rate * item.qty, precision("amount", item));
+							//console.log(item.cash_discount);
+							item.patient_share = flt(item.patient_rate * item.qty, precision("patient_share", item)) - flt(item.cash_discount , precision("cash_discount", item));
+							item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
+							item.base_cash_discount = flt(item.cash_discount * me.frm.doc.conversion_rate, precision("base_cash_discount", item));
+							
+							if (me.frm.doc.additional_discount_percentage>=0){
+								item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) , precision("contract_discount", item));
+								item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
+								if (item.discount_amount == 0){
+									item.contract_discount = 0
+									item.base_contract_discount = 0
+								}
+							}
 						}
-					}
-				} else {
-					//console.log('1111')
-					item.amount = flt(item.rate * item.qty, precision("amount", item));
-					//console.log(item.cash_discount);
-					item.patient_share = flt(item.patient_rate * item.qty, precision("patient_share", item)) - flt(item.cash_discount , precision("cash_discount", item));
-					item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
-					item.base_cash_discount = flt(item.cash_discount * me.frm.doc.conversion_rate, precision("base_cash_discount", item));
-					
-					if (me.frm.doc.additional_discount_percentage>=0){
-						item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) , precision("contract_discount", item));
-						item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
-						if (item.discount_amount == 0){
-							item.contract_discount = 0
-							item.base_contract_discount = 0
-						}
-					}
+		
+						//ibrahim
+						//item.net_amount = item.amount;
+						item.net_amount = item.patient_share;
+						item.item_tax_amount = 0.0;
+						item.total_weight = flt(item.weight_per_unit * item.stock_qty);
+		
+						me.set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "amount", "contract_discount", "patient_share", "cash_discount", "net_rate", "net_amount"]);
+						
+					});
 				}
-
-				//ibrahim
-				//item.net_amount = item.amount;
-				item.net_amount = item.patient_share;
-				item.item_tax_amount = 0.0;
-				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
-
-				me.set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "amount", "contract_discount", "patient_share", "cash_discount", "net_rate", "net_amount"]);
-				
-			});
+		
+		}else{
+				if (!this.discount_amount_applied) {
+					$.each(this.frm.doc["items"] || [], function(i, item) {
+						frappe.model.round_floats_in(item);
+						item.net_rate = item.rate;
+		
+						if ((!item.qty) && me.frm.doc.is_return) {
+							item.amount = flt(item.rate * -1, precision("amount", item));
+						} else {
+							item.amount = flt(item.rate * item.qty, precision("amount", item));
+						}
+		
+						item.net_amount = item.amount;
+						item.item_tax_amount = 0.0;
+						item.total_weight = flt(item.weight_per_unit * item.stock_qty);
+		
+						me.set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
+					});
+				}
 		}
 	},
 
@@ -313,28 +336,42 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_net_total: function() {
 		var me = this;
-		this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = this.frm.doc.total_discount_provider = 0.0;
-		this.frm.doc.base_total_discount_provider = this.frm.doc.total_patient = this.frm.doc.base_total_patient = 0.0;
-		this.frm.doc.discount_amount = this.frm.doc.base_discount_amount = this.frm.doc.total_cash_discount = this.frm.doc.base_total_cash_discount = 0.0;
-
-		//ibrahim
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			me.frm.doc.total += item.amount;
-			me.frm.doc.total_qty += item.qty;
-			me.frm.doc.base_total += item.base_amount;
-			me.frm.doc.net_total += item.net_amount;
-			me.frm.doc.base_net_total += item.base_net_amount;
-			me.frm.doc.total_discount_provider += item.discount_amount;
-			me.frm.doc.base_total_discount_provider += item.discount_amount;
-			me.frm.doc.total_cash_discount += item.cash_discount;
-			me.frm.doc.base_total_cash_discount += item.base_cash_discount;
-			me.frm.doc.total_patient += item.patient_share;
-			me.frm.doc.base_total_patient += item.base_patient_share;
-			me.frm.doc.discount_amount += item.contract_discount;
-			me.frm.doc.base_discount_amount += item.base_contract_discount;
-			});
-
-		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total", "total_discount_provider", "base_total_discount_provider", "total_patient", "base_total_patient"]);
+		if (in_list(["Sales Invoice"], this.frm.doc.doctype)) {
+			this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = this.frm.doc.total_discount_provider = 0.0;
+			this.frm.doc.base_total_discount_provider = this.frm.doc.total_patient = this.frm.doc.base_total_patient = 0.0;
+			this.frm.doc.discount_amount = this.frm.doc.base_discount_amount = this.frm.doc.total_cash_discount = this.frm.doc.base_total_cash_discount = 0.0;
+		
+			//ibrahim
+			$.each(this.frm.doc["items"] || [], function(i, item) {
+				me.frm.doc.total += item.amount;
+				me.frm.doc.total_qty += item.qty;
+				me.frm.doc.base_total += item.base_amount;
+				me.frm.doc.net_total += item.net_amount;
+				me.frm.doc.base_net_total += item.base_net_amount;
+				me.frm.doc.total_discount_provider += item.discount_amount;
+				me.frm.doc.base_total_discount_provider += item.discount_amount;
+				me.frm.doc.total_cash_discount += item.cash_discount;
+				me.frm.doc.base_total_cash_discount += item.base_cash_discount;
+				me.frm.doc.total_patient += item.patient_share;
+				me.frm.doc.base_total_patient += item.base_patient_share;
+				me.frm.doc.discount_amount += item.contract_discount;
+				me.frm.doc.base_discount_amount += item.base_contract_discount;
+				});
+		
+			frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total", "total_discount_provider", "base_total_discount_provider", "total_patient", "base_total_patient"]);
+		}else{
+			this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = 0.0;
+	
+			$.each(this.frm.doc["items"] || [], function(i, item) {
+				me.frm.doc.total += item.amount;
+				me.frm.doc.total_qty += item.qty;
+				me.frm.doc.base_total += item.base_amount;
+				me.frm.doc.net_total += item.net_amount;
+				me.frm.doc.base_net_total += item.base_net_amount;
+				});
+	
+			frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
+		}
 	},
 
 	add_taxes_from_item_tax_template: function(item_tax_map) {
@@ -668,11 +705,18 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	set_discount_amount: function() {
-		if(this.frm.doc.additional_discount_percentage) {
-			//ibrahim
-			this.frm.doc.discount_amount = flt(this.frm.doc.discount_amount, precision("discount_amount"));
-			//this.frm.doc.discount_amount = flt(flt(this.frm.doc[frappe.scrub(this.frm.doc.apply_discount_on)])
-			//	* this.frm.doc.additional_discount_percentage / 100, precision("discount_amount"));
+		if (in_list(["Sales Invoice"], this.frm.doc.doctype)) {
+			if(this.frm.doc.additional_discount_percentage) {
+				//ibrahim
+				this.frm.doc.discount_amount = flt(this.frm.doc.discount_amount, precision("discount_amount"));
+				//this.frm.doc.discount_amount = flt(flt(this.frm.doc[frappe.scrub(this.frm.doc.apply_discount_on)])
+				//	* this.frm.doc.additional_discount_percentage / 100, precision("discount_amount"));
+			}
+		}else{
+			if(this.frm.doc.additional_discount_percentage) {
+				this.frm.doc.discount_amount = flt(flt(this.frm.doc[frappe.scrub(this.frm.doc.apply_discount_on)])
+					* this.frm.doc.additional_discount_percentage / 100, precision("discount_amount"));
+			}
 		}
 	},
 
@@ -695,8 +739,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				$.each(this.frm.doc["items"] || [], function(i, item) {
 					distributed_amount = flt(me.frm.doc.discount_amount) * item.net_amount / total_for_discount_amount;
 					//ibrahim
-					item.net_amount = flt(item.net_amount ,	precision("base_amount", item));
-					//item.net_amount = flt(item.net_amount - distributed_amount,	precision("base_amount", item));
+					if (in_list(["Sales Invoice"], me.frm.doc.doctype)) {
+						item.net_amount = flt(item.net_amount ,	precision("base_amount", item));
+						//item.net_amount = flt(item.net_amount - distributed_amount,	precision("base_amount", item));
+					}else{
+						item.net_amount = flt(item.net_amount - distributed_amount, precision("base_amount", item));
+					}
 					net_total += item.net_amount;
 
 					// discount amount rounding loss adjustment if no taxes
@@ -705,8 +753,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 						var discount_amount_loss = flt(me.frm.doc.net_total - net_total
 							- me.frm.doc.discount_amount, precision("net_total"));
 						//ibrahim
-						item.net_amount = flt(item.net_amount ,precision("net_amount", item));
-						//item.net_amount = flt(item.net_amount + discount_amount_loss,precision("net_amount", item));
+						if (in_list(["Sales Invoice"], me.frm.doc.doctype)) {
+							item.net_amount = flt(item.net_amount ,precision("net_amount", item));
+							//item.net_amount = flt(item.net_amount + discount_amount_loss,precision("net_amount", item));
+						}else{
+							item.net_amount = flt(item.net_amount + discount_amount_loss,
+								precision("net_amount", item));
+						}
 					}
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -852,12 +905,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-
-				this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
+			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
-				
 		}
-
 	},
 
 	set_total_amount_to_default_mop: function() {

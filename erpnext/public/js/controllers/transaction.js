@@ -700,22 +700,27 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		else
 			//console.log('1111111111111111')
 			//ibrahim
-			//item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),precision("rate", item));
-			item.rate = flt(item.price_list_rate ,precision("rate", item));
+			if (in_list(["Sales Invoice Item","Sales Invoice", "POS Invoice Item"]), cdt)
+				//item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),precision("rate", item));
+				item.rate = flt(item.price_list_rate ,precision("rate", item));
+			else
+				item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),precision("rate", item));
 
 
 		//ibrahim && omar
 		//console.log('1111111111111111')
-		var me = this;
-		if (me.frm.doc.insurance_party_type ){
-			if  (me.frm.doc.coverage_percentage != 0  && item.discount_updated < 3){
-				frappe.model.set_value(cdt, cdn,  "discount_updated", item.discount_updated + 1);
-				frappe.model.set_value(cdt, cdn,  "margin_type", 'Percentage');
-				frappe.model.set_value(cdt, cdn,  "discount_percentage", me.frm.doc.coverage_type !='Cash' ? me.frm.doc.coverage_percentage:0 );
-				
+		if (in_list(["Sales Invoice Item","Sales Invoice", "POS Invoice Item"]), cdt){
+			var me = this;
+			if (me.frm.doc.insurance_party_type ){
+				if  (me.frm.doc.coverage_percentage != 0  && item.discount_updated < 3){
+					frappe.model.set_value(cdt, cdn,  "discount_updated", item.discount_updated + 1);
+					frappe.model.set_value(cdt, cdn,  "margin_type", 'Percentage');
+					frappe.model.set_value(cdt, cdn,  "discount_percentage", me.frm.doc.coverage_type !='Cash' ? me.frm.doc.coverage_percentage:0 );
+					
+				}
 			}
+			//console.log('222222222222222222222')
 		}
-		//console.log('222222222222222222222')
 
 
 		this.calculate_taxes_and_totals();

@@ -110,63 +110,97 @@ class calculate_taxes_and_totals(object):
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
 
-				if item.discount_percentage == 100:
-					#ibrahim
-					#item.rate = 0.0
-					item.net_rate = 0.0
-					item.patient_rate = 0.0
-					item.cash_discount = 0.0
-				elif item.price_list_rate:
-					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+				if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+					if item.discount_percentage == 100:
 						#ibrahim
-						item.rate = flt(item.price_list_rate , item.precision("rate"))
-						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
-						#item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-						#item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
-					elif item.discount_amount and item.pricing_rules:
-						#ibrahim
-						#item.rate =  item.price_list_rate - item.discount_amount
-						item.rate =  item.price_list_rate 
-
+						#item.rate = 0.0
+						item.net_rate = 0.0
+						item.patient_rate = 0.0
+						item.cash_discount = 0.0
+					elif item.price_list_rate:
+						if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+							#ibrahim
+							item.rate = flt(item.price_list_rate , item.precision("rate"))
+							item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+							#item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+							#item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+						elif item.discount_amount and item.pricing_rules:
+							#ibrahim
+							#item.rate =  item.price_list_rate - item.discount_amount
+							item.rate =  item.price_list_rate 
+				else:
+						if item.discount_percentage == 100:
+							item.rate = 0.0
+						elif item.price_list_rate:
+							if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+								item.rate = flt(item.price_list_rate *
+									(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+								item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+							elif item.discount_amount and item.pricing_rules:
+								item.rate =  item.price_list_rate - item.discount_amount
+					
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item', 'POS Invoice Item', 'Purchase Invoice Item', 'Purchase Order Item', 'Purchase Receipt Item']:
-					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
-					if flt(item.rate_with_margin) > 0:
-						#ibrahim
-						item.rate = flt(item.rate_with_margin , item.precision("rate"))
-						#item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-
-						if item.discount_amount and not item.discount_percentage:
+					if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+						item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
+						if flt(item.rate_with_margin) > 0:
 							#ibrahim
-							item.rate = item.rate_with_margin 
-							#item.rate = item.rate_with_margin - item.discount_amount
-						else:
+							item.rate = flt(item.rate_with_margin , item.precision("rate"))
+							#item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+	
+							if item.discount_amount and not item.discount_percentage:
+								#ibrahim
+								item.rate = item.rate_with_margin 
+								#item.rate = item.rate_with_margin - item.discount_amount
+							else:
+								#ibrahim
+								item.discount_amount = item.rate_with_margin - item.rate
+								#item.discount_amount = item.rate_with_margin - item.rate
+	
+						elif flt(item.price_list_rate) >= 0:
 							#ibrahim
-							item.discount_amount = item.rate_with_margin - item.rate
-							#item.discount_amount = item.rate_with_margin - item.rate
+							if item.doctype not in ['Sales Invoice Item']:
+								item.discount_amount = item.discount_amount #item.price_list_rate - item.rate
+					elif item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Purchase Invoice Item', 'Purchase Order Item', 'Purchase Receipt Item']:
+						item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
+						if flt(item.rate_with_margin) > 0:
+							item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+	
+							if item.discount_amount and not item.discount_percentage:
+								item.rate = item.rate_with_margin - item.discount_amount
+							else:
+								item.discount_amount = item.rate_with_margin - item.rate
+	
+						elif flt(item.price_list_rate) > 0:
+							item.discount_amount = item.price_list_rate - item.rate
 
-					elif flt(item.price_list_rate) >= 0:
-						#ibrahim
-						if item.doctype not in ['Sales Invoice Item']:
-							item.discount_amount = item.discount_amount #item.price_list_rate - item.rate
 				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
-					#ibrahim
-					item.discount_amount = item.discount_amount
-					#item.discount_amount = item.price_list_rate - item.rate
+					if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+						#ibrahim
+						item.discount_amount = item.discount_amount
+						#item.discount_amount = item.price_list_rate - item.rate
+					else:
+						item.discount_amount = item.price_list_rate - item.rate
 
-				#ibrahim
-				#item.net_rate = item.rate
-				item.net_rate = item.patient_rate
+				if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+					#ibrahim
+					#item.net_rate = item.rate
+					item.net_rate = item.patient_rate
+				else:
+					item.net_rate = item.rate
 
 				if not item.qty and self.doc.get("is_return"):
 					item.amount = flt(-1 * item.rate, item.precision("amount"))
 				else:
 					item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 
-				#ibrahim
-				#item.net_amount = item.amount
-				item.net_amount = item.patient_share
-
-				self._set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "net_rate", "contract_discount", "patient_share", "cash_discount", "amount", "net_amount"])
+				if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+					#ibrahim
+					#item.net_amount = item.amount
+					item.net_amount = item.patient_share
+					self._set_in_company_currency(item, ["price_list_rate", "rate", "patient_rate", "net_rate", "contract_discount", "patient_share", "cash_discount", "amount", "net_amount"])
+				else:
+					item.net_amount = item.amount
+					self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
 
 				item.item_tax_amount = 0.0
 
@@ -339,9 +373,11 @@ class calculate_taxes_and_totals(object):
 						and self.doc.discount_amount \
 						and self.doc.apply_discount_on == "Grand Total" \
 						and not self.doc.get('is_consolidated'):
-							#ibrahim
-							self.doc.rounding_adjustment = flt(self.doc.grand_total	 - tax.total,self.doc.precision("rounding_adjustment"))
-							#self.doc.rounding_adjustment = flt(self.doc.grand_total	- flt(self.doc.discount_amount) - tax.total,self.doc.precision("rounding_adjustment"))
+							if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+								#ibrahim
+								self.doc.rounding_adjustment = flt(self.doc.grand_total	 - tax.total,self.doc.precision("rounding_adjustment"))
+							else:
+								self.doc.rounding_adjustment = flt(self.doc.grand_total - flt(self.doc.discount_amount) - tax.total, self.doc.precision("rounding_adjustment"))
 
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
@@ -500,11 +536,15 @@ class calculate_taxes_and_totals(object):
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:
-			#ibrahim
-			None
-			#self.doc.discount_amount = flt(flt(self.doc.get(scrub(self.doc.apply_discount_on)))
-			#	* self.doc.additional_discount_percentage / 100, self.doc.precision("discount_amount"))
-
+			if self.doc.doctype in ['Sales Invoice Item','Sales Invoice', 'POS Invoice Item', 'POS Invoice']:
+				#ibrahim
+				None
+				#self.doc.discount_amount = flt(flt(self.doc.get(scrub(self.doc.apply_discount_on)))
+				#	* self.doc.additional_discount_percentage / 100, self.doc.precision("discount_amount"))
+			else:
+				self.doc.discount_amount = flt(flt(self.doc.get(scrub(self.doc.apply_discount_on)))
+					* self.doc.additional_discount_percentage / 100, self.doc.precision("discount_amount"))
+			
 	def apply_discount_amount(self):
 		if self.doc.discount_amount:
 			if not self.doc.apply_discount_on:
@@ -521,9 +561,11 @@ class calculate_taxes_and_totals(object):
 				# calculate item amount after Discount Amount
 				for i, item in enumerate(self.doc.get("items")):
 					distributed_amount = flt(self.doc.discount_amount) * item.net_amount / total_for_discount_amount
-					#ibrahim
-					item.net_amount = flt(item.net_amount , item.precision("net_amount"))
-					#item.net_amount = flt(item.net_amount - distributed_amount, item.precision("net_amount"))
+					if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+						#ibrahim
+						item.net_amount = flt(item.net_amount , item.precision("net_amount"))
+					else:
+						item.net_amount = flt(item.net_amount - distributed_amount, item.precision("net_amount"))
 					net_total += item.net_amount
 
 					# discount amount rounding loss adjustment if no taxes
@@ -532,9 +574,11 @@ class calculate_taxes_and_totals(object):
 							discount_amount_loss = flt(self.doc.net_total - net_total - self.doc.discount_amount,
 								self.doc.precision("net_total"))
 
-							#ibrahim
-							item.net_amount = flt(item.net_amount ,item.precision("net_amount"))
-							#item.net_amount = flt(item.net_amount + discount_amount_loss,item.precision("net_amount"))
+							if item.doctype in ['Sales Invoice Item', 'POS Invoice Item']:
+								#ibrahim
+								item.net_amount = flt(item.net_amount ,item.precision("net_amount"))
+							else:
+								item.net_amount = flt(item.net_amount + discount_amount_loss,	item.precision("net_amount"))
 
 					item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0
 

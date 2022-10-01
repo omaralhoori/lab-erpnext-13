@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import json
 from collections import defaultdict
+from pydoc import doc
 
 import frappe
 from frappe import scrub
@@ -234,7 +235,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False,add_filter_lab_inv=0):
 	conditions = []
 
 	if isinstance(filters, str):
@@ -283,46 +284,88 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				del filters['customer']
 			else:
 				del filters['supplier']
+	
+	#ibrahim 
 
+	# for "Delivery Note Item", "Purchase Receipt Item", "Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item" , "Sales Order Item", "Purchase Order Item", "Material Request Item", "Product Bundle"
+	# add_filter_lab_inv = 0
+	# sales invoice 
+	# add_filter_lab_inv = 1
+	if add_filter_lab_inv == 0 :
+		description_cond = ''
+		if frappe.db.count('Item', cache=True) < 50000:
+			# scan description only if items are less than 50000
+			description_cond = 'or tabItem.description LIKE %(txt)s'
+		return frappe.db.sql("""select
+				tabItem.name, tabItem.item_name, tabItem.item_group,
+			if(length(tabItem.description) > 40, \
+				concat(substr(tabItem.description, 1, 40), "..."), description) as description
+			{columns}
+			from tabItem
+			where tabItem.docstatus < 2
+				and tabItem.disabled=0
+				and tabItem.has_variants=0
+				and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
+				and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+					{description_cond})
+				{fcond} {mcond}
+			order by
+				if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+				if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
+				idx desc,
+				name, item_name
+			limit %(start)s, %(page_len)s """.format(
+				columns=columns,
+				scond=searchfields,
+				fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+				mcond=get_match_cond(doctype).replace('%', '%%'),
+				description_cond = description_cond),
+				{
+					"today": nowdate(),
+					"txt": "%%%s%%" % txt,
+					"_txt": txt.replace("%", ""),
+					"start": start,
+					"page_len": page_len
+				}, as_dict=as_dict)
+	else:
+		description_cond = ''
+		if frappe.db.count('Item', cache=True) < 50000:
+			# scan description only if items are less than 50000 			and lab_test_template_type!='Single'
+			description_cond = 'or tabItem.description LIKE %(txt)s'
+		return frappe.db.sql("""select
+				tabItem.name, tabItem.item_name, tabItem.item_group,
+			if(length(tabItem.description) > 40, \
+				concat(substr(tabItem.description, 1, 40), "..."), description) as description
+			{columns}
+			from tabItem
+			INNER JOIN ( SELECT item as template_item, lab_test_template_type, alias from `tabLab Test Template` ) as ltt ON ltt.template_item=name
+			where tabItem.docstatus < 2
 
-	description_cond = ''
-	if frappe.db.count('Item', cache=True) < 50000:
-		# scan description only if items are less than 50000 			and lab_test_template_type!='Single'
-		description_cond = 'or tabItem.description LIKE %(txt)s'
-	return frappe.db.sql("""select
-			tabItem.name, tabItem.item_name, tabItem.item_group,
-		if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description
-		{columns}
-		from tabItem
-		INNER JOIN ( SELECT item as template_item, lab_test_template_type, alias from `tabLab Test Template` ) as ltt ON ltt.template_item=name
-		where tabItem.docstatus < 2
-
-			and tabItem.disabled=0
-			and tabItem.has_variants=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
-				{description_cond})
-			{fcond} {mcond}
-		order by
-			sales desc,
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
-			idx desc,
-			name, item_name
-		limit %(start)s, %(page_len)s """.format(
-			columns=columns,
-			scond=searchfields,
-			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
-			mcond=get_match_cond(doctype).replace('%', '%%'),
-			description_cond = description_cond),
-			{
-				"today": nowdate(),
-				"txt": "%%%s%%" % txt,
-				"_txt": txt.replace("%", ""),
-				"start": start,
-				"page_len": page_len
-			}, as_dict=as_dict)
+				and tabItem.disabled=0
+				and tabItem.has_variants=0
+				and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
+				and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+					{description_cond})
+				{fcond} {mcond}
+			order by
+				sales desc,
+				if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+				if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
+				idx desc,
+				name, item_name
+			limit %(start)s, %(page_len)s """.format(
+				columns=columns,
+				scond=searchfields,
+				fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+				mcond=get_match_cond(doctype).replace('%', '%%'),
+				description_cond = description_cond),
+				{
+					"today": nowdate(),
+					"txt": "%%%s%%" % txt,
+					"_txt": txt.replace("%", ""),
+					"start": start,
+					"page_len": page_len
+				}, as_dict=as_dict)
 
 
 @frappe.whitelist()
