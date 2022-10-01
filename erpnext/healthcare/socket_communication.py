@@ -652,14 +652,18 @@ def start_lision_listener(ip_address, port):
                         except:
                             send_check_msg(conn)
                             continue
-                        print("data received-------------------------------------------------------")
-                        print(data)
-                        log_result("lision",str(data))
+                        # print("data received-------------------------------------------------------")
+                        # print(data)
+                        # log_result("lision",str(data))
                         if data:
                             msg += data
                           
                         conn.sendall(chr(6).encode())
-                        if msg.endswith(chr(4).encode()):                    
+                        if msg.endswith(chr(4).encode()):
+                            print("msg received-------------------------------------------------------")
+                            print(msg)
+                            log_result("lision", "msg received----------------------------------")
+                            log_result("lision",str(msg))                   
                             # results, embassy_results = get_patient_results_lision(msg)
                             # if len(results) > 0:
                             #     requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
@@ -668,19 +672,25 @@ def start_lision_listener(ip_address, port):
                             query = get_liaison_query_orders(msg)
                             if query:
                                 orders = read_orders_in_list_from_db("Liaison XL", query)
-                                order_msg = make_lision_msg(orders)
-                                print("order msg--------------------------")
-                                print(order_msg)
-                                conn.sendall(order_msg)
-                                data = conn.recv(1024)
-                                if data and data.endswith(tcode("ACK")):
-                                    print("ORder deleted")
-                                    for order in orders:
+                                for order in orders:
+                                    order_msg = make_lision_msg([order])
+                                    print("order msg--------------------------")
+                                    print(order_msg)
+                                    log_result("lision", "order received----------------------------------")
+                                    log_result("lision", str(order_msg))
+                                    conn.sendall(order_msg)
+                                    data = conn.recv(1024)
+                                    if data and data.endswith(tcode("ACK")):
+                                        print("ORder deleted")
+                                        #for order in orders:
                                         delete_or_mark_order(order[0], "Liaison XL")
+                                    time.sleep(1)
                             else:
                                 results = get_results_liaison(msg)
                                 print("results-----------------------------")
                                 print(results)
+                                log_result("lision", "results received----------------------------------")
+                                log_result("lision", json.dumps(results))
                                 if len(results) > 0:
                                     requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
                             msg = b""
@@ -689,7 +699,7 @@ def start_lision_listener(ip_address, port):
                             break
         except socket.error:
             print("Socket cannot connect")
-            log_result("infinty", "Socket cannot connect")
+            log_result("lision", "Socket cannot connect")
             sleep(5)
             continue
 
