@@ -2289,6 +2289,7 @@
    "label": "Mobile No"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "referred_by",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -2363,7 +2364,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-10-01 07:18:10.487565",
+ "modified": "2022-10-02 13:43:40.967298",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

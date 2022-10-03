@@ -336,8 +336,8 @@ def get_service_item_and_practitioner_charge(doc):
 	if not service_item:
 		throw_config_service_item(is_inpatient)
 
-	if not practitioner_charge:
-		throw_config_practitioner_charge(is_inpatient, doc.practitioner)
+	#if not practitioner_charge:
+	#	throw_config_practitioner_charge(is_inpatient, doc.practitioner)
 
 	return {'service_item': service_item, 'practitioner_charge': practitioner_charge}
 
