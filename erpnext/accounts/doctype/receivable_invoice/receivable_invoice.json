@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "company",
   "from_date",
   "to_date",
   "insurance_party",
@@ -50,12 +51,22 @@
    "options": "Receivable Invoice",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-20 12:38:19.453354",
+ "migration_hash": "0cdf279d82c4781fd0150b4c9dcdfa83",
+ "modified": "2022-10-03 20:21:41.367192",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Receivable Invoice",

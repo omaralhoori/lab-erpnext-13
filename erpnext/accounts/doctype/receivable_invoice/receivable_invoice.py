@@ -13,6 +13,7 @@ class ReceivableInvoice(Document):
 
 def get_conditions(invoice):
 	conditions = ""
+	conditions += f" AND company ='{invoice.company}'"
 	if invoice.from_date: conditions += f" AND posting_date >='{invoice.from_date}'"
 	if invoice.to_date: conditions += f" AND posting_date <='{invoice.to_date}'"
 	if invoice.insurance_party: conditions += f" AND (insurance_party='{invoice.insurance_party}' or insurance_party_child='{invoice.insurance_party}')"
