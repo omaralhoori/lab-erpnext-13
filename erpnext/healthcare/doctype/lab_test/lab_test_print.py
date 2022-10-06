@@ -448,11 +448,12 @@ def format_embassy_tests(tests, header, previous_tests={}):
             normal_range = test['template'][0]['range_text']
         if test['conv_result']:
             result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
+            class_name = "red" if (test['conv_result'] == "Positive" and test['lab_test_name'] != "Blood Rhesus") else "" 
             test_html = f"""
                 <tr >
                 <td class="width-40">{test['lab_test_name']}</td>
                 <td class="width-5 f-s "></td>
-                <td class="width-10 ">{result} </td>
+                <td class="width-10 {class_name}">{result} </td>
                 <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
                 <td class="f-s width-10">{normal_crit}</td>
                 <td class="f-s width-10">{normal_range}</td>
