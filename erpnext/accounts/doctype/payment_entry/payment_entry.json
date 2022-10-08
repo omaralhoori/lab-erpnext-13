@@ -48,7 +48,14 @@
   "received_amount_after_tax",
   "target_exchange_rate",
   "base_received_amount",
+  "transaction_references",
+  "cheque_data",
+  "issue_cheque_data",
   "base_received_amount_after_tax",
+  "section_break_46",
+  "total_incoming_cheques",
+  "column_break_48",
+  "total_issued_cheques",
   "section_break_14",
   "get_outstanding_invoice",
   "references",
@@ -73,9 +80,8 @@
   "total_taxes_and_charges",
   "deductions_or_loss_section",
   "deductions",
-  "transaction_references",
+  "section_break_70",
   "reference_no",
-  "column_break_23",
   "reference_date",
   "clearance_date",
   "accounting_dimensions_section",
@@ -445,29 +451,28 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_from && doc.paid_to)",
+   "depends_on": "//eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Cheque/Reference No",
    "mandatory_depends_on": "//eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
   },
   {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
-  },
-  {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_from && doc.paid_to)",
+   "depends_on": "//eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Cheque/Reference Date",
    "mandatory_depends_on": "//eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
+   "depends_on": "//eval:doc.docstatus==1",
    "fieldname": "clearance_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Clearance Date",
    "no_copy": 1,
    "print_hide": 1,
@@ -745,14 +750,56 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Mode of Payment Type",
-   "options": "Cash\nCard\nBank\nGeneral\nPhone",
+   "options": "Cash\nCard\nBank\nCheque\nGeneral\nPhone",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.payment_type == 'Receive'",
+   "fieldname": "cheque_data",
+   "fieldtype": "Table",
+   "label": "Cheque Data",
+   "options": "Cheque Info"
+  },
+  {
+   "depends_on": "eval: doc.payment_type == 'Pay'",
+   "fieldname": "issue_cheque_data",
+   "fieldtype": "Table",
+   "label": "Issue Cheque Data",
+   "options": "Issue Cheque Info"
+  },
+  {
+   "fieldname": "section_break_70",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_break_46",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_incoming_cheques",
+   "fieldtype": "Float",
+   "label": "Total Incoming Cheques",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_issued_cheques",
+   "fieldtype": "Float",
+   "label": "Total Issued Cheques",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-01 21:08:27.202824",
+ "migration_hash": "3f80b30e239e6b1a06b87947ab1709c0",
+ "modified": "2022-10-08 20:38:21.400445",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

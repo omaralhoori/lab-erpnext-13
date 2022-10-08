@@ -72,6 +72,7 @@ class PaymentEntry(AccountsController):
 		self.set_tax_withholding()
 		self.set_amounts()
 		self.validate_amounts()
+		self.validate_cheque_amounts()
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
@@ -445,7 +446,7 @@ class PaymentEntry(AccountsController):
 			net_total_for_tds = 0
 			if reference.reference_doctype == 'Purchase Order':
 				net_total_for_tds += flt(frappe.db.get_value('Purchase Order', reference.reference_name, 'net_total'))
-
+		
 			if net_total_for_tds:
 				net_total = net_total_for_tds
 
@@ -507,6 +508,15 @@ class PaymentEntry(AccountsController):
 		if self.paid_from_account_currency == self.paid_to_account_currency:
 			if self.paid_amount < self.received_amount:
 				frappe.throw(_("Received Amount cannot be greater than Paid Amount"))
+
+	def validate_cheque_amounts(self):
+		if self.cheque_data:
+			if self.paid_amount != self.total_incoming_cheques:
+				frappe.throw(_("Paid amount should be equal to total incoming cheques"))
+
+		if self.issue_cheque_data:
+			if self.paid_amount != self.total_issued_cheques:
+				frappe.throw(_("Paid amount should be equal to total Issued cheques"))
 
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
@@ -711,7 +721,12 @@ class PaymentEntry(AccountsController):
 				"cost_center": self.cost_center
 			}, item=self)
 
-			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
+			#ibrahim
+			if self.party_type=="Employee":
+				dr_or_cr = "debit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "credit"
+			else:
+				dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
+			#dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
 			for d in self.get("references"):
 				cost_center = self.cost_center
@@ -1615,6 +1630,11 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 def get_bank_cash_account(doc, bank_account):
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
 		account=bank_account)
+
+	#ibrahim
+	if not bank:
+		bank = get_default_bank_cash_account(doc.company, "Cheque", mode_of_payment=doc.get("mode_of_payment"),
+			account=bank_account)
 
 	if not bank:
 		bank = get_default_bank_cash_account(doc.company, "Cash", mode_of_payment=doc.get("mode_of_payment"),

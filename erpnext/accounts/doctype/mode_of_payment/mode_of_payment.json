@@ -31,7 +31,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Type",
-   "options": "Cash\nCard\nBank\nGeneral\nPhone"
+   "options": "Cash\nCard\nBank\nCheque\nGeneral\nPhone"
   },
   {
    "fieldname": "accounts",
@@ -56,7 +56,8 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-29 13:09:37.787664",
+ "migration_hash": "a14b3eab48fad7727075ec64e692335e",
+ "modified": "2022-10-04 22:41:17.906872",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",

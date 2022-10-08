@@ -1413,6 +1413,50 @@ frappe.ui.form.on('Payment Entry Deduction', {
 		frm.events.set_unallocated_amount(frm);
 	}
 })
+frappe.ui.form.on('Cheque Info', {
+	cheque_amount:function(frm, cdt, cdn) {
+		cur_frm.cscript.update_total_incoming_cheques(frm.doc);
+	},
+	cheque_data_remove: function(frm, cdt, cdn) {
+		cur_frm.cscript.update_total_incoming_cheques(frm.doc);
+	},
+	cheque_data_add: function(frm, cdt, cdn) {
+		cur_frm.cscript.update_total_incoming_cheques(frm.doc);
+	},
+})
+
+cur_frm.cscript.update_total_incoming_cheques = function(doc) {
+	var total_incoming_cheques=0.0;
+	var cheque_data = doc.cheque_data || [];
+	for(var i in cheque_data) {
+		total_incoming_cheques += flt(cheque_data[i].cheque_amount);
+	}
+	doc.total_incoming_cheques = total_incoming_cheques;
+	refresh_many(['total_incoming_cheques']);
+}
+
+frappe.ui.form.on('Issue Cheque Info', {
+	cheque_amount:function(frm, cdt, cdn) {
+		cur_frm.cscript.update_total_issued_cheques(frm.doc);
+	},
+	issue_cheque_data_remove: function(frm, cdt, cdn) {
+		cur_frm.cscript.update_total_issued_cheques(frm.doc);
+	},
+	issue_cheque_data_add: function(frm, cdt, cdn) {
+		cur_frm.cscript.update_total_issued_cheques(frm.doc);
+	},
+})
+
+cur_frm.cscript.update_total_issued_cheques = function(doc) {
+	var total_issued_cheques=0.0;
+	var issue_cheque_data = doc.issue_cheque_data || [];
+	for(var i in issue_cheque_data) {
+		total_issued_cheques += flt(issue_cheque_data[i].cheque_amount);
+	}
+	doc.total_issued_cheques = total_issued_cheques;
+	refresh_many(['total_issued_cheques']);
+}
+
 frappe.ui.form.on('Payment Entry', {
 	cost_center: function(frm){
 		if (frm.doc.posting_date && (frm.doc.paid_from||frm.doc.paid_to)) {

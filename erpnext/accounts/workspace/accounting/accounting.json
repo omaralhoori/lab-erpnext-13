@@ -1101,9 +1101,35 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cheques",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Incoming Cheque Entry",
+   "link_to": "Cheque Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Issued Cheques Entry",
+   "link_to": "Cheque Issued Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-09-21 07:19:28.199794",
+ "modified": "2022-10-04 21:36:34.611197",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
