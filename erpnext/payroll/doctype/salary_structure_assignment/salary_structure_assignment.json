@@ -22,6 +22,10 @@
   "base",
   "column_break_9",
   "variable",
+  "column_break_16",
+  "annual",
+  "column_break_18",
+  "social",
   "amended_from"
  ],
  "fields": [
@@ -141,11 +145,32 @@
    "fieldtype": "Link",
    "label": "Payroll Payable Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "annual",
+   "fieldtype": "Currency",
+   "label": "Annual Income",
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "social",
+   "fieldtype": "Currency",
+   "label": "Fixed Social Deduction",
+   "options": "currency"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:44:46.267974",
+ "migration_hash": "b8c4b8476b42465426b6e4776ea5d68d",
+ "modified": "2022-05-30 05:40:29.552946",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",

@@ -231,12 +231,12 @@ class SalarySlip(TransactionBase):
 				sa.from_date <= %(end_date)s or sa.from_date <= %(joining_date)s)"""
 		if self.payroll_frequency:
 			cond += """and ss.payroll_frequency = '%(payroll_frequency)s'""" % {"payroll_frequency": self.payroll_frequency}
-
+		#ibrahim
 		st_name = frappe.db.sql("""
 			select sa.salary_structure
 			from `tabSalary Structure Assignment` sa join `tabSalary Structure` ss
 			where sa.salary_structure=ss.name
-				and sa.docstatus = 1 and ss.docstatus = 1 and ss.is_active ='Yes' %s
+				and sa.docstatus = 1 and ss.docstatus = 0 and ss.is_active ='Yes' %s
 			order by sa.from_date desc
 			limit 1
 		""" %cond, {'employee': self.employee, 'start_date': self.start_date,
@@ -637,6 +637,11 @@ class SalarySlip(TransactionBase):
 		# Calculate variable_based_on_taxable_salary after all components updated in salary slip
 		tax_components, other_deduction_components = [], []
 		for d in self._salary_structure_doc.get("deductions"):
+			#frappe.msgprint(_("""(12) variable_based_on_taxable_salary {0}  --- 
+			#					formula {1} ---
+			#					amount {2}
+			#	""").format(d.variable_based_on_taxable_salary , d.formula,flt(d.amount) \
+			#		))
 			if d.variable_based_on_taxable_salary == 1 and not d.formula and not flt(d.amount):
 				tax_components.append(d.salary_component)
 			else:
@@ -645,6 +650,10 @@ class SalarySlip(TransactionBase):
 		if not tax_components:
 			tax_components = [d.name for d in frappe.get_all("Salary Component", filters={"variable_based_on_taxable_salary": 1})
 				if d.name not in other_deduction_components]
+
+		#frappe.msgprint(_("""(11) total_exemption_amount {0} 
+		#	""").format(tax_components \
+		#		))
 
 		for d in tax_components:
 			tax_amount = self.calculate_variable_based_on_taxable_salary(d, payroll_period)
@@ -682,10 +691,11 @@ class SalarySlip(TransactionBase):
 			if not amount:
 				return
 
+			#ibrahim
 			component_row = self.append(component_type)
 			for attr in (
 				'depends_on_payment_days', 'salary_component',
-				'do_not_include_in_total', 'is_tax_applicable',
+				'do_not_include_in_total', 'is_tax_applicable','company_contributions_account',
 				'is_flexible_benefit', 'variable_based_on_taxable_salary',
 				'exempted_from_income_tax'
 			):
@@ -731,13 +741,15 @@ class SalarySlip(TransactionBase):
 				.format(tax_component))
 			return
 
+		#ibrahim
 		# Deduct taxes forcefully for unsubmitted tax exemption proof and unclaimed benefits in the last period
-		if payroll_period.end_date <= getdate(self.end_date):
-			self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
-			self.deduct_tax_for_unclaimed_employee_benefits = 1
+		#if payroll_period.end_date <= getdate(self.end_date):
+		#	self.deduct_tax_for_unsubmitted_tax_exemption_proof = 1
+		#	self.deduct_tax_for_unclaimed_employee_benefits = 1
 
 		return self.calculate_variable_tax(payroll_period, tax_component)
 
+	#ibrahim
 	def calculate_variable_tax(self, payroll_period, tax_component):
 		# get Tax slab from salary structure assignment for the employee and payroll period
 		tax_slab = self.get_income_tax_slabs(payroll_period)
@@ -760,6 +772,19 @@ class SalarySlip(TransactionBase):
 		current_additional_earnings = current_taxable_earnings_for_payment_days.additional_income
 		current_additional_earnings_with_full_tax = current_taxable_earnings_for_payment_days.additional_income_with_full_tax
 
+		#frappe.msgprint(_("""(1) current_taxable_earnings_for_payment_days {0} -  
+		#	current_structured_taxable_earnings {1} - 
+		#	current_additional_earnings {2} - 
+		#	current_additional_earnings_with_full_tax {3} -
+		#	remaining_sub_periods {4} -
+		#	current_taxable_earnings {5} -
+		#	""").format(current_taxable_earnings_for_payment_days,\
+		#		current_structured_taxable_earnings,\
+		#		current_additional_earnings,current_additional_earnings_with_full_tax, \
+		#		remaining_sub_periods, \
+		#		current_taxable_earnings.additional_income \
+		#		))
+
 		# Get taxable unclaimed benefits
 		unclaimed_taxable_benefits = 0
 		if self.deduct_tax_for_unclaimed_employee_benefits:
@@ -769,20 +794,59 @@ class SalarySlip(TransactionBase):
 		# Total exemption amount based on tax exemption declaration
 		total_exemption_amount = self.get_total_exemption_amount(payroll_period, tax_slab)
 
+		#frappe.msgprint(_("""(2) total_exemption_amount {0} 
+		#	""").format(total_exemption_amount \
+		#		))
+
+
 		#Employee Other Incomes
 		other_incomes = self.get_income_form_other_sources(payroll_period) or 0.0
 
 		# Total taxable earnings including additional and other incomes
-		total_taxable_earnings = previous_taxable_earnings + current_structured_taxable_earnings + future_structured_taxable_earnings \
-			+ current_additional_earnings + other_incomes + unclaimed_taxable_benefits - total_exemption_amount
+		#total_taxable_earnings = previous_taxable_earnings + current_structured_taxable_earnings + future_structured_taxable_earnings \
+		#	+ current_additional_earnings + other_incomes + unclaimed_taxable_benefits - total_exemption_amount
+		#ibrahim
+		if 	remaining_sub_periods > 0:
+			current_additional_earnings = current_additional_earnings #/ remaining_sub_periods
+			unclaimed_taxable_benefits = unclaimed_taxable_benefits #/ remaining_sub_periods
+		
+		total_taxable_earnings = current_structured_taxable_earnings \
+								+ current_additional_earnings \
+								+ (other_incomes/12) \
+								+ unclaimed_taxable_benefits \
+								- (total_exemption_amount/12)
+
+		#frappe.msgprint(_("""(3) total_taxable_earnings {0} -  
+		#	previous_taxable_earnings {1} - 
+		#	current_structured_taxable_earnings {2} - 
+		#	future_structured_taxable_earnings {3} -
+		#	current_additional_earnings {4} -
+		#	other_incomes {5} -
+		#	unclaimed_taxable_benefits {6} -
+		#	total_exemption_amount {7} -
+		#	""").format(total_taxable_earnings,\
+		#		previous_taxable_earnings,\
+		#		current_structured_taxable_earnings, \
+		#		future_structured_taxable_earnings, \
+		#		current_additional_earnings, \
+		#		other_incomes, \
+		#		unclaimed_taxable_benefits, \
+		#		total_exemption_amount \
+		#		))
+
 
 		# Total taxable earnings without additional earnings with full tax
-		total_taxable_earnings_without_full_tax_addl_components = total_taxable_earnings - current_additional_earnings_with_full_tax
+		#ibrahim
+		#total_taxable_earnings_without_full_tax_addl_components = total_taxable_earnings - current_additional_earnings_with_full_tax
+		total_taxable_earnings_without_full_tax_addl_components = (total_taxable_earnings * 12) - current_additional_earnings_with_full_tax
 
 		# Structured tax amount
 		total_structured_tax_amount = self.calculate_tax_by_tax_slab(
 			total_taxable_earnings_without_full_tax_addl_components, tax_slab)
-		current_structured_tax_amount = (total_structured_tax_amount - previous_total_paid_taxes) / remaining_sub_periods
+		#ibrahim
+		#current_structured_tax_amount = (total_structured_tax_amount - previous_total_paid_taxes) / remaining_sub_periods
+		#current_structured_tax_amount = (total_structured_tax_amount - previous_total_paid_taxes) / 12
+		current_structured_tax_amount = (total_structured_tax_amount) / 12
 
 		# Total taxable earnings with additional earnings with full tax
 		full_tax_on_additional_earnings = 0.0
@@ -791,8 +855,33 @@ class SalarySlip(TransactionBase):
 			full_tax_on_additional_earnings = total_tax_amount - total_structured_tax_amount
 
 		current_tax_amount = current_structured_tax_amount + full_tax_on_additional_earnings
+		#current_tax_amount = current_structured_tax_amount
 		if flt(current_tax_amount) < 0:
 			current_tax_amount = 0
+
+
+
+		#frappe.msgprint(_("""(4) remaining_sub_periods {0} -  
+		#	total_taxable_earnings_without_full_tax_addl_components {1} - 
+		#	current_additional_earnings_with_full_tax {2} - 
+		#	total_structured_tax_amount {3} -
+		#	full_tax_on_additional_earnings {4} -
+		#	current_structured_tax_amount {5} - 
+		#	previous_total_paid_taxes {6} - 
+		#	current_tax_amount {7} - 
+		#	total_taxable_earnings {8}
+		#	""").format(remaining_sub_periods,\
+		#		total_taxable_earnings_without_full_tax_addl_components,\
+		#		current_additional_earnings_with_full_tax, \
+		#		total_structured_tax_amount, \
+		#		full_tax_on_additional_earnings, \
+		#		current_structured_tax_amount, \
+		#		previous_total_paid_taxes, \
+		#		current_tax_amount, \
+		#		total_taxable_earnings
+		#		))
+
+
 
 		return current_tax_amount
 
@@ -904,11 +993,12 @@ class SalarySlip(TransactionBase):
 				else:
 					taxable_earnings += (amount - additional_amount)
 					additional_income += additional_amount
-
+					
+					#ibrahim
 					# Get additional amount based on future recurring additional salary
-					if additional_amount and earning.is_recurring_additional_salary:
-						additional_income += self.get_future_recurring_additional_amount(earning.additional_salary,
-							earning.additional_amount) # Used earning.additional_amount to consider the amount for the full month
+					#if additional_amount and earning.is_recurring_additional_salary:
+					#	additional_income += self.get_future_recurring_additional_amount(earning.additional_salary,
+					#		earning.additional_amount) # Used earning.additional_amount to consider the amount for the full month
 
 					if earning.deduct_full_tax_on_selected_payroll_date:
 						additional_income_with_full_tax += additional_amount
@@ -1037,6 +1127,11 @@ class SalarySlip(TransactionBase):
 		for slab in tax_slab.slabs:
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
 				continue
+			#frappe.msgprint(_("""(6) data {0} -  
+			#	condition {1} - 
+			#	""").format(data, \
+			#		tax_slab.slabs\
+			#		))
 			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
 				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
 				continue
@@ -1044,6 +1139,15 @@ class SalarySlip(TransactionBase):
 				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
 			elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
 				tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * .01
+
+		#frappe.msgprint(_("""(5) tax_slab {0} -  
+		#	annual_taxable_earning {1} - 
+		#	tax_amount {2} - 
+		#	""").format(tax_slab.slabs,\
+		#		annual_taxable_earning,\
+		#		tax_amount \
+		#		))
+
 
 		# other taxes and charges on income tax
 		for d in tax_slab.other_taxes_and_charges:
@@ -1060,6 +1164,13 @@ class SalarySlip(TransactionBase):
 	def eval_tax_slab_condition(self, condition, data):
 		try:
 			condition = condition.strip()
+
+			#frappe.msgprint(_("""(6) condition {0} -  
+			#	condition 1 {1} - 
+			#	""").format(condition, \
+			#		condition.strip() \
+			#		))
+
 			if condition:
 				return frappe.safe_eval(condition, self.whitelisted_globals, data)
 		except NameError as err:
@@ -1377,6 +1488,7 @@ def get_salary_component_data(component):
 			"depends_on_payment_days",
 			"salary_component_abbr as abbr",
 			"do_not_include_in_total",
+			"company_contributions_account",
 			"is_tax_applicable",
 			"is_flexible_benefit",
 			"variable_based_on_taxable_salary",

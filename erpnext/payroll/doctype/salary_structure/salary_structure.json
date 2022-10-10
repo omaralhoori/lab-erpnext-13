@@ -34,8 +34,7 @@
   "account",
   "mode_of_payment",
   "column_break_28",
-  "payment_account",
-  "amended_from"
+  "payment_account"
  ],
  "fields": [
   {
@@ -207,15 +206,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Salary Structure",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "conditions_and_formula_variable_and_example",
    "fieldtype": "HTML",
    "label": "Conditions and Formula variable and example"
@@ -230,17 +220,14 @@
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 15:41:12.342380",
+ "modified": "2022-02-12 18:49:26.955644",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure",
  "owner": "Administrator",
  "permissions": [
   {
-   "amend": 1,
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -249,12 +236,9 @@
    "report": 1,
    "role": "HR User",
    "share": 1,
-   "submit": 1,
    "write": 1
   },
   {
-   "amend": 1,
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -265,11 +249,13 @@
    "report": 1,
    "role": "HR Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
 }

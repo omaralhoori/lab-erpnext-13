@@ -16,6 +16,7 @@
   "currency",
   "exchange_rate",
   "payroll_payable_account",
+  "company_social_account",
   "section_break_8",
   "branch",
   "department",
@@ -284,12 +285,21 @@
    "label": "Payroll Payable Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "company_social_account",
+   "fieldtype": "Link",
+   "label": "Company Social Security Contributions Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-17 15:13:17.766210",
+ "migration_hash": "5b5b577064478cc62ae2ddafb352a258",
+ "modified": "2022-06-03 05:27:39.206392",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Entry",

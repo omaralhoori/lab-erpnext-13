@@ -190,20 +190,23 @@ class PayrollEntry(Document):
 
 		return account
 
-	def get_salary_components(self, component_type):
+	#ibrahim
+	def get_salary_components(self, component_type,company_share = 0):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
 		if salary_slips:
 			salary_components = frappe.db.sql("""
-				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
-				from `tabSalary Slip` ss, `tabSalary Detail` ssd
-				where ss.name = ssd.parent and ssd.parentfield = '%s' and ss.name in (%s)
-			""" % (component_type, ', '.join(['%s']*len(salary_slips))),
+				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center , ssd.company_contributions_account
+				from `tabSalary Slip` ss, `tabSalary Detail` ssd 
+				where ss.name = ssd.parent and ssd.parentfield = '%s' and  ssd.company_contributions_account = '%s' and ss.name in (%s) 
+			""" % (component_type,company_share, ', '.join(['%s']*len(salary_slips))),
 				tuple([d.name for d in salary_slips]), as_dict=True)
 
 			return salary_components
+			
 
-	def get_salary_component_total(self, component_type = None):
-		salary_components = self.get_salary_components(component_type)
+	#ibrahim
+	def get_salary_component_total(self, component_type = None, company_share = 0):
+		salary_components = self.get_salary_components(component_type,company_share)
 		if salary_components:
 			component_dict = {}
 			for item in salary_components:
@@ -215,25 +218,30 @@ class PayrollEntry(Document):
 				if add_component_to_accrual_jv_entry:
 					component_dict[(item.salary_component, item.payroll_cost_center)] \
 						= component_dict.get((item.salary_component, item.payroll_cost_center), 0) + flt(item.amount)
+			
 			account_details = self.get_account(component_dict = component_dict)
+			
 			return account_details
 
 	def get_account(self, component_dict = None):
 		account_dict = {}
-		for key, amount in component_dict.items():
+		for key, amount  in component_dict.items():
 			account = self.get_salary_component_account(key[0])
 			account_dict[(account, key[1])] = account_dict.get((account, key[1]), 0) + amount
 		return account_dict
 
 	def make_accrual_jv_entry(self):
 		self.check_permission("write")
-		earnings = self.get_salary_component_total(component_type = "earnings") or {}
-		deductions = self.get_salary_component_total(component_type = "deductions") or {}
+		earnings = self.get_salary_component_total(component_type = "earnings",company_share = 0) or {}
+		deductions = self.get_salary_component_total(component_type = "deductions",company_share = 0) or {}
+		#ibrahim
+		company_share = self.get_salary_component_total(component_type = "deductions",company_share = 1) or {}
 		payroll_payable_account = self.payroll_payable_account
+		company_social_account = self.company_social_account
 		jv_name = ""
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
-		if earnings or deductions:
+		if earnings or deductions or company_share:
 			journal_entry = frappe.new_doc("Journal Entry")
 			journal_entry.voucher_type = "Journal Entry"
 			journal_entry.user_remark = _("Accrual Journal Entry for salaries from {0} to {1}")\
@@ -248,8 +256,40 @@ class PayrollEntry(Document):
 			multi_currency = 0
 			company_currency = erpnext.get_company_currency(self.company)
 
+			#frappe.msgprint(_("""  	company_social_account {0} -
+			#						deductions {1} -
+			#						company_share {2} 
+			# 	""").format(company_social_account , \
+			#			deductions , \
+			#			company_share
+			#		))
+
+			#ibrahim
+			#frappe.msgprint(_("1"))
+			# company_share
+			for acc_cc, amount   in company_share.items():
+				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
+				#payable_amount += flt(amount, precision)
+				accounts.append(self.update_accounting_dimensions({
+					"account": company_social_account,
+					"debit_in_account_currency": flt(amt, precision),
+					"exchange_rate": flt(exchange_rate),
+					"cost_center": acc_cc[1] or self.cost_center,
+					"project": self.project
+				}, accounting_dimensions))
+				
+				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
+				accounts.append(self.update_accounting_dimensions({
+					"account": acc_cc[0],
+					"credit_in_account_currency": flt(amt, precision),
+					"exchange_rate": flt(exchange_rate),
+					"cost_center": acc_cc[1] or self.cost_center,
+					"project": self.project
+				}, accounting_dimensions))
+
+
 			# Earnings
-			for acc_cc, amount in earnings.items():
+			for acc_cc, amount  in earnings.items():
 				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
 				payable_amount += flt(amount, precision)
 				accounts.append(self.update_accounting_dimensions({
@@ -259,7 +299,8 @@ class PayrollEntry(Document):
 					"cost_center": acc_cc[1] or self.cost_center,
 					"project": self.project
 				}, accounting_dimensions))
-
+			
+			#frappe.msgprint(_("3"))
 			# Deductions
 			for acc_cc, amount in deductions.items():
 				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
@@ -271,7 +312,8 @@ class PayrollEntry(Document):
 					"cost_center": acc_cc[1] or self.cost_center,
 					"project": self.project
 				}, accounting_dimensions))
-
+			
+			#frappe.msgprint(_("4"))
 			# Payable amount
 			exchange_rate, payable_amt = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, payable_amount, company_currency, currencies)
 			accounts.append(self.update_accounting_dimensions({
@@ -287,7 +329,7 @@ class PayrollEntry(Document):
 			journal_entry.multi_currency = multi_currency
 			journal_entry.title = payroll_payable_account
 			journal_entry.save()
-
+			#frappe.msgprint(_("5"))
 			try:
 				journal_entry.submit()
 				jv_name = journal_entry.name
@@ -441,7 +483,7 @@ def get_sal_struct(company, currency, salary_slip_based_on_timesheet, condition)
 		select
 			name from `tabSalary Structure`
 		where
-			docstatus = 1 and
+			docstatus = 0 and
 			is_active = 'Yes'
 			and company = %(company)s
 			and currency = %(currency)s and

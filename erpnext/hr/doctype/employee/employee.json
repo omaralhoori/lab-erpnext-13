@@ -212,14 +212,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "employee_number",
-   "fieldtype": "Data",
-   "in_global_search": 1,
-   "label": "Employee Number",
-   "oldfieldname": "employee_number",
-   "oldfieldtype": "Data"
-  },
-  {
    "fieldname": "employment_type",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -807,13 +799,19 @@
    "fieldtype": "Link",
    "label": "Shift Request Approver",
    "options": "User"
+  },
+  {
+   "fieldname": "employee_number",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Employee Number"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2021-06-17 11:31:37.730760",
+ "modified": "2022-10-09 08:30:09.668562",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

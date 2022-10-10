@@ -201,7 +201,7 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 @frappe.whitelist()
 def get_employees(salary_structure):
 	employees = frappe.get_list('Salary Structure Assignment',
-		filters={'salary_structure': salary_structure, 'docstatus': 1}, fields=['employee'])
+		filters={'salary_structure': salary_structure, 'docstatus': 0}, fields=['employee'])
 
 	if not employees:
 		frappe.throw(_("There's no Employee with Salary Structure: {0}. Assign {1} to an Employee to preview Salary Slip").format(

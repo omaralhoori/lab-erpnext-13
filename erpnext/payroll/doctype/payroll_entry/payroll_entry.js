@@ -15,6 +15,7 @@ frappe.ui.form.on('Payroll Entry', {
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 		frm.events.department_filters(frm);
 		frm.events.payroll_payable_account_filters(frm);
+		frm.events.company_social_account_filters(frm);
 	},
 
 	department_filters: function (frm) {
@@ -33,6 +34,17 @@ frappe.ui.form.on('Payroll Entry', {
 				filters: {
 					"company": frm.doc.company,
 					"root_type": "Liability",
+					"is_group": 0,
+				}
+			};
+		});
+	},
+	company_social_account_filters: function (frm) {
+		frm.set_query("company_social_account", function () {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"root_type": "Expense",
 					"is_group": 0,
 				}
 			};
@@ -202,6 +214,9 @@ frappe.ui.form.on('Payroll Entry', {
 		});
 		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_payroll_payable_account", (r) => {
 			frm.set_value('payroll_payable_account', r.default_payroll_payable_account);
+		});
+		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_expense_company_social_account", (r) => {
+			frm.set_value('company_social_account', r.default_expense_company_social_account);
 		});
 	},
 
