@@ -63,6 +63,15 @@ frappe.ui.form.on("Customer", {
 				}
 			}
 		});
+
+		frm.fields_dict['item_coverage'].grid.get_field('item').get_query = function(doc, cdt, cdn) {
+			return {    
+				filters:[
+					['is_sales_item', '=', 1],
+					['disabled', '=', 0],
+				]
+			}
+		}
 	},
 	customer_primary_address: function(frm){
 		if(frm.doc.customer_primary_address){

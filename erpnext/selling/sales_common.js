@@ -172,6 +172,28 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.apply_coverage_on_item();
 		
 	},
+	apply_custom_coverage(frm, cdt, cdn){
+		if(frm.doc.coverage_type !='Cash'){
+			if(frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value()){
+				frappe.call({
+					method: "erpnext.selling.doctype.customer.customer.get_payer_coverage_percentage",
+					args: {
+						customer_name: frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value(),
+						item_name: frappe.model.get_value("Sales Invoice Item", cdn, 'item_code'),
+						coverage_percentage: frm.doc.coverage_percentage
+					},
+					callback: function(res){
+						if(res.message || res.message == 0){
+							frappe.model.set_value(cdt, cdn, 'discount_percentage',res.message)					
+						}
+						
+					}
+				})
+			}
+		}else{
+			frappe.model.set_value(cdt, cdn,  "discount_percentage",0 );
+		}
+	},
 	//ibrahim
 	apply_coverage_on_item:function() {
 		var me = this;
@@ -179,7 +201,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if(me.frm.doc.coverage_type !='Cash'){
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
-				frappe.model.set_value(item.doctype, item.name, "discount_percentage",me.frm.doc.coverage_percentage);
+				//frappe.model.set_value(item.doctype, item.name, "discount_percentage",me.frm.doc.coverage_percentage);
+				me.apply_custom_coverage(me.frm, item.doctype, item.name);
 				});
 		}else{
 			$.each(this.frm.doc["items"] || [], function(i, item) {

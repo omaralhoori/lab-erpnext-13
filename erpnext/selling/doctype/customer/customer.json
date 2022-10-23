@@ -34,6 +34,11 @@
   "represents_company",
   "customer_oldid",
   "customer_oldinsuranceid",
+  "custom_coverage_section",
+  "custom_coverage_type",
+  "procedure_coverage",
+  "item_group_coverage",
+  "item_coverage",
   "allowed_to_transact_section",
   "companies",
   "currency_and_price_list",
@@ -612,6 +617,40 @@
    "fieldtype": "Section Break",
    "hidden": 1,
    "label": "Hidden Fields"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\",\"Insurance Company Parties\"], doc.customer_type)",
+   "fieldname": "custom_coverage_section",
+   "fieldtype": "Section Break",
+   "label": "Custom Coverage"
+  },
+  {
+   "fieldname": "custom_coverage_type",
+   "fieldtype": "Select",
+   "label": "Custom Coverage Type",
+   "options": "\nProcedure\nItem Group\nItem"
+  },
+  {
+   "depends_on": "eval:in_list([\"Procedure\"], doc.custom_coverage_type)",
+   "fieldname": "procedure_coverage",
+   "fieldtype": "Table",
+   "label": "Procedure Coverage",
+   "options": "Customer Procedure Coverage"
+  },
+  {
+   "depends_on": "eval:in_list([\"Item Group\"], doc.custom_coverage_type)",
+   "fieldname": "item_group_coverage",
+   "fieldtype": "Table",
+   "label": "Item Group Coverage",
+   "options": "Customer Item Group Coverage"
+  },
+  {
+   "depends_on": "eval:in_list([\"Item\"], doc.custom_coverage_type)",
+   "fieldname": "item_coverage",
+   "fieldtype": "Table",
+   "label": "Item Coverage",
+   "options": "Customer Item Coverage"
   }
  ],
  "icon": "fa fa-user",
@@ -625,7 +664,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-29 06:50:23.255919",
+ "modified": "2022-10-22 20:29:58.324669",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -293,6 +293,47 @@ class Customer(TransactionBase):
 				_("Multiple Loyalty Programs found for Customer {}. Please select manually.")
 				.format(frappe.bold(self.customer_name))
 			)
+	
+	def get_coverage_percentage(self, item, coverage_percentage):
+		default_percentage = 0.0
+		if coverage_percentage or self.coverage_percentage: default_percentage = coverage_percentage or self.coverage_percentage
+		if not self.custom_coverage_type or self.custom_coverage_type == '': return default_percentage
+		if self.custom_coverage_type == 'Procedure': return self.get_procedure_coverage(item) or default_percentage
+		elif self.custom_coverage_type == 'Item Group': return self.get_item_group_coverage(item) or default_percentage
+		elif self.custom_coverage_type == 'Item': return self.get_item_coverage(item) or default_percentage
+		return default_percentage
+
+	def get_procedure_coverage(self, item):
+		coverage = frappe.db.sql(f"""
+			SELECT cvr.coverage_percentage FROM `tabCustomer Procedure Coverage` as cvr
+			INNER JOIN `tabItem Group` as itg ON itg.claim_type=cvr.procedure_type
+			INNER JOIN `tabItem` as itm ON itm.item_group=itg.name
+			WHERE itm.name="{item}" AND cvr.parent="{self.name}"
+		""")
+		if len(coverage) > 0: return coverage[0][0]
+		return None
+
+	def get_item_group_coverage(self, item):
+		coverage = frappe.db.sql(f"""
+			SELECT cvr.coverage_percentage FROM `tabCustomer Item Group Coverage` as cvr
+			INNER JOIN `tabItem Group` as itg ON itg.name=cvr.item_group
+			INNER JOIN `tabItem` as itm ON itm.item_group=itg.name
+			WHERE itm.name="{item}" AND cvr.parent="{self.name}"
+		""")
+		if len(coverage) > 0: return coverage[0][0]
+		return None
+	def get_item_coverage(self, item):
+		coverage = frappe.db.sql(f"""
+			SELECT cvr.coverage_percentage FROM `tabCustomer Item Coverage` as cvr
+			WHERE cvr.item="{item}" AND cvr.parent="{self.name}"
+		""")
+		if len(coverage) > 0: return coverage[0][0]
+		return None
+
+@frappe.whitelist()
+def get_payer_coverage_percentage(customer_name, item_name, coverage_percentage):
+	payer = frappe.get_doc("Customer", customer_name)
+	return payer.get_coverage_percentage(item_name, coverage_percentage)
 
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""
