@@ -174,7 +174,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	apply_custom_coverage(frm, cdt, cdn){
 		if(frm.doc.coverage_type !='Cash'){
-			if(frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value()){
+			if(frappe.model.get_value("Sales Invoice Item", cdn, 'item_code') && (frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value())){
 				frappe.call({
 					method: "erpnext.selling.doctype.customer.customer.get_payer_coverage_percentage",
 					args: {
