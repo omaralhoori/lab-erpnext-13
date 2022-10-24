@@ -294,46 +294,46 @@ class Customer(TransactionBase):
 				.format(frappe.bold(self.customer_name))
 			)
 	
-	def get_coverage_percentage(self, item, coverage_percentage):
+	def get_additional_discount_percentage(self, item):
 		default_percentage = 0.0
-		if coverage_percentage or self.coverage_percentage: default_percentage = coverage_percentage or self.coverage_percentage
-		if not self.custom_coverage_type or self.custom_coverage_type == '': return default_percentage
-		if self.custom_coverage_type == 'Procedure': return self.get_procedure_coverage(item) or default_percentage
-		elif self.custom_coverage_type == 'Item Group': return self.get_item_group_coverage(item) or default_percentage
-		elif self.custom_coverage_type == 'Item': return self.get_item_coverage(item) or default_percentage
+		if self.additional_discount_percentage: default_percentage = self.additional_discount_percentage
+		if not self.custom_discount_type or self.custom_discount_type == '': return default_percentage
+		if self.custom_discount_type == 'Procedure': return self.get_procedure_discount(item) or default_percentage
+		elif self.custom_discount_type == 'Item Group': return self.get_item_group_discount(item) or default_percentage
+		elif self.custom_discount_type == 'Item': return self.get_ite_discount(item) or default_percentage
 		return default_percentage
 
-	def get_procedure_coverage(self, item):
-		coverage = frappe.db.sql(f"""
-			SELECT cvr.coverage_percentage FROM `tabCustomer Procedure Coverage` as cvr
+	def get_procedure_discount(self, item):
+		discount = frappe.db.sql(f"""
+			SELECT cvr.discount_percentage FROM `tabCustomer Procedure Discount` as cvr
 			INNER JOIN `tabItem Group` as itg ON itg.claim_type=cvr.procedure_type
 			INNER JOIN `tabItem` as itm ON itm.item_group=itg.name
 			WHERE itm.name="{item}" AND cvr.parent="{self.name}"
 		""")
-		if len(coverage) > 0: return coverage[0][0]
+		if len(discount) > 0: return discount[0][0]
 		return None
 
-	def get_item_group_coverage(self, item):
-		coverage = frappe.db.sql(f"""
-			SELECT cvr.coverage_percentage FROM `tabCustomer Item Group Coverage` as cvr
+	def get_item_group_discount(self, item):
+		discount = frappe.db.sql(f"""
+			SELECT cvr.discount_percentage FROM `tabCustomer Item Group Discount` as cvr
 			INNER JOIN `tabItem Group` as itg ON itg.name=cvr.item_group
 			INNER JOIN `tabItem` as itm ON itm.item_group=itg.name
 			WHERE itm.name="{item}" AND cvr.parent="{self.name}"
 		""")
-		if len(coverage) > 0: return coverage[0][0]
+		if len(discount) > 0: return discount[0][0]
 		return None
-	def get_item_coverage(self, item):
-		coverage = frappe.db.sql(f"""
-			SELECT cvr.coverage_percentage FROM `tabCustomer Item Coverage` as cvr
+	def get_ite_discount(self, item):
+		discount = frappe.db.sql(f"""
+			SELECT cvr.discount_percentage FROM `tabCustomer Item Discount` as cvr
 			WHERE cvr.item="{item}" AND cvr.parent="{self.name}"
 		""")
-		if len(coverage) > 0: return coverage[0][0]
+		if len(discount) > 0: return discount[0][0]
 		return None
 
 @frappe.whitelist()
-def get_payer_coverage_percentage(customer_name, item_name, coverage_percentage):
+def get_payer_additional_discount_percentage(customer_name, item_name):
 	payer = frappe.get_doc("Customer", customer_name)
-	return payer.get_coverage_percentage(item_name, coverage_percentage)
+	return payer.get_additional_discount_percentage(item_name)
 
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""

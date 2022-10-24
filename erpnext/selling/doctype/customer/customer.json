@@ -35,10 +35,10 @@
   "customer_oldid",
   "customer_oldinsuranceid",
   "custom_coverage_section",
-  "custom_coverage_type",
-  "procedure_coverage",
-  "item_group_coverage",
-  "item_coverage",
+  "custom_discount_type",
+  "procedure_additional_discount",
+  "item_group_additional_discount",
+  "item_additional_discount",
   "allowed_to_transact_section",
   "companies",
   "currency_and_price_list",
@@ -623,34 +623,34 @@
    "depends_on": "eval:in_list([\"Payer\", \"Insurance Company\",\"Insurance Company Parties\"], doc.customer_type)",
    "fieldname": "custom_coverage_section",
    "fieldtype": "Section Break",
-   "label": "Custom Coverage"
+   "label": "Custom Additional Discount"
   },
   {
-   "fieldname": "custom_coverage_type",
+   "fieldname": "custom_discount_type",
    "fieldtype": "Select",
-   "label": "Custom Coverage Type",
+   "label": "Custom Discount Type",
    "options": "\nProcedure\nItem Group\nItem"
   },
   {
-   "depends_on": "eval:in_list([\"Procedure\"], doc.custom_coverage_type)",
-   "fieldname": "procedure_coverage",
+   "depends_on": "eval:in_list([\"Procedure\"], doc.custom_discount_type)",
+   "fieldname": "procedure_additional_discount",
    "fieldtype": "Table",
-   "label": "Procedure Coverage",
-   "options": "Customer Procedure Coverage"
+   "label": "Procedure Additional Discount",
+   "options": "Customer Procedure Discount"
   },
   {
-   "depends_on": "eval:in_list([\"Item Group\"], doc.custom_coverage_type)",
-   "fieldname": "item_group_coverage",
+   "depends_on": "eval:in_list([\"Item Group\"], doc.custom_discount_type)",
+   "fieldname": "item_group_additional_discount",
    "fieldtype": "Table",
-   "label": "Item Group Coverage",
-   "options": "Customer Item Group Coverage"
+   "label": "Item Group Additional Discount",
+   "options": "Customer Item Group Discount"
   },
   {
-   "depends_on": "eval:in_list([\"Item\"], doc.custom_coverage_type)",
-   "fieldname": "item_coverage",
+   "depends_on": "eval:in_list([\"Item\"], doc.custom_discount_type)",
+   "fieldname": "item_additional_discount",
    "fieldtype": "Table",
-   "label": "Item Coverage",
-   "options": "Customer Item Coverage"
+   "label": "Item Additional Discount",
+   "options": "Customer Item Discount"
   }
  ],
  "icon": "fa fa-user",
@@ -664,7 +664,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-10-22 20:29:58.324669",
+ "modified": "2022-10-24 16:15:09.115574",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

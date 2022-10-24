@@ -1017,7 +1017,7 @@ frappe.ui.form.on('Sales Invoice', {
 		if (frm.doc.discount_amount >= 0){
 			$.each(frm.doc["items"] || [], function(i, item) {
 				if ((!item.qty) && frm.doc.is_return) {
-					item.contract_discount = flt(item.rate * item.qty  * (frm.doc.additional_discount_percentage/100) * -1, precision("contract_discount", item));
+					item.contract_discount = flt(item.rate * item.qty  * (item.contract_percentage/100) * -1, precision("contract_discount", item));
 					if (item.discount_amount == 0){
 						item.contract_discount = 0
 						item.base_contract_discount = 0
@@ -1025,7 +1025,7 @@ frappe.ui.form.on('Sales Invoice', {
 				
 				} else {
 					
-					item.contract_discount = flt(item.rate * item.qty * (frm.doc.additional_discount_percentage/100), precision("contract_discount", item));
+					item.contract_discount = flt(item.rate * item.qty * (item.contract_percentage/100), precision("contract_discount", item));
 					if (item.discount_amount == 0){
 						item.contract_discount = 0
 						item.base_contract_discount = 0

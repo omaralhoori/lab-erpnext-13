@@ -148,8 +148,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							item.patient_share = flt(item.patient_rate * -1, precision("patient_share", item)) ;
 							item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
 		
-							if (me.frm.doc.additional_discount_percentage>=0){
-								item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) * -1, precision("contract_discount", item));
+							if (item.contract_percentage>=0){
+								item.contract_discount = flt(item.rate * item.qty  * (item.contract_percentage/100) * -1, precision("contract_discount", item)); // me.frm.doc.additional_discount_percentage
 								item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
 								if (item.discount_amount == 0){
 									item.contract_discount = 0
@@ -164,8 +164,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							item.base_patient_share = flt(item.patient_share * me.frm.doc.conversion_rate, precision("base_patient_share", item));
 							item.base_cash_discount = flt(item.cash_discount * me.frm.doc.conversion_rate, precision("base_cash_discount", item));
 							
-							if (me.frm.doc.additional_discount_percentage>=0){
-								item.contract_discount = flt(item.rate * item.qty  * (me.frm.doc.additional_discount_percentage/100) , precision("contract_discount", item));
+							if (item.contract_percentage>=0){
+								item.contract_discount = flt(item.rate * item.qty  * (item.contract_percentage/100) , precision("contract_discount", item)); //me.frm.doc.additional_discount_percentage
 								item.base_contract_discount = flt(item.contract_discount * me.frm.doc.conversion_rate, precision("contract_discount", item));
 								if (item.discount_amount == 0){
 									item.contract_discount = 0

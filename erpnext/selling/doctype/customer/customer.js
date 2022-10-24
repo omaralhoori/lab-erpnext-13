@@ -64,7 +64,7 @@ frappe.ui.form.on("Customer", {
 			}
 		});
 
-		frm.fields_dict['item_coverage'].grid.get_field('item').get_query = function(doc, cdt, cdn) {
+		frm.fields_dict['item_additional_discount'].grid.get_field('item').get_query = function(doc, cdt, cdn) {
 			return {    
 				filters:[
 					['is_sales_item', '=', 1],

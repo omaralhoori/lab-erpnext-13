@@ -1,39 +1,39 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2022-10-22 20:23:06.632598",
+ "creation": "2022-10-22 20:21:46.470711",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item",
-  "coverage_percentage"
+  "item_group",
+  "discount_percentage"
  ],
  "fields": [
   {
-   "fieldname": "item",
+   "fieldname": "item_group",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Item",
-   "options": "Item",
+   "label": "Item Group",
+   "options": "Item Group",
    "reqd": 1
   },
   {
    "default": "0",
-   "fieldname": "coverage_percentage",
-   "fieldtype": "Float",
+   "fieldname": "discount_percentage",
+   "fieldtype": "Percent",
    "in_list_view": 1,
-   "label": "Coverage Percentage",
+   "label": "Discount Percentage",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-22 20:23:06.632598",
+ "modified": "2022-10-24 16:22:19.517934",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "Customer Item Coverage",
+ "name": "Customer Item Group Discount",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
