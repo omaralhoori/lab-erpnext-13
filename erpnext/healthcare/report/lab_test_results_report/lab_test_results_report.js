@@ -62,12 +62,46 @@ erpnext.utils.add_dimensions('Lab Test Results Report', 7);
 
 const print_result = (msg, with_header) =>
 {
-	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_result?lab_test=${msg}&with_header=${with_header}`;
-	window.open(url, '_blank');
+	frappe.call({
+		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.check_invoice_paid",
+		args: {
+			doctype: "Lab Test",
+			docname: msg
+		},
+		callback: function(res){
+			if (res.message){
+				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_result?lab_test=${msg}&with_header=${with_header}`;
+				window.open(url, '_blank');
+			}else{
+				frappe.msgprint({
+					title: __('Warning'),
+					indicator: 'red',
+					message: __("The invoice for this test has not been paid")
+				});
+			}
+		}
+})
+	
 }
 
 const print_xray = (msg, with_header) =>
 {
-	let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_xray?sales_invoice=${msg}&with_header=${with_header}`;
-	window.open(url, '_blank');
+	frappe.call({
+		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.check_invoice_paid",
+		args: {
+			invoice: msg
+		},
+		callback: function(res){
+			if (res.message){
+				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_xray?sales_invoice=${msg}&with_header=${with_header}`;
+				window.open(url, '_blank');
+			}else{
+				frappe.msgprint({
+					title: __('Warning'),
+					indicator: 'red',
+					message: __("The invoice for this test has not been paid")
+				});
+			}
+		}
+})
 }

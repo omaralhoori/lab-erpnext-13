@@ -2581,3 +2581,26 @@ def is_customer_parent(customer):
 		WHERE parent_customer='{customer}'
 	""".format(customer=customer))
 	return len(res) > 0
+
+@frappe.whitelist()
+def check_invoice_paid(invoice=None, doctype=None, docname=None):
+	if "Results Printer" in frappe.get_roles(frappe.session.user): return True
+	if invoice:
+		outstanding = frappe.db.sql(f"""
+			SELECT inv.outstanding_amount FROM `tabSales Invoice` as inv
+			WHERE inv.name='{invoice}'
+		""")
+		if len(outstanding) < 1: return False
+		if float(outstanding[0][0]) > 0: return False
+		return True
+	elif doctype and docname:
+		query =f"""
+			SELECT inv.outstanding_amount FROM `tabSales Invoice` as inv
+			INNER JOIN `tab{doctype}` as tst ON tst.sales_invoice=inv.name
+			WHERE tst.name='{docname}'
+		"""
+		outstanding = frappe.db.sql(query)
+		if len(outstanding) < 1: return False
+		if float(outstanding[0][0]) > 0: return False
+		return True
+	return False
