@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-10-27 13:22:53.311408",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_type",
+  "customer",
+  "primary_email"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "customer_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "primary_email",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Contact Email"
+  },
+  {
+   "fieldname": "customer_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Customer Type",
+   "options": "Customer\nSupplier"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-10-31 16:23:30.418554",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Balance Confirmation Statement Customer",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
