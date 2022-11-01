@@ -84,8 +84,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 			var total = flt(frm.doc[frappe.model.scrub(frm.doc.apply_discount_on)]);
-			var discount_amount = flt(total*flt(frm.doc.additional_discount_percentage) / 100,
-				precision("discount_amount"));
+			var discount_amount = 0; //flt(total*flt(frm.doc.additional_discount_percentage) / 100,
+				//precision("discount_amount"));
+			for (var item in frm.doc.items){
+				discount_amount += item.contract_discount;
+			}
+			discount_amount = flt(discount_amount,
+			precision("discount_amount"));
 
 			frm.set_value("discount_amount", discount_amount)
 				.then(() => delete frm.via_discount_percentage);
@@ -716,7 +721,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					frappe.model.set_value(cdt, cdn,  "discount_updated", item.discount_updated + 1);
 					frappe.model.set_value(cdt, cdn,  "margin_type", 'Percentage');
 					frappe.model.set_value(cdt, cdn,  "discount_percentage", me.frm.doc.coverage_type !='Cash' ? me.frm.doc.coverage_percentage:0 );
-					
+					this.apply_custom_additional_discount(me.frm, cdt, cdn);
 				}
 			}
 			//console.log('222222222222222222222')
@@ -744,6 +749,28 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.calculate_taxes_and_totals();
 			cur_frm.refresh_fields();
 		}
+	},
+	apply_custom_additional_discount(frm, cdt, cdn){
+			if(frappe.model.get_value(cdt, cdn, 'item_code') && (frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value())){
+				frappe.call({
+					method: "erpnext.selling.doctype.customer.customer.get_payer_additional_discount_percentage",
+					args: {
+						customer_name: frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value(),
+						item_name: frappe.model.get_value(cdt, cdn, 'item_code'),
+					},
+					callback: function(res){
+						if(res.message || res.message == 0){
+							frappe.model.set_value(cdt, cdn, 'contract_percentage',res.message)	
+							for(var item in frm.doc.items){
+								item.contract_discount = flt(item.rate * item.qty  * (item.contract_percentage/100) * -1, precision("contract_discount", item)); // me.frm.doc.additional_discount_percentage
+								item.base_contract_discount = flt(item.contract_discount * frm.doc.conversion_rate, precision("contract_discount", item));
+							}				
+						}
+						
+					}
+				})
+			}
+		
 	},
 
 	get_incoming_rate: function(item, posting_date, posting_time, voucher_type, company) {

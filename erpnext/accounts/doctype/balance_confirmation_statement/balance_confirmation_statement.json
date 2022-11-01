@@ -1,0 +1,170 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "Prompt",
+ "creation": "2022-10-27 13:20:53.913415",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "download_preferences_section",
+  "status",
+  "download_link",
+  "column_break_4",
+  "consolidate_statements",
+  "download_statements",
+  "section_break_7",
+  "company",
+  "column_break_2",
+  "to_date",
+  "customers_section",
+  "customer_collection",
+  "collection_name",
+  "fetch_customers",
+  "customers",
+  "print_format_preferences_section",
+  "letter_head",
+  "print_format_template",
+  "get_template",
+  "print_format"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customers_section",
+   "fieldtype": "Section Break",
+   "label": "Customers"
+  },
+  {
+   "fieldname": "customer_collection",
+   "fieldtype": "Select",
+   "label": "Select Customers By",
+   "options": "\nCustomer Group\nSupplier Group"
+  },
+  {
+   "fieldname": "collection_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Recipient",
+   "options": "customer_collection"
+  },
+  {
+   "fieldname": "fetch_customers",
+   "fieldtype": "Button",
+   "label": "Fetch Customers"
+  },
+  {
+   "fieldname": "customers",
+   "fieldtype": "Table",
+   "label": "Customers",
+   "options": "Balance Confirmation Statement Customer"
+  },
+  {
+   "fieldname": "print_format_preferences_section",
+   "fieldtype": "Section Break",
+   "label": "Print Format Preferences"
+  },
+  {
+   "fieldname": "print_format_template",
+   "fieldtype": "Link",
+   "label": "Print Format Template",
+   "options": "Balance Confirmation Statement Print Format"
+  },
+  {
+   "fieldname": "get_template",
+   "fieldtype": "Button",
+   "label": "Get Template"
+  },
+  {
+   "fieldname": "print_format",
+   "fieldtype": "Text Editor",
+   "label": "Print Format"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nIn Progress\nProcessed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "download_link",
+   "fieldtype": "Data",
+   "label": "Download Link",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!cur_frm.is_new()",
+   "fieldname": "download_preferences_section",
+   "fieldtype": "Section Break",
+   "label": "Download Preferences"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "consolidate_statements",
+   "fieldtype": "Check",
+   "label": "Consolidate Statements"
+  },
+  {
+   "depends_on": "eval:doc.download_link",
+   "fieldname": "download_statements",
+   "fieldtype": "Button",
+   "label": "Download Statements"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-01 05:49:05.150071",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Balance Confirmation Statement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

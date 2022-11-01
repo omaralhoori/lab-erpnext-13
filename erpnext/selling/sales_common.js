@@ -172,6 +172,27 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.apply_coverage_on_item();
 		
 	},
+	apply_custom_additional_discount(frm, cdt, cdn){
+		if(frappe.model.get_value(cdt, cdn, 'item_code') && (frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value())){
+			frappe.call({
+				method: "erpnext.selling.doctype.customer.customer.get_payer_additional_discount_percentage",
+				args: {
+					customer_name: frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value(),
+					item_name: frappe.model.get_value(cdt, cdn, 'item_code'),
+				},
+				callback: function(res){
+					if(res.message || res.message == 0){
+						frappe.model.set_value(cdt, cdn, 'contract_percentage',res.message);
+						for(var item in frm.doc.items){
+							item.contract_discount = flt(item.rate * item.qty  * (item.contract_percentage/100) * -1, precision("contract_discount", item)); // me.frm.doc.additional_discount_percentage
+							item.base_contract_discount = flt(item.contract_discount * frm.doc.conversion_rate, precision("contract_discount", item));
+						}						
+					}
+					
+				}
+			})
+		}
+	},
 	//ibrahim
 	apply_coverage_on_item:function() {
 		var me = this;
@@ -180,6 +201,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.set_value(item.doctype, item.name, "margin_type", 'Percentage');
 				frappe.model.set_value(item.doctype, item.name, "discount_percentage",me.frm.doc.coverage_percentage);
+				me.apply_custom_additional_discount(me.frm, item.doctype, item.name);
 				});
 		}else{
 			$.each(this.frm.doc["items"] || [], function(i, item) {

@@ -390,16 +390,49 @@ frappe.ui.form.on('Lab Test', {
 		if (!frm.is_new()){
 			frm.add_custom_button(__('Print'), function(){
 				//let url = `/printview?doctype=Lab%20Test&name=${frm.doc.name}&trigger_print=1&format=Lab%20Test%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`;
-				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}`
-				window. open(url, '_blank')
+				frappe.call({
+					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.check_invoice_paid",
+					args: {
+						invoice: frm.doc.sales_invoice
+					},
+					callback: function(res){
+						if (res.message){
+							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}`
+							window. open(url, '_blank')
+						}else{
+							frappe.msgprint({
+								title: __('Warning'),
+								indicator: 'red',
+								message: __("The invoice for this test has not been paid")
+							});
+						}
+					}
+			})
 			})
 			frm.page.add_menu_item(__('Print Selected'), function () {
-				var searchIDs = $(".result-checkbox:checked").map(function(){
-					//frappe.model.set_value('Normal Test Result', $(this).val(), "status", button) ;
-					return `'${$(this).val()}'`;
-				  }).get();
-				  let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result_selected?lab_test=${frm.doc.name}&selected_tests=${JSON.stringify(searchIDs)}`
-				window. open(url, '_blank')
+				frappe.call({
+					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.check_invoice_paid",
+					args: {
+						invoice: frm.doc.sales_invoice
+					},
+					callback: function(res){
+						if (res.message){
+							var searchIDs = $(".result-checkbox:checked").map(function(){
+								//frappe.model.set_value('Normal Test Result', $(this).val(), "status", button) ;
+								return `'${$(this).val()}'`;
+							  }).get();
+							  let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result_selected?lab_test=${frm.doc.name}&selected_tests=${JSON.stringify(searchIDs)}`
+							window. open(url, '_blank')
+						}else{
+							frappe.msgprint({
+								title: __('Warning'),
+								indicator: 'red',
+								message: __("The invoice for this test has not been paid")
+							});
+						}
+					}
+			})
+				
 			});
 
 			if (frappe.user.has_role('Lab Test Users')){
