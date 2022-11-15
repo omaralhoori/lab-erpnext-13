@@ -764,16 +764,33 @@ class PaymentEntry(AccountsController):
 
 	def add_bank_gl_entries(self, gl_entries):
 		if self.payment_type in ("Pay", "Internal Transfer"):
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.paid_from,
-					"account_currency": self.paid_from_account_currency,
-					"against": self.party if self.payment_type=="Pay" else self.paid_to,
-					"credit_in_account_currency": self.paid_amount,
-					"credit": self.base_paid_amount,
-					"cost_center": self.cost_center
-				}, item=self)
-			)
+			#ibrahim
+			if self.issue_cheque_data:
+				for d in self.get('issue_cheque_data'):
+					chq_remarks = _("Cheaue No {0} Date {1}, Amount {2} {3} to {4}")\
+						.format(d.cheque_no , d.cheque_date ,self.paid_from_account_currency, d.cheque_amount, self.party)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": self.paid_from,
+							"account_currency": self.paid_from_account_currency,
+							"against": self.party if self.payment_type=="Pay" else self.paid_to,
+							"credit_in_account_currency": d.cheque_amount,
+							"credit": d.cheque_amount,
+							"cost_center": self.cost_center,
+							"remarks": chq_remarks
+						}, item=self)
+					)
+			else:
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.paid_from,
+						"account_currency": self.paid_from_account_currency,
+						"against": self.party if self.payment_type=="Pay" else self.paid_to,
+						"credit_in_account_currency": self.paid_amount,
+						"credit": self.base_paid_amount,
+						"cost_center": self.cost_center
+					}, item=self)
+				)
 		if self.payment_type in ("Receive", "Internal Transfer"):
 			gl_entries.append(
 				self.get_gl_dict({
