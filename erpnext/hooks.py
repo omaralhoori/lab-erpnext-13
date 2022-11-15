@@ -386,8 +386,9 @@ scheduler_events = {
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
-		"erpnext.non_profit.doctype.membership.membership.set_expired_status"
-		"erpnext.hr.doctype.interview.interview.send_daily_feedback_reminder"
+		"erpnext.non_profit.doctype.membership.membership.set_expired_status",
+		"erpnext.hr.doctype.interview.interview.send_daily_feedback_reminder",
+		"erpnext.healthcare.doctype.lab_test_template.lab_test_template.enable_disable_templates",
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",

@@ -173,3 +173,27 @@ def get_package_templates(test_template):
 		   SELECT ntt.lab_test_template as template FROM `tabLab Test Group Template` as ntt 
 		WHERE ntt.parent='{test_template}'
 	""", as_dict=True)
+
+def enable_disable_templates():
+	frappe.db.sql("""
+		update 
+		`tabItem` ti
+		INNER JOIN 
+		`tabLab Test Template` tltt
+		ON tltt.item=ti.name
+		set ti.disabled=0, tltt.disabled=0
+		WHERE tltt.effective_date <= now()
+		;
+	""")
+	frappe.db.sql("""
+		update 
+		`tabItem` ti
+		INNER JOIN 
+		`tabLab Test Template` tltt
+		ON tltt.item=ti.name
+		set ti.disabled=1, tltt.disabled=1
+		WHERE tltt.expiry_date  < now()
+		;
+	""")
+
+	frappe.db.commit()
