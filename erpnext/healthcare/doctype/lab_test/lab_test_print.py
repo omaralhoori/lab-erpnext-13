@@ -12,7 +12,7 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
         where_stmt = "WHERE p.name='{patient_name}' AND lt.docstatus=1".format(patient_name=patient_name)
     limit_stmt = "" if show_all_results else "LIMIT 1"
     fields = [
-        "p.patient_name", "lt.patient_age", "p.patient_number", "p.sex as patient_gender", 
+        "p.patient_name", "lt.patient_age", "p.patient_number", "p.sex as patient_gender", "lt.creation",
      "lt.sales_invoice", "sc.modified as sample_date", "lt.practitioner_name", "lt.name as test_name"] # p.dob
     query = """
         SELECT {fields}
@@ -42,7 +42,7 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
 
         results = {}
         for result in test["results"]:
-            result['template'] = filter_ranges(get_normal_ranges(result['template']), patient)
+            result['template'] = filter_ranges(get_normal_ranges(result['template'], test['creation']), patient)
             if result['report_code']:
                 if not results.get(result['report_code']):
                     results[result['report_code']] = []
@@ -54,15 +54,15 @@ def map_test_report_code(test_results):
     results = {}
     return results
 
-def get_normal_ranges(lab_test_template):
+def get_normal_ranges(lab_test_template, creation):
     return frappe.db.sql("""
     SELECT nr.range_type, nr.gender, nr.criteria_text, nr.range_text, nr.si_range_text, 
     nr.age_range, nr.from_age, nr.from_age_period, nr.to_age, nr.to_age_period
     FROM `tabAttribute Normal Range` as anr
     INNER JOIN `tabNormal Range` as nr ON nr.name = anr.normal_range_id
-    WHERE anr.parent="{lab_test_template}" AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (nr.effective_date IS NULL OR now() >nr.effective_date) AND (nr.expiry_date IS NULL OR now() < nr.expiry_date)
+    WHERE anr.parent="{lab_test_template}" AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (nr.effective_date IS NULL OR "{creation}" >= nr.effective_date) AND (nr.expiry_date IS NULL OR "{creation}" <= nr.expiry_date)
     ORDER BY nr.range_order
-    """.format(lab_test_template=lab_test_template), as_dict=True)
+    """.format(lab_test_template=lab_test_template, creation=creation.date()), as_dict=True)
 
 def filter_range_by_gender(range, patient):
     if range['gender'] in ['Male', 'Female']:
@@ -428,7 +428,7 @@ def get_embassy_tests(test_doc, only_finalized=False, selected_tests=[]):
     if patient:
         for test in tests:
             test['previous'] = previous_tests.get(test['template'])
-            test['template'] = filter_ranges(get_normal_ranges(test['template']), patient)
+            test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
     else: test['template'] = []
     return tests
 
@@ -503,7 +503,7 @@ def get_routine_tests(test_doc, only_finalized=False, selected_tests=[]):
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
-            test['template'] = filter_ranges(get_normal_ranges(test['template']), patient)
+            test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
     else: test['template'] = []
     new_tests = {}
     for item in tests:
@@ -599,7 +599,7 @@ def get_hematology_tests(test_doc, only_finalized=False, selected_tests=[]):
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
-            test['template'] = filter_ranges(get_normal_ranges(test['template']), patient)
+            test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
     else: test['template'] = []
     return tests
 
@@ -691,9 +691,9 @@ def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[]):
     if patient:
         for test in tests:
             if test['print_all_normal_ranges']:
-                test['template'] =  get_normal_ranges(test['template'])
+                test['template'] =  get_normal_ranges(test['template'], test_doc.creation)
             else:
-                test['template'] = filter_ranges(get_normal_ranges(test['template']), patient)
+                test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
     else: test['template'] = []
     return tests
     
