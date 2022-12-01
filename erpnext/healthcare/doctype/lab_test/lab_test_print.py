@@ -933,7 +933,7 @@ def get_embassy_previous_tests(test_name, patient):
     tests =  frappe.db.sql(f"""
         SELECT GROUP_CONCAT(lt.template SEPARATOR "/;/") as templates , GROUP_CONCAT(IFNULL(lt.result_value, '')  SEPARATOR "/;/") as results FROM `tabNormal Test Result` as lt
         INNER JOIN `tabLab Test` AS lt1 ON lt1.name=lt.parent
-        WHERE lt.parent !='{test_name}' AND lt1.patient='{patient}'
+        WHERE lt.parent !="{test_name}" AND lt1.patient="{patient}"
        	GROUP BY lt1.name
         ORDER BY lt1.creation DESC
         LIMIT 1;

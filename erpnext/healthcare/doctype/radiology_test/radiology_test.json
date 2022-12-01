@@ -118,8 +118,7 @@
    "fieldname": "physician",
    "fieldtype": "Link",
    "label": "Referring Physician",
-   "options": "Healthcare Practitioner",
-   "read_only": 1
+   "options": "Healthcare Practitioner"
   },
   {
    "fieldname": "company",
@@ -176,7 +175,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-21 19:40:09.065889",
+ "modified": "2022-11-20 10:19:00.306791",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",
