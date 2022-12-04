@@ -244,7 +244,7 @@ def lab_test_result_selected(lab_test, selected_tests):
 
 
 @frappe.whitelist()
-def lab_test_result(lab_test):
+def lab_test_result(lab_test, previous=None):
     # f = open("test-print.html", "r")
     # html  = f.read()
     # f.close()
@@ -256,7 +256,7 @@ def lab_test_result(lab_test):
         frappe.throw("Lab Test not found")
     html = get_print_html_base()
     header = get_print_header(test_doc)
-    tbody = get_print_tbody(test_doc, header)
+    tbody = get_print_tbody(test_doc, header, previous=previous)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
     footer = get_lab_result_footer(test_doc)
@@ -386,18 +386,18 @@ def get_print_body(header, tbody):
     </table>
     """
 
-def get_print_tbody(test_doc, header, only_finalized=False, selected_tests=[]):
+def get_print_tbody(test_doc, header, only_finalized=False, selected_tests=[], previous=None):
     body = ""
-    hematology_tests = get_hematology_tests(test_doc, only_finalized, selected_tests=selected_tests )
+    hematology_tests = get_hematology_tests(test_doc, only_finalized, selected_tests=selected_tests ,previous=previous)
     if len(hematology_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_hematology_tests(hematology_tests, header)
-    chemistry_tests = get_chemistry_tests(test_doc, only_finalized, selected_tests=selected_tests)
+    chemistry_tests = get_chemistry_tests(test_doc, only_finalized, selected_tests=selected_tests, previous=previous)
     if len(chemistry_tests) > 0:
         if len(body) > 0: body += get_break()
         chemistry_table = format_chemistry_tests(chemistry_tests, header)
         body += chemistry_table
-    routine_tests = get_routine_tests(test_doc, only_finalized, selected_tests=selected_tests)
+    routine_tests = get_routine_tests(test_doc, only_finalized, selected_tests=selected_tests, previous=previous)
     if len(routine_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_routine_tests(routine_tests, header)
@@ -498,8 +498,8 @@ def format_embassy_tests(tests, header, previous_tests={}):
 
 
     
-def get_routine_tests(test_doc, only_finalized=False, selected_tests=[]):
-    tests = get_tests_by_item_group(test_doc.name, "Routine", only_finalized, selected_tests=selected_tests)
+def get_routine_tests(test_doc, only_finalized=False, selected_tests=[], previous=None):
+    tests = get_tests_by_item_group(test_doc, "Routine", only_finalized, selected_tests=selected_tests, previous=previous)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -522,9 +522,13 @@ def format_routine_tests(tests, header):
 
 def format_routine_page_tests(tests, header, test_name):
     tests_html = ""
-    tests.sort(key=lambda x: x['order'])
+    prev_tests_html = ""
+    # tests.sort(key=lambda x: x['order'])
     microscopt_tests = ""
+    prev_microscopt_tests = ""
     normal_test, test_count = "", 0
+    prev_normal_test = ""
+    prev_date = ""
     for test in tests:
         if test['conv_result']:
             if test['is_microscopy']:
@@ -539,22 +543,50 @@ def format_routine_page_tests(tests, header, test_name):
                 """
                 test_html = "<tr><td><table>" + test_html + "</table></td></tr>"
                 microscopt_tests += test_html
+                if test.get("prev_conv_result")  is not None:
+                    prev_test_html = f"""
+                        <tr>
+                        <td class="width-20">{test['lab_test_name']}</td>
+                        <td class="{'width-15' if test['prev_conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])}</strong></td>
+                        <td class="width-10"> {test['prev_conv_uom'] or ''} </td>
+                        <td class="width-50"> {test['template'][0]['range_text'] if test['template'] else ''} </td>
+                        </tr>
+                    """
+                    prev_test_html = "<tr><td><table>" + prev_test_html + "</table></td></tr>"
+                    prev_microscopt_tests += prev_test_html
+                    prev_date = test['prev_creation']
             else:
                 test_count += 1
                 normal_test += f"""
                     <td class="width-20">{test['lab_test_name']}</td>
                     <td class="width-30"><strong>: {test['conv_result']}</strong></td>
                 """
+                if test.get("prev_conv_result")  is not None:
+                    prev_normal_test += f"""
+                    <td class="width-20">{test['lab_test_name']}</td>
+                    <td class="width-30"><strong>: {test['prev_conv_result']}</strong></td>
+                """
+                    prev_date = test['prev_creation']
                 if test_count == 2:
                     normal_test = "<tr>" + normal_test + "</tr>"
                     normal_test = "<tr><td><table>" + normal_test + "</table></td></tr>"
                     tests_html+= normal_test
                     normal_test = ""
                     test_count = 0
+                    if test.get("prev_conv_result")  is not None:
+                        prev_normal_test = "<tr>" + prev_normal_test + "</tr>"
+                        prev_normal_test = "<tr><td><table>" + prev_normal_test + "</table></td></tr>"
+                        prev_tests_html+= prev_normal_test
+                        prev_normal_test = ""
+        print(prev_date)
     if test_count == 1:
         normal_test = "<tr>" + normal_test + "<td class='width-20'></td><td class='width-30'></td></tr>"
         normal_test = "<tr><td><table>" + normal_test + "</table></td></tr>"
         tests_html+= normal_test
+        if prev_normal_test != "":
+            prev_normal_test = "<tr>" + prev_normal_test + "<td class='width-20'></td><td class='width-30'></td></tr>"
+            prev_normal_test = "<tr><td><table>" + prev_normal_test + "</table></td></tr>"
+            prev_tests_html+= prev_normal_test
 
     if len(microscopt_tests) > 0:
         microscopt_tests = f"""  
@@ -565,6 +597,20 @@ def format_routine_page_tests(tests, header, test_name):
              <td colspan="4" class="center title b-bottom b-top mt-20">MICROSCOPY</td>
            </tr>
            {microscopt_tests}
+
+            </table>
+        </td>
+        </tr>
+        """
+    if len(prev_microscopt_tests) > 0:
+        prev_microscopt_tests = f"""  
+        <tr>
+            <td>
+             <table>
+           <tr>
+             <td colspan="4" class="center title b-bottom b-top mt-20">MICROSCOPY</td>
+           </tr>
+           {prev_microscopt_tests}
 
             </table>
         </td>
@@ -592,10 +638,34 @@ def format_routine_page_tests(tests, header, test_name):
            {microscopt_tests}
         </tbody>
     </table>"""
+    if len(prev_tests_html) > 0 or len(prev_microscopt_tests) > 0:
+        html += get_break()
+        html += f"""<table class="f-s">
+        <thead>
+        <tr>
+            <td>{header}</td>
+        </tr>
+        <tr>
+            <td>
+                 <table>
+                <tr>
+            <td colspan="4" class="center title b-bottom">{test_name} Result On {frappe.utils.get_datetime(prev_date).strftime("%d/%m/%Y",)}</td>
+
+            </tr>
+            </table>
+            </td>
+        </tr>
+           
+        </thead>
+        <tbody>
+           {prev_tests_html}
+           {prev_microscopt_tests}
+        </tbody>
+    </table>"""
     return html
 
-def get_hematology_tests(test_doc, only_finalized=False, selected_tests=[]):
-    tests = get_tests_by_item_group(test_doc.name, "Hematology", only_finalized ,selected_tests=selected_tests)
+def get_hematology_tests(test_doc, only_finalized=False, selected_tests=[], previous=None):
+    tests = get_tests_by_item_group(test_doc, "Hematology", only_finalized ,selected_tests=selected_tests, previous=previous)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -606,13 +676,18 @@ def get_hematology_tests(test_doc, only_finalized=False, selected_tests=[]):
 
 def format_hematology_tests(tests, header):
     tests_html = ""
-    tests.sort(key=lambda x: x['order'])
+    prev_tests_html = ""
+    prev_date = ""
     diff= 0
     for test in tests:
         if test['conv_result']:
+            prev_result= ""
             result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
+            if test.get("prev_conv_result") is not None:
+                prev_result = format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
             precentage = ""
             secondary_result = ""
+            prev_secondary_result = ""
             test_title = ""
             if diff == 1:
                 test_title = """
@@ -625,8 +700,14 @@ def format_hematology_tests(tests, header):
                 secondary_result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
                 precentage = "%"
                 result = format_float_result(test['result_percentage'], 0)
+                if  test.get('prev_result_percentage') is not None:
+                    prev_secondary_result = format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
+                    prev_result = format_float_result(test['prev_result_percentage'], 0)
+                    prev_date = test['prev_creation']
             elif diff == 2:
                 result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
+                if test.get("prev_conv_result")  is not None:
+                    prev_result = format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
             test_class = ""
             if test['lab_test_name'] == "Leukocytes":
                 test_class = "border-line"
@@ -638,6 +719,13 @@ def format_hematology_tests(tests, header):
                         <td class="f-s">{result} </td>
                     </tr>
                 """
+                if prev_result is not None and prev_result != "":
+                    prev_test_html = f"""
+                        <tr>
+                            <td class="width-25 hema-test">{test['lab_test_name']}</td>
+                            <td class="f-s">{prev_result} </td>
+                        </tr>
+                    """
             else:
                 test_html = f"""
                     <tr >
@@ -650,8 +738,22 @@ def format_hematology_tests(tests, header):
 
                     </tr>
                 """
+                if prev_result is not None and prev_result != "":
+                    prev_test_html = f"""
+                        <tr >
+                        <td class="width-25 hema-test">{test['lab_test_name']}</td>
+                        <td class="f-s width-10 fb">{prev_result} </td>
+                        <td class="width-5 f-s ">{precentage}</td>
+                        <td class="width-10 f-s fb">{prev_secondary_result}</td>
+                        <td class="width-10 f-s ">{test['prev_conv_uom'] or test['prev_si_uom'] or ''}</td>
+                        <td class="f-s width-40">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{test['template'][0]['range_text'] if test['template'] else ''}</td>
+
+                        </tr>
+                    """
             test_html = f"{test_title}<tr><td class='{test_class}'><table>" + test_html + "</table></td></tr>"
+            if prev_result is not None and prev_result != "": prev_test_html = f"{test_title}<tr><td class='{test_class}'><table>" + prev_test_html + "</table></td></tr>"
             tests_html+= test_html
+            if prev_result is not None and prev_result != "": prev_tests_html+= prev_test_html
     html = f"""<table>
         <thead>
         <tr>
@@ -681,11 +783,42 @@ def format_hematology_tests(tests, header):
             </tr>
         </tfoot>
     </table>"""
+    if prev_tests_html:
+        html += get_break()
+        html += f"""<table>
+        <thead>
+        <tr>
+            <td>{header}</td>
+        </tr>
+        <tr>
+            <td>
+                 <table>
+                <tr>
+            <td colspan="3" class="center title b-bottom">HEMATOLOGY Result On {frappe.utils.get_datetime(prev_date).strftime("%d/%m/%Y",)}</td>
+
+            </tr>
+            <tr>
+                <td colspan="3" class="f-r f-s">Normal Range( Age and Sex releated)</td>
+            </tr>
+            </table>
+            </td>
+        </tr>
+           
+        </thead>
+        <tbody>
+           {prev_tests_html}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8">&nbsp;</td>
+            </tr>
+        </tfoot>
+    </table>"""
     return html
 
 
-def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[]):
-    tests = get_tests_by_item_group(test_doc.name, "Chemistry", only_finalized, selected_tests=selected_tests)
+def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[], previous=None):
+    tests = get_tests_by_item_group(test_doc, "Chemistry", only_finalized, selected_tests=selected_tests, previous=previous)
     #tests.sort(key=lambda x: x['order'])
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
@@ -807,10 +940,18 @@ def format_chemistry_tests(tests, header=""):
                     test_html = f"<tr><td colspan='3' >{child_test['parent_template']}</td></tr>" +test_html
                 si = ""
                 conv = ""
+                prev_si = ""
+                prev_conv = ""
                 if child_test['si_result'] and child_test['si_uom']:
                     si =str(format_float_result(child_test['si_result'], child_test['si_round_digits'], child_test['round_si_digits']))+ ' ' + child_test['si_uom']
                 if child_test['conv_result'] and child_test['conv_uom']:
                     conv = str(format_float_result(child_test['conv_result'], child_test['conventional_round_digits'], child_test['round_conventional_digits'])) + ' ' + child_test['conv_uom']
+                # add previous results
+                if child_test.get('prev_si_result') and child_test.get('prev_si_uom'):
+                    prev_si =str(format_float_result(child_test['prev_si_result'], child_test['si_round_digits'], child_test['round_si_digits']))+ ' ' + child_test['prev_si_uom']
+                if child_test.get('prev_conv_result') and child_test.get('prev_conv_uom'):
+                    prev_conv = str(format_float_result(child_test['prev_conv_result'], child_test['conventional_round_digits'], child_test['round_conventional_digits'])) + ' ' + child_test['prev_conv_uom']
+                
                 if (child_test['si_result'] or child_test['conv_result'] ):
 
                     test_html += f"""
@@ -822,6 +963,16 @@ def format_chemistry_tests(tests, header=""):
                             <td class="width-25">{conv}</td>
                         </tr>
                     """
+                    if prev_si or prev_conv:
+                        test_html += f"""
+                            <tr>
+                                <td class="width-50">
+                                &emsp;&emsp; Previous Result On {frappe.utils.get_datetime(child_test['prev_creation']).strftime("%d/%m/%Y",)}
+                                </td>
+                                <td class="width-25">{prev_si}</td>
+                                <td class="width-25">{prev_conv}</td>
+                            </tr>
+                        """
                     for idx, normal in enumerate(child_test["template"]):
                         si_range = normal['si_range_text'] if child_test['si_uom'] else ''
                         conv_range = normal['range_text'] if child_test['conv_uom'] else ''
@@ -843,10 +994,19 @@ def format_chemistry_tests(tests, header=""):
             test_html = ""
             si = ""
             conv = ""
+            prev_si = ""
+            prev_conv = ""
             if test['si_result'] and test['si_uom']:
                 si =str(format_float_result(test['si_result'], test['si_round_digits'], test['round_si_digits']))+ ' ' + test['si_uom']
             if test['conv_result'] and test['conv_uom']:
                 conv = str(format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])) + ' ' + test['conv_uom']
+            
+            # add previous results
+            if test.get('prev_si_result') and test.get('prev_si_uom'):
+                prev_si =str(format_float_result(test['prev_si_result'], test['si_round_digits'], test['round_si_digits']))+ ' ' + test['prev_si_uom']
+            if test.get('prev_conv_result') and test.get('prev_conv_uom'):
+                prev_conv = str(format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])) + ' ' + test['prev_conv_uom']
+            
             if (test['si_result'] or test['conv_result'] ):
 
                 test_html += f"""
@@ -858,6 +1018,16 @@ def format_chemistry_tests(tests, header=""):
                         <td class="width-25">{conv}</td>
                     </tr>
                 """
+                if prev_si or prev_conv:
+                    test_html += f"""
+                        <tr>
+                            <td class="width-50">
+                            &emsp;&emsp; Previous Result On {frappe.utils.get_datetime(test['prev_creation']).strftime("%d/%m/%Y",)}
+                            </td>
+                            <td class="width-25">{prev_si}</td>
+                            <td class="width-25">{prev_conv}</td>
+                        </tr>
+                    """
                 for idx, normal in enumerate(test["template"]):
                     si_range = normal['si_range_text'] if test['si_uom'] else ''
                     conv_range = normal['range_text'] if test['conv_uom'] else ''
@@ -899,7 +1069,9 @@ def format_chemistry_tests(tests, header=""):
     </table>"""
     return html
 
-def get_tests_by_item_group(test_name, item_group, only_finalized=False, selected_tests=[]):
+def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected_tests=[], previous=None):
+    prev_join_stmt = ""
+    prev_select_stmt = ""
     where_stmt = " lt.status IN ('Finalized', 'Released')"
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     order = "tltt.order"
@@ -911,10 +1083,43 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False, selecte
     if len(selected_tests)> 0:
         selected_tests = ",".join(selected_tests)
         where_stmt += f" AND lt.name IN ({selected_tests})"
+    if previous:
+        previous_tests = frappe.db.sql("""
+        select name from `tabLab Test` where name <> "{test_name}" and patient="{patient_name}" and creation < "{creation}";
+        """.format(test_name=test_doc.name, patient_name=test_doc.patient, creation=test_doc.creation))
+        if len(previous_tests) > 0: 
+            previous_tests = ",".join("'%s'" % tup[0] for tup in previous_tests)
+            prev_join_stmt = f"""
+            LEFT JOIN (SELECT trp.template ,trp.creation as prev_creation,
+            trp.result_value as prev_conv_result,ctu.lab_test_uom as prev_conv_uom,  trp.result_percentage as prev_result_percentage,
+            trp.secondary_uom_result as prev_si_result, stu.si_unit_name as prev_si_uom
+            FROM `tabNormal Test Result` as trp
+            INNER JOIN (select template,max(creation) as creation
+                from `tabNormal Test Result` WHERE  parent in ({previous_tests})
+                and status IN ('Finalized')
+                group by template) recent_tests
+            ON trp.template=recent_tests.template
+           and trp.creation = recent_tests.creation
+            LEFT JOIN `tabLab Test UOM` as ctu
+            ON ctu.name=trp.lab_test_uom
+            LEFT JOIN `tabLab Test UOM` as stu
+            ON stu.name=trp.secondary_uom
+                WHERE  trp.parent in ({previous_tests})
+                and trp.status IN ('Finalized')
+                ) as trp2
+                ON  trp2.template=lt.template 
+            """
+            prev_select_stmt = """
+            ,trp2.prev_creation, trp2.prev_conv_result, trp2.prev_conv_uom, trp2.prev_result_percentage, trp2.prev_si_result , trp2.prev_si_uom
+            """
+
+
     return frappe.db.sql("""
         SELECT  
         lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name,ltt.group_tests, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.round_conventional_digits, tltt.round_si_digits, tltt.conventional_round_digits, tltt.si_round_digits,  lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.round_conventional_digits, tltt.round_si_digits, tltt.conventional_round_digits, tltt.si_round_digits, 
+         lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+         {prev_select_stmt}
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
@@ -924,10 +1129,10 @@ def get_tests_by_item_group(test_name, item_group, only_finalized=False, selecte
         ON ctu.name=lt.lab_test_uom
         LEFT JOIN `tabLab Test UOM` as stu
         ON stu.name=lt.secondary_uom
-
+        {prev_join_stmt}
         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         ORDER BY ltt.order, tltt.order
-        """.format(test_name=test_name, order= order, item_group=item_group, where_stmt=where_stmt), as_dict=True)
+        """.format(test_name=test_doc.name, order= order, item_group=item_group, where_stmt=where_stmt, prev_join_stmt=prev_join_stmt, prev_select_stmt=prev_select_stmt), as_dict=True)
 
 def get_embassy_previous_tests(test_name, patient):
     tests =  frappe.db.sql(f"""
