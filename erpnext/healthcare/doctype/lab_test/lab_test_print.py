@@ -28,15 +28,11 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
     patient = frappe.get_doc("Patient", patient_name)
     for test in lab_tests:
         test["results"] = frappe.db.sql("""
-            SELECT ntr.lab_test_name, ntr.result_value, ntr.result_percentage, ltu1.lab_test_uom, ntr.secondary_uom_result, ltu2.si_unit_name, 
+            SELECT ntr.lab_test_name, ntr.result_value, ntr.result_percentage, ntr.lab_test_uom, ntr.secondary_uom_result,ntr.secondary_uom as si_unit_name, 
             ntr.lab_test_comment, ntr.template, ltt.normal_range_label, ntr.report_code
             FROM `tabNormal Test Result` as ntr
             INNER JOIN `tabLab Test Template` as ltt
             ON ltt.name=ntr.template
-            LEFT JOIN `tabLab Test UOM` as ltu1
-            ON ltu1.name=ntr.lab_test_uom
-            LEFT JOIN `tabLab Test UOM` as ltu2
-            ON ltu2.name=ntr.secondary_uom
             WHERE ntr.parent='{test_name}' AND ntr.parenttype='Lab Test' AND ntr.status IN ('Finalized', 'Released')
         """.format(test_name=test["test_name"]), as_dict=True)
 
@@ -56,12 +52,12 @@ def map_test_report_code(test_results):
 
 def get_normal_ranges(lab_test_template, creation):
     return frappe.db.sql("""
-    SELECT nr.range_type, nr.gender, nr.criteria_text, nr.range_text, nr.si_range_text, 
-    nr.age_range, nr.from_age, nr.from_age_period, nr.to_age, nr.to_age_period
+    SELECT anr.range_type, anr.gender, anr.criteria_text, anr.range_text, anr.si_range_text, 
+    anr.age_range, anr.from_age, anr.from_age_period, anr.to_age, anr.to_age_period, anr.result_type, anr.hide_normal_range,
+    anr.range_from, anr.range_to, anr.min_si_value, anr.max_si_value
     FROM `tabAttribute Normal Range` as anr
-    INNER JOIN `tabNormal Range` as nr ON nr.name = anr.normal_range_id
-    WHERE anr.parent="{lab_test_template}" AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (nr.effective_date IS NULL OR "{creation}" >= nr.effective_date) AND (nr.expiry_date IS NULL OR "{creation}" <= nr.expiry_date)
-    ORDER BY nr.range_order
+    WHERE anr.parent="{lab_test_template}" AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (anr.effective_date IS NULL OR "{creation}" >= anr.effective_date) AND (anr.expiry_date IS NULL OR "{creation}" <= anr.expiry_date)
+    ORDER BY anr.range_order
     """.format(lab_test_template=lab_test_template, creation=creation.date()), as_dict=True)
 
 def filter_range_by_gender(range, patient):
@@ -344,7 +340,7 @@ def get_print_header(test_doc, head=None):
             </td>
             <td>Age</td>
             <td class="width-35">: {test_doc.patient_age}</td>
-        <tr>
+        </tr>
          <tr>
             <td >
                  File No.
@@ -354,7 +350,7 @@ def get_print_header(test_doc, head=None):
             </td>
             <td >Gender</td>
             <td >: {test_doc.patient_sex}</td>
-        <tr>
+        </tr>
         <tr>
             <td >
                  Visit No.
@@ -364,7 +360,7 @@ def get_print_header(test_doc, head=None):
             </td>
             <td >Sample Date</td>
             <td >: {  frappe.utils.get_datetime(test_doc.creation).strftime("%d/%m/%Y %r",)   }</td>
-        <tr>
+        </tr>
         <tr>
             <td >
                  Consultant
@@ -374,7 +370,7 @@ def get_print_header(test_doc, head=None):
             </td>
             <td >{payer_label}</td>
             <td >{payer_name}</td>
-        <tr>
+        </tr>
     </table>
     """
 
@@ -388,14 +384,15 @@ def get_print_body(header, tbody):
 
 def get_print_tbody(test_doc, header, only_finalized=False, selected_tests=[], previous=None):
     body = ""
+    patient = frappe.get_doc("Patient", test_doc.patient)
     hematology_tests = get_hematology_tests(test_doc, only_finalized, selected_tests=selected_tests ,previous=previous)
     if len(hematology_tests) > 0:
         if len(body) > 0: body += get_break()
         body +=  format_hematology_tests(hematology_tests, header)
-    chemistry_tests = get_chemistry_tests(test_doc, only_finalized, selected_tests=selected_tests, previous=previous)
+    chemistry_tests = get_chemistry_tests(test_doc, only_finalized, selected_tests=selected_tests, previous=previous, patient=patient)
     if len(chemistry_tests) > 0:
         if len(body) > 0: body += get_break()
-        chemistry_table = format_chemistry_tests(chemistry_tests, header)
+        chemistry_table = format_chemistry_tests(chemistry_tests, header, patient=patient)
         body += chemistry_table
     routine_tests = get_routine_tests(test_doc, only_finalized, selected_tests=selected_tests, previous=previous)
     if len(routine_tests) > 0:
@@ -441,14 +438,15 @@ def format_embassy_tests(tests, header, previous_tests={}):
         normal_range = ''
         #previous_test = previous_tests.get()
         #print(test['template'])
-        if test['template'] and len(test['template']) > 0:
+        if test['template'] and len(test['template']) > 0 and not test['template'][0].get('hide_normal_range'):
             
             if len(test['template']) == 1:
                 normal_crit = test['template'][0]['criteria_text'] or ''
             normal_range = test['template'][0]['range_text']
         if test['conv_result']:
+            highlight = highlight_abnormal_result(test, test['template'])
             result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
-            class_name = "red" if (test['conv_result'] == "Positive" and test['lab_test_name'] != "Blood Rhesus") else "" 
+            class_name = "highlight-result" if highlight else ""#(test['conv_result'] == "Positive" and test['lab_test_name'] != "Blood Rhesus") else "" 
             test_html = f"""
                 <tr >
                 <td class="width-40">{test['lab_test_name']}</td>
@@ -531,14 +529,19 @@ def format_routine_page_tests(tests, header, test_name):
     prev_date = ""
     for test in tests:
         if test['conv_result']:
+            highlight = highlight_abnormal_result(test, test['template'])
+            highlight_class = "highlight-result" if highlight else ""
             if test['is_microscopy']:
                 test_percentage = '<strong>' + format_float_result(test['result_percentage']) + "</strong> % &emsp;" if test['result_percentage'] else ""
+                print_normal_range = True
+                if test['template'] and len(test['template']) > 0: 
+                    if test['template'][0].get('hide_normal_range'): print_normal_range = False
                 test_html = f"""
-                    <tr>
+                    <tr class="{highlight_class}">
                     <td class="width-20">{test['lab_test_name']}</td>
-                    <td class="{'width-15' if test['conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])}</strong></td>
+                    <td class="{'width-15' if test['conv_uom'] else 'width-40'}">{format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])}</td>
                     <td class="width-10"> {test['conv_uom'] or ''} </td>
-                     <td class="width-50"> {test['template'][0]['range_text'] if test['template'] else ''} </td>
+                     <td class="width-50"> {test['template'][0]['range_text'] if test['template'] and print_normal_range else ''} </td>
                     </tr>
                 """
                 test_html = "<tr><td><table>" + test_html + "</table></td></tr>"
@@ -547,9 +550,9 @@ def format_routine_page_tests(tests, header, test_name):
                     prev_test_html = f"""
                         <tr>
                         <td class="width-20">{test['lab_test_name']}</td>
-                        <td class="{'width-15' if test['prev_conv_uom'] else 'width-40'} red"><strong>{format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])}</strong></td>
+                        <td class="{'width-15' if test['prev_conv_uom'] else 'width-40'}">{format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])}</td>
                         <td class="width-10"> {test['prev_conv_uom'] or ''} </td>
-                        <td class="width-50"> {test['template'][0]['range_text'] if test['template'] else ''} </td>
+                        <td class="width-50"> {test['template'][0]['range_text'] if test['template'] and print_normal_range else ''} </td>
                         </tr>
                     """
                     prev_test_html = "<tr><td><table>" + prev_test_html + "</table></td></tr>"
@@ -558,13 +561,13 @@ def format_routine_page_tests(tests, header, test_name):
             else:
                 test_count += 1
                 normal_test += f"""
-                    <td class="width-20">{test['lab_test_name']}</td>
-                    <td class="width-30"><strong>: {test['conv_result']}</strong></td>
+                    <td class="width-20 {highlight_class}">{test['lab_test_name']}</td>
+                    <td class="width-30 {highlight_class}">: {test['conv_result']}</td>
                 """
                 if test.get("prev_conv_result")  is not None:
                     prev_normal_test += f"""
                     <td class="width-20">{test['lab_test_name']}</td>
-                    <td class="width-30"><strong>: {test['prev_conv_result']}</strong></td>
+                    <td class="width-30">: {test['prev_conv_result']}</td>
                 """
                     prev_date = test['prev_creation']
                 if test_count == 2:
@@ -578,7 +581,6 @@ def format_routine_page_tests(tests, header, test_name):
                         prev_normal_test = "<tr><td><table>" + prev_normal_test + "</table></td></tr>"
                         prev_tests_html+= prev_normal_test
                         prev_normal_test = ""
-        print(prev_date)
     if test_count == 1:
         normal_test = "<tr>" + normal_test + "<td class='width-20'></td><td class='width-30'></td></tr>"
         normal_test = "<tr><td><table>" + normal_test + "</table></td></tr>"
@@ -681,6 +683,8 @@ def format_hematology_tests(tests, header):
     diff= 0
     for test in tests:
         if test['conv_result']:
+            highlight = highlight_abnormal_result(test, test['template'])
+            highlight_class = "highlight-result" if highlight else ""
             prev_result= ""
             result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
             if test.get("prev_conv_result") is not None:
@@ -714,7 +718,7 @@ def format_hematology_tests(tests, header):
                 diff = 1
             if test['control_type'] == "Free Text":
                 test_html = f"""
-                    <tr>
+                    <tr class="{highlight_class}">
                         <td class="width-25 hema-test">{test['lab_test_name']}</td>
                         <td class="f-s">{result} </td>
                     </tr>
@@ -728,7 +732,7 @@ def format_hematology_tests(tests, header):
                     """
             else:
                 test_html = f"""
-                    <tr >
+                    <tr class="{highlight_class}">
                     <td class="width-25 hema-test">{test['lab_test_name']}</td>
                     <td class="f-s width-10 fb">{result} </td>
                     <td class="width-5 f-s ">{precentage}</td>
@@ -817,10 +821,9 @@ def format_hematology_tests(tests, header):
     return html
 
 
-def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[], previous=None):
+def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[], previous=None, patient=None):
     tests = get_tests_by_item_group(test_doc, "Chemistry", only_finalized, selected_tests=selected_tests, previous=previous)
     #tests.sort(key=lambda x: x['order'])
-    patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
             if test['print_all_normal_ranges']:
@@ -920,7 +923,7 @@ def format_float_result(result, point=2, round_digits=False):
     except ValueError:
         return result
 
-def format_chemistry_tests(tests, header=""):
+def format_chemistry_tests(tests, header="", patient=None):
     tests_html = ""
     grouped_tests = []
     for test in tests:
@@ -936,12 +939,14 @@ def format_chemistry_tests(tests, header=""):
         if type(test) == list:
             test_html = ""
             for idx, child_test in enumerate(test):
+                normal_ranges =  filter_ranges(child_test['template'], patient) if (child_test.get('print_all_normal_ranges') and child_test.get('highlight_abnormal_result')) else child_test['template']
                 if idx == 0:
                     test_html = f"<tr><td colspan='3' >{child_test['parent_template']}</td></tr>" +test_html
                 si = ""
                 conv = ""
                 prev_si = ""
                 prev_conv = ""
+                highlight = highlight_abnormal_result(child_test, normal_ranges)
                 if child_test['si_result'] and child_test['si_uom']:
                     si =str(format_float_result(child_test['si_result'], child_test['si_round_digits'], child_test['round_si_digits']))+ ' ' + child_test['si_uom']
                 if child_test['conv_result'] and child_test['conv_uom']:
@@ -953,9 +958,9 @@ def format_chemistry_tests(tests, header=""):
                     prev_conv = str(format_float_result(child_test['prev_conv_result'], child_test['conventional_round_digits'], child_test['round_conventional_digits'])) + ' ' + child_test['prev_conv_uom']
                 
                 if (child_test['si_result'] or child_test['conv_result'] ):
-
+                    highlight_class = 'highlight-result' if highlight else ""
                     test_html += f"""
-                        <tr>
+                        <tr class="{highlight_class}">
                             <td class="width-50">
                             &emsp;&emsp;{child_test['lab_test_name']}
                             </td>
@@ -991,11 +996,14 @@ def format_chemistry_tests(tests, header=""):
             tests_html += test_html
 
         else:
+            normal_ranges =  filter_ranges(test['template'], patient) if (test.get('print_all_normal_ranges') and test.get('highlight_abnormal_result')) else test['template']
             test_html = ""
             si = ""
             conv = ""
             prev_si = ""
             prev_conv = ""
+            print(test.get('print_all_normal_ranges') and test.get('highlight_abnormal_result'))
+            highlight = highlight_abnormal_result(test, normal_ranges)
             if test['si_result'] and test['si_uom']:
                 si =str(format_float_result(test['si_result'], test['si_round_digits'], test['round_si_digits']))+ ' ' + test['si_uom']
             if test['conv_result'] and test['conv_uom']:
@@ -1008,9 +1016,9 @@ def format_chemistry_tests(tests, header=""):
                 prev_conv = str(format_float_result(test['prev_conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])) + ' ' + test['prev_conv_uom']
             
             if (test['si_result'] or test['conv_result'] ):
-
+                highlight_class = "highlight-result" if highlight else ""
                 test_html += f"""
-                    <tr>
+                    <tr class="{highlight_class}">
                         <td class="width-50">
                         &emsp;{test['lab_test_name']}
                         </td>
@@ -1028,10 +1036,14 @@ def format_chemistry_tests(tests, header=""):
                             <td class="width-25">{prev_conv}</td>
                         </tr>
                     """
+                normal_idx = 0
                 for idx, normal in enumerate(test["template"]):
+                    if normal.get('hide_normal_range'): 
+                        normal_idx += 1
+                        continue
                     si_range = normal['si_range_text'] if test['si_uom'] else ''
                     conv_range = normal['range_text'] if test['conv_uom'] else ''
-                    if idx == 0:
+                    if idx == normal_idx:
                         test_html += """<tr><td>&emsp;Normal Ranges: </td><td></td><td></td></tr>"""
                     test_html += f"""
                         <tr>
@@ -1069,6 +1081,47 @@ def format_chemistry_tests(tests, header=""):
     </table>"""
     return html
 
+def highlight_abnormal_result(test, normal_ranges):
+    if not test.get('highlight_abnormal_result'): return False
+    highlight = False
+    for normal_range in normal_ranges:
+        if normal_range.get('result_type') == 'Text':
+            if (test['conv_result'] and test['conv_result'] ==  normal_range['range_text']) or (test['si_result'] and test['si_result'] ==  normal_range['si_range_text']) :
+                if normal_range.get('range_type') == 'Abnormal':
+                        return True
+                else: return False
+            else:
+                if normal_range.get('range_type') == 'Abnormal':
+                    highlight= False
+                else:
+                    highlight = True
+        else:
+            try:
+                if test['conv_uom'] and (normal_range.get('range_from') != 0.0 or normal_range.get('range_to') != 0 ) and (normal_range.get('range_from') or normal_range.get('range_from') == 0) and (normal_range.get('range_to') or normal_range.get('range_to') == 0):
+                    if  normal_range.get('range_from') <= float(test['conv_result']) and normal_range.get('range_to') >= float(test['conv_result']):
+                        if normal_range.get('range_type') == 'Abnormal':
+                            return True
+                        else:
+                            return False
+                    else:
+                        if normal_range.get('range_type') == 'Abnormal':
+                            highlight= False
+                        else:
+                            highlight = True
+                elif test['si_uom'] and (normal_range.get('min_si_value') != 0.0 or normal_range.get('max_si_value') != 0 ) and (normal_range.get('min_si_value') or normal_range.get('min_si_value') == 0) and (normal_range.get('max_si_value') or normal_range.get('max_si_value') == 0):
+                    if  normal_range.get('min_si_value') <= float(test['si_result']) and normal_range.get('max_si_value') >= float(test['si_result']):
+                        if normal_range.get('range_type') == 'Abnormal':
+                            return True
+                        else: return False
+                    else:
+                        if normal_range.get('range_type') == 'Abnormal':
+                            highlight= False
+                        else:
+                            highlight = True
+            except:
+                continue
+    return highlight
+
 def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected_tests=[], previous=None):
     prev_join_stmt = ""
     prev_select_stmt = ""
@@ -1091,8 +1144,8 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
             previous_tests = ",".join("'%s'" % tup[0] for tup in previous_tests)
             prev_join_stmt = f"""
             LEFT JOIN (SELECT trp.template ,trp.creation as prev_creation,
-            trp.result_value as prev_conv_result,ctu.lab_test_uom as prev_conv_uom,  trp.result_percentage as prev_result_percentage,
-            trp.secondary_uom_result as prev_si_result, stu.si_unit_name as prev_si_uom
+            trp.result_value as prev_conv_result,trp.lab_test_uom as prev_conv_uom,  trp.result_percentage as prev_result_percentage,
+            trp.secondary_uom_result as prev_si_result, trp.secondary_uom as prev_si_uom
             FROM `tabNormal Test Result` as trp
             INNER JOIN (select template,max(creation) as creation
                 from `tabNormal Test Result` WHERE  parent in ({previous_tests})
@@ -1100,10 +1153,6 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
                 group by template) recent_tests
             ON trp.template=recent_tests.template
            and trp.creation = recent_tests.creation
-            LEFT JOIN `tabLab Test UOM` as ctu
-            ON ctu.name=trp.lab_test_uom
-            LEFT JOIN `tabLab Test UOM` as stu
-            ON stu.name=trp.secondary_uom
                 WHERE  trp.parent in ({previous_tests})
                 and trp.status IN ('Finalized')
                 ) as trp2
@@ -1116,19 +1165,15 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
 
     return frappe.db.sql("""
         SELECT  
-        lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name,ltt.group_tests, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.round_conventional_digits, tltt.round_si_digits, tltt.conventional_round_digits, tltt.si_round_digits, 
-         lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+        lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name,ltt.group_tests, lt.result_value as conv_result, lt.result_percentage ,lt.lab_test_uom as conv_uom, {order},
+        lt.secondary_uom_result as si_result, lt.secondary_uom as si_uom, tltt.round_conventional_digits, tltt.round_si_digits, tltt.conventional_round_digits, tltt.si_round_digits, 
+         lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy, tltt.highlight_abnormal_result
          {prev_select_stmt}
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
         INNER JOIN `tabLab Test Template` as tltt
         ON tltt.name=lt.template
-        LEFT JOIN `tabLab Test UOM` as ctu
-        ON ctu.name=lt.lab_test_uom
-        LEFT JOIN `tabLab Test UOM` as stu
-        ON stu.name=lt.secondary_uom
         {prev_join_stmt}
         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         ORDER BY ltt.order, tltt.order
@@ -1161,17 +1206,14 @@ def get_embassy_tests_items(test_name, only_finalized=False, selected_tests=[]):
         where_stmt += f" AND lt.name IN ({selected_tests})"
     return frappe.db.sql("""
         SELECT  
-        lt.template, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,ctu.lab_test_uom as conv_uom, {order},
-        lt.secondary_uom_result as si_result, stu.si_unit_name as si_uom, tltt.round_si_digits, tltt.round_conventional_digits,tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy
+        lt.template, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,lt.lab_test_uom as conv_uom, {order},
+        lt.secondary_uom_result as si_result, lt.secondary_uom as si_uom, tltt.round_si_digits, tltt.round_conventional_digits,tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy,
+        tltt.highlight_abnormal_result
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code
         INNER JOIN `tabLab Test Template` as tltt
         ON tltt.name=lt.template
-        LEFT JOIN `tabLab Test UOM` as ctu
-        ON ctu.name=lt.lab_test_uom
-        LEFT JOIN `tabLab Test UOM` as stu
-        ON stu.name=lt.secondary_uom
         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         ORDER BY ltt.order,tltt.order
         """.format(test_name=test_name, order= order, where_stmt=where_stmt), as_dict=True)
@@ -1344,7 +1386,7 @@ def format_xray_header(xray_test, with_header=False, url=""):
             <td >: {age}</td>
             <td>Gender</td>
             <td>: {xray_test.patient_sex}</td>
-        <tr>
+        </tr>
          <tr>
             <td >
                  Visit Date
@@ -1354,13 +1396,13 @@ def format_xray_header(xray_test, with_header=False, url=""):
             </td>
             <td >Referring Physician</td>
             <td colspan="3">: {xray_test.practitioner_name or "" }</td>
-        <tr>
+        </tr>
         <tr>
             <td >
                 Report Date
             </td>
             <td colspan="5">: {  frappe.utils.get_datetime(finalize_date).strftime("%d/%m/%Y %r",)   }</td>
-        <tr>
+        </tr>
     </table>
     """
 
@@ -1378,7 +1420,7 @@ def get_normal_xray_tbody(reports, header):
             </td></tr>
         """
         html += f"""
-            <table>
+            <table class="xray-reports">
             <thead>
                 <tr><td>{header}</td></tr>
             </thead>
@@ -1602,7 +1644,10 @@ def get_print_style():
      .mt-20{
         margin-top: 20px;
      }
-     
+     .highlight-result{
+        font-weight: bold;
+        color: red;
+     }
         </style>
     """
 

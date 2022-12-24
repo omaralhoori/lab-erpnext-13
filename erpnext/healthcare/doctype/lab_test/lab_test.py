@@ -40,7 +40,7 @@ class LabTest(Document):
 		if frappe.db.get_value("Sales Invoice", self.sales_invoice, "outstanding_amount") != 0:
 			frappe.throw(_("Invoice is not paid"))
 	
-	def send_result_sms(self):
+	def send_result_sms(self, msg=None):
 		send_to_payer = False
 		receiver_number = None
 		invoice = frappe.get_doc("Sales Invoice", self.sales_invoice)
@@ -49,7 +49,7 @@ class LabTest(Document):
 			if invoice.sms_to_payer and invoice.sms_to_payer == 1:
 				send_to_payer= True
 				
-		result_msg = frappe.db.get_single_value("Healthcare Settings", "result_sms_message")
+		result_msg = msg if msg else frappe.db.get_single_value("Healthcare Settings", "result_sms_message")
 		if not result_msg or result_msg == "":
 			frappe.msgprint(_("Failed to send sms. Result sms message is empty in Healthcare Settings."))
 			return
@@ -75,9 +75,10 @@ class LabTest(Document):
 			return
 		patient_password, patient_number = patient_info
 		result_url += "test-result?usercode=" + patient_password + "_" + patient_number.replace(" ", "%20")
-		result_msg += "\n"  + result_url
-
+		#result_msg += "\n"  + result_url
+		result_msg = result_msg.format(url=result_url, patient=invoice.patient_name)
 		send_sms(msg=result_msg, receiver_list=[receiver_number])
+		self.db_set('sms_sent', 1)
 
 	def before_save(self):
 		for lab_test in self.normal_test_items:
@@ -155,6 +156,18 @@ class LabTest(Document):
 		elif all_released: status='Released'
 		elif partially_released: status='Partially Released'
 		self.db_set('status', status)
+		self.check_result_sms()
+	def check_result_sms(self):
+		if self.status != "Finalized" and self.status != "Partially Finalized": return
+		if frappe.db.get_single_value("Healthcare Settings", "finalized_result_sms") == 0:return
+		if frappe.db.get_single_value("Healthcare Settings", "result_sms_once") and self.sms_sent: return
+
+		if self.status == "Finalized":
+			self.send_result_sms()
+			return
+
+		if self.status == "Partially Finalized" and frappe.db.get_single_value("Healthcare Settings", "partially_result_sms") == 0: return
+		self.send_result_sms(msg=frappe.db.get_single_value("Healthcare Settings", "partial_result_sms_message"))
 	def after_insert(self):
 		if self.prescription:
 			frappe.db.set_value('Lab Prescription', self.prescription, 'lab_test_created', 1)
@@ -1143,9 +1156,7 @@ def get_test_attribute_options(lab_test):
 	""".format(lab_test=lab_test), as_dict=True)
 
 	units = frappe.db.sql("""
-		SELECT tntr.name,tltu.lab_test_uom as conv_unit, tltu2.si_unit_name as si_unit FROM `tabNormal Test Result` tntr 
-		LEFT JOIN `tabLab Test UOM` tltu ON tltu.name=tntr.lab_test_uom
-		LEFT JOIN `tabLab Test UOM` tltu2 ON tltu2.name=tntr.secondary_uom
+		SELECT tntr.name,tntr.lab_test_uom as conv_unit,tntr.secondary_uom as si_unit FROM `tabNormal Test Result` tntr
 		WHERE tntr.parent="{lab_test}"
 	""".format(lab_test=lab_test),as_dict=True)
 
@@ -1164,13 +1175,11 @@ def get_test_attribute_options(lab_test):
 def get_lab_test_form_tests(lab_test):
 	return frappe.db.sql(f"""
 	SELECT tntr.name, tntr.template, tntr.report_code as parent_template, tltt.attribute_options, tntr.result_percentage,  tntr.control_type, 
-		tltu.lab_test_uom as conv_unit, tltu2.si_unit_name as si_unit, tntr.lab_test_comment, tntr.status, tntr.lab_test_name, tntr.result_value,
+		tntr.lab_test_uom as conv_unit, tntr.secondary_uom as si_unit, tntr.lab_test_comment, tntr.status, tntr.lab_test_name, tntr.result_value,
 		tntr.host_code, tntr.secondary_uom_result
 		FROM `tabNormal Test Result` tntr 
 		INNER JOIN `tabLab Test Template` tltt ON tntr.template=tltt.name
 		LEFT JOIN `tabLab Test Template` tltt2 ON tntr.report_code=tltt2.name
-		LEFT JOIN `tabLab Test UOM` tltu ON tltu.name=tntr.lab_test_uom
-		LEFT JOIN `tabLab Test UOM` tltu2 ON tltu2.name=tntr.secondary_uom
 		WHERE tntr.parent="{lab_test}"
 		ORDER BY ISNULL(tltt2.printing_order), ISNULL(tltt.printing_order), cast(tltt2.printing_order as unsigned), cast(tltt.printing_order as unsigned)
 		;

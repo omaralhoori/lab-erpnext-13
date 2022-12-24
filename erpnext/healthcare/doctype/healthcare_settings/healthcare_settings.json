@@ -40,17 +40,24 @@
   "send_test_order",
   "use_branch_code",
   "column_break_30",
-  "result_sms_message",
   "sb_in_ac",
   "income_account",
   "receivable_account",
   "out_patient_sms_alerts",
+  "result_sms_message",
+  "partial_result_sms_message",
+  "patient_survey_message",
+  "column_break_42",
+  "finalized_result_sms",
+  "partially_result_sms",
+  "result_sms_once",
+  "sample_collection_sms",
+  "column_break_16",
   "send_registration_msg",
   "registration_msg",
   "send_appointment_confirmation",
   "appointment_confirmation_msg",
   "avoid_confirmation",
-  "column_break_16",
   "send_appointment_reminder",
   "appointment_reminder_msg",
   "remind_before",
@@ -407,6 +414,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "You can use {url}, {patient} variables",
    "fieldname": "result_sms_message",
    "fieldtype": "Small Text",
    "label": "Result SMS Message"
@@ -436,11 +444,49 @@
    "fieldname": "remove_test_uncollect",
    "fieldtype": "Check",
    "label": "Uncollection Required for Removing Test"
+  },
+  {
+   "fieldname": "partial_result_sms_message",
+   "fieldtype": "Small Text",
+   "label": "Partial Result SMS Message"
+  },
+  {
+   "fieldname": "patient_survey_message",
+   "fieldtype": "Small Text",
+   "label": "Patient Survey Message"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "finalized_result_sms",
+   "fieldtype": "Check",
+   "label": "Send SMS When Result Finalized"
+  },
+  {
+   "default": "0",
+   "fieldname": "partially_result_sms",
+   "fieldtype": "Check",
+   "label": "Send SMS When Result Partially Finalized"
+  },
+  {
+   "default": "1",
+   "fieldname": "result_sms_once",
+   "fieldtype": "Check",
+   "label": "Send Result SMS Once"
+  },
+  {
+   "default": "0",
+   "fieldname": "sample_collection_sms",
+   "fieldtype": "Check",
+   "label": "Send Survey Message When Sample Collected"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-08-29 13:46:46.676325",
+ "modified": "2022-12-22 15:59:00.862829",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
