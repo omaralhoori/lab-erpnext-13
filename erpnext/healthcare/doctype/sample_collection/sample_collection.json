@@ -30,7 +30,8 @@
   "sample_details",
   "amended_from",
   "sales_invoice",
-  "collection_serial"
+  "collection_serial",
+  "sms_sent"
  ],
  "fields": [
   {
@@ -214,11 +215,18 @@
    "label": "Record Status",
    "options": "Draft\nReleased",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sms_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "SMS Sent"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-20 06:44:05.522680",
+ "modified": "2022-12-22 16:55:12.293387",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

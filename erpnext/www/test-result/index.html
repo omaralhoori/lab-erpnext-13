@@ -5,13 +5,145 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <style>
+        .container{
+            width: 90%;
+            margin: 10px auto;
+        }
+        .patient-card{
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            font-weight: bold;
+        }
+        .patient-visits{
+            margin: 10px auto;
+        }
+        .alert{
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.2em;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            font-weight: 600;
+        }
+        .warning{
+            background-color: #ff9966;
+            color: white;
+        }
+        .danger{
+            background-color: #cc3300;
+            color: white;
+        }
+        .visit-card{
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            display: inline-block;
+            cursor: pointer;
+            color: black;
+            text-decoration: none;
+        }
+        .visits-label{
+            font-weight: bold;
+            margin: 20px auto;
+            border-bottom: 1px solid;
+            padding-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="print-format-gutter">
-        <div class="print-format">
-            {{ body }}
+    {{ header }}
+    {% if error %}
+    <div class="container">
+        <div class="alert danger">
+            {{ error }}
         </div>
     </div>
+    {% else %}
+    <div class="container">
+        <div class="patient-card">
+            <table>
+                <tr>
+                    <td>
+                        {{ _('Patient Name')}}
+                    </td>
+                    <td>
+                        : {{ patient_name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{_('File No')}}
+                    </td>
+                    <td>
+                        : {{ file_no }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="patient-visits">
+            {% if invoices|length == 0 %}
+                <div class="alert warning">
+                    {{_('There are no visits available')}}
+                </div>
+            {% else %}
+                <div class="visits-label">
+                    {{_('Available Visits')}}
+                </div>
+                {% for invoice in invoices %}
+                {% if invoice['result_status'] != "Finalized" and invoice['result_status'] != "Partially Finalized" %}   
+                <div class="visit-card">
+ 
+                {% else %}
+                    <a class="visit-card" href="/api/method/erpnext.www.test-result.index.test_details?usercode={{usercode}}&test_type={{invoice['result_type']}}&test_name={{invoice['result_name']}}">
+
+                {%endif%}
+                        <table>
+                            <tr>
+                                <td colspan="2">
+                                    <strong>{{ _(invoice['result_type'] )}}</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{_('Visit No')}}</td>
+                                <td>: {{invoice['invoice_name'] }}</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{_('Visit Date')}}
+                                </td>
+                                <td>
+                                   : {{ frappe.utils.get_datetime(invoice['visit_date']).strftime("%d/%m/%Y %r",)  }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{_('Status')}}
+                                </td>
+                                <td>
+                                    {% if invoice['result_status'] != "Finalized" and invoice['result_status'] != "Partially Finalized" %}
+                                        : {{ _('Not Finalized') }}
+                                    {% else %}
+                                        : {{ _(invoice['result_status']) }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                        {% if invoice['result_status'] != "Finalized" and invoice['result_status'] != "Partially Finalized" %}  
+                        </div>  
+                        {% else %}
+                        </a>
+        
+                        {%endif%}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    
+    {% endif %}
+    {{ footer }}
     <script>
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -45,9 +177,9 @@
             // setTimeout(function() {
             //     window.close();
             // }, 5000);
-            var usercode = window.location.href.split("?")[1]
+            // var usercode = window.location.href.split("?")[1]
 
-            window.location.href =   "/api/method/erpnext.www.test-result.index.user_result?" + usercode  ;
+            // window.location.href =   "/api/method/erpnext.www.test-result.index.user_result?" + usercode  ;
         })
     </script>
 </body>
