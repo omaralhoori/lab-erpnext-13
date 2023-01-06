@@ -88,6 +88,36 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 const disable_input = (status) => {
 	return status == "Rejected" || status == "Finalized" ? 'disabled' : ''; 
 }
+
+
+function moreOptionsOnclick (obj) {
+	
+	let test_row = cur_frm.doc.normal_test_items.find(o => o.name === $(obj).attr('name'));
+	if (test_row){
+		let d = new frappe.ui.Dialog({
+			title: __('Other Options'),
+			fields: [
+				{
+					label: 'Custom Normal Range',
+					fieldname: 'custom_normal_range',
+					fieldtype: 'Small Text',
+					default: test_row.custom_normal_range,
+					description: "To use custom normal range it should be entered as shown: conventional range;criteria text;si range"
+				},
+			],
+			primary_action_label: 'Save',
+			primary_action(values) {
+				frappe.model.set_value('Normal Test Result',$(obj).attr('name'), "custom_normal_range", values.custom_normal_range);
+				cur_frm.save()
+				d.hide();
+			}
+		});
+		
+		d.show();
+	}
+	
+}
+
 const format_tests_html = (tests) => {
 	var html = "";
 	//	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
@@ -147,7 +177,9 @@ const format_tests_html = (tests) => {
 						
 						</div>
 					</span>
-					<span><label class="test-status">${childTest['status'] || ""} </label>&nbsp;<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" /></span>
+					<span><label class="test-status">${childTest['status'] || ""} </label>&nbsp;<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" />
+					<span class="dots3 more-test-options" name="${childTest.name}"></span>
+					</span>
 					
 				</div>
 			`;
@@ -319,6 +351,10 @@ const setup_input_listeners = (frm) => {
 		round_percentge(frm)
 
 		frm.refresh()
+	})
+
+	$('.more-test-options').click(function() {
+		moreOptionsOnclick(this);
 	})
 	
 }

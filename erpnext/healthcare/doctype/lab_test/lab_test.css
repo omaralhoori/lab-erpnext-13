@@ -53,9 +53,9 @@
     padding: 5px 0;
 }
 
-.result-checkbox{
+/* .result-checkbox{
     float: right;
-}
+} */
 .test_result_container {
     display: flex;
     align-items: center;
@@ -68,4 +68,12 @@ div[data-fieldname="patient_mobile"]  .control-value{
     width: 200px;
     display: inline-block;
     margin: 5px;
+}
+.dots3{
+    margin-left: 10px;
+    cursor: pointer;
+}
+.dots3:after {
+    content: '\2807';
+    font-size: 1.2em;
 }

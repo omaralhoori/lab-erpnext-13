@@ -12,7 +12,7 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
         where_stmt = "WHERE p.name='{patient_name}' AND lt.docstatus=1".format(patient_name=patient_name)
     limit_stmt = "" if show_all_results else "LIMIT 1"
     fields = [
-        "p.patient_name", "lt.patient_age", "p.patient_number", "p.sex as patient_gender", "lt.creation",
+        "p.patient_name", "lt.patient_age", "p.patient_number", "p.sex as patient_gender", "lt.creation","lt.company",
      "lt.sales_invoice", "sc.modified as sample_date", "lt.practitioner_name", "lt.name as test_name"] # p.dob
     query = """
         SELECT {fields}
@@ -29,7 +29,7 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
     for test in lab_tests:
         test["results"] = frappe.db.sql("""
             SELECT ntr.lab_test_name, ntr.result_value, ntr.result_percentage, ntr.lab_test_uom, ntr.secondary_uom_result,ntr.secondary_uom as si_unit_name, 
-            ntr.lab_test_comment, ntr.template, ltt.normal_range_label, ntr.report_code
+            ntr.lab_test_comment, ntr.template, ltt.normal_range_label, ntr.report_code, ntr.custom_normal_range
             FROM `tabNormal Test Result` as ntr
             INNER JOIN `tabLab Test Template` as ltt
             ON ltt.name=ntr.template
@@ -38,7 +38,10 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
 
         results = {}
         for result in test["results"]:
-            result['template'] = filter_ranges(get_normal_ranges(result['template'], test['creation']), patient)
+            if result.get('custom_normal_range') and result.get('custom_normal_range') != "":
+                result['template'] = parse_custom_normal_range(result.get('custom_normal_range'))
+            else:
+                result['template'] = filter_ranges(get_normal_ranges(result['template'], test['creation'], branch=test['company']), patient)
             if result['report_code']:
                 if not results.get(result['report_code']):
                     results[result['report_code']] = []
@@ -46,11 +49,37 @@ def get_lab_test_result(patient_name, show_all_results, where_stmt=None):
         test["results"] = results
     return lab_tests
 
+def parse_custom_normal_range(normal_range_str):
+    normal_ranges = normal_range_str.split("\n")
+    return list(map(lambda normal_range:parse_one_custom_range(normal_range), normal_ranges))
+    
+def parse_one_custom_range(normal_range_str):
+    normal_range = normal_range_str.split(";")
+    return {
+        "range_type": "Normal",
+        "gender": "All",
+        "criteria_text": normal_range[1] if len(normal_range) > 1 else "",
+        "range_text": normal_range[0],
+        "si_range_text": normal_range[2] if len(normal_range) > 2 else "",
+        "age_range": "All", "hide_normal_range": 0, "range_from": 0, "range_to": 0, "min_si_value": 0, "max_si_value": 0,
+        "from_age": "", "from_age_period": "", "to_age": "", "to_age_period": "", "result_type": ""
+    }
+
 def map_test_report_code(test_results):
     results = {}
     return results
 
-def get_normal_ranges(lab_test_template, creation):
+def get_normal_ranges(lab_test_template, creation,branch=None):
+    if branch:
+        custom_nr = frappe.db.sql("""
+        SELECT anr.range_type, anr.gender, anr.criteria_text, anr.range_text, anr.si_range_text, 
+        anr.age_range, anr.from_age, anr.from_age_period, anr.to_age, anr.to_age_period, anr.result_type, anr.hide_normal_range,
+        anr.range_from, anr.range_to, anr.min_si_value, anr.max_si_value
+        FROM `tabCustom Normal Range` as anr
+        WHERE anr.parent="{lab_test_template}" AND anr.company="{company}" AND anr.parenttype='Lab Test Template' AND anr.range_type!='Machine Edge' AND (anr.effective_date IS NULL OR "{creation}" >= anr.effective_date) AND (anr.expiry_date IS NULL OR "{creation}" <= anr.expiry_date)
+        ORDER BY anr.range_order
+        """.format(lab_test_template=lab_test_template, creation=creation.date(), company=branch), as_dict=True)
+        if len(custom_nr) > 0: return custom_nr
     return frappe.db.sql("""
     SELECT anr.range_type, anr.gender, anr.criteria_text, anr.range_text, anr.si_range_text, 
     anr.age_range, anr.from_age, anr.from_age_period, anr.to_age, anr.to_age_period, anr.result_type, anr.hide_normal_range,
@@ -425,7 +454,10 @@ def get_embassy_tests(test_doc, only_finalized=False, selected_tests=[]):
     if patient:
         for test in tests:
             test['previous'] = previous_tests.get(test['template'])
-            test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
+            if test.get('custom_normal_range') and test.get('custom_normal_range') != "":
+                test['template'] = parse_custom_normal_range(test.get('custom_normal_range'))
+            else:
+                test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation, branch=test_doc.company), patient)
     else: test['template'] = []
     return tests
 
@@ -501,7 +533,10 @@ def get_routine_tests(test_doc, only_finalized=False, selected_tests=[], previou
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
-            test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
+            if test.get('custom_normal_range') and test.get('custom_normal_range') != "":
+                test['template'] = parse_custom_normal_range(test.get('custom_normal_range'))
+            else:
+                test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation, branch=test_doc.company), patient)
     else: test['template'] = []
     new_tests = {}
     for item in tests:
@@ -671,7 +706,10 @@ def get_hematology_tests(test_doc, only_finalized=False, selected_tests=[], prev
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
-            test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
+            if test.get('custom_normal_range') and test.get('custom_normal_range') != "":
+                test['template'] = parse_custom_normal_range(test.get('custom_normal_range'))
+            else:
+                test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation, branch=test_doc.company), patient)
     else: test['template'] = []
     return tests
 
@@ -826,10 +864,13 @@ def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[], previ
     #tests.sort(key=lambda x: x['order'])
     if patient:
         for test in tests:
-            if test['print_all_normal_ranges']:
-                test['template'] =  get_normal_ranges(test['template'], test_doc.creation)
+            if test.get('custom_normal_range') and test.get('custom_normal_range') != "":
+                test['template'] = parse_custom_normal_range(test.get('custom_normal_range'))
             else:
-                test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation), patient)
+                if test['print_all_normal_ranges']:
+                    test['template'] =  get_normal_ranges(test['template'], test_doc.creation, branch=test_doc.company)
+                else:
+                    test['template'] = filter_ranges(get_normal_ranges(test['template'], test_doc.creation, branch=test_doc.company), patient)
     else: test['template'] = []
     return tests
     
@@ -1145,7 +1186,7 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
             prev_join_stmt = f"""
             LEFT JOIN (SELECT trp.template ,trp.creation as prev_creation,
             trp.result_value as prev_conv_result,trp.lab_test_uom as prev_conv_uom,  trp.result_percentage as prev_result_percentage,
-            trp.secondary_uom_result as prev_si_result, trp.secondary_uom as prev_si_uom
+            trp.secondary_uom_result as prev_si_result, trp.secondary_uom as prev_si_uom, trp.custom_normal_range as prev_custom_normal_range
             FROM `tabNormal Test Result` as trp
             INNER JOIN (select template,max(creation) as creation
                 from `tabNormal Test Result` WHERE  parent in ({previous_tests})
@@ -1167,7 +1208,7 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
         SELECT  
         lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name,ltt.group_tests, lt.result_value as conv_result, lt.result_percentage ,lt.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, lt.secondary_uom as si_uom, tltt.round_conventional_digits, tltt.round_si_digits, tltt.conventional_round_digits, tltt.si_round_digits, 
-         lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy, tltt.highlight_abnormal_result
+         lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy, tltt.highlight_abnormal_result, lt.custom_normal_range
          {prev_select_stmt}
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
@@ -1208,7 +1249,7 @@ def get_embassy_tests_items(test_name, only_finalized=False, selected_tests=[]):
         SELECT  
         lt.template, tltt.lab_test_name, lt.result_value as conv_result, lt.result_percentage ,lt.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, lt.secondary_uom as si_uom, tltt.round_si_digits, tltt.round_conventional_digits,tltt.conventional_round_digits, tltt.si_round_digits, lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy,
-        tltt.highlight_abnormal_result
+        tltt.highlight_abnormal_result, lt.custom_normal_range
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
         ON ltt.name=lt.report_code

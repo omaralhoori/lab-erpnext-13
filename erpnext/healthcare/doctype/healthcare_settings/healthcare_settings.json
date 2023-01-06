@@ -39,6 +39,7 @@
   "show_all_results",
   "send_test_order",
   "use_branch_code",
+  "show_machine_comment",
   "column_break_30",
   "sb_in_ac",
   "income_account",
@@ -482,11 +483,17 @@
    "fieldname": "sample_collection_sms",
    "fieldtype": "Check",
    "label": "Send Survey Message When Sample Collected"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_machine_comment",
+   "fieldtype": "Check",
+   "label": "Show Machine Comment"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-12-22 15:59:00.862829",
+ "modified": "2023-01-04 09:54:43.226891",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

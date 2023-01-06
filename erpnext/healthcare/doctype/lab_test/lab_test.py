@@ -1098,7 +1098,7 @@ def receive_infinty_results():
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
 				INNER JOIN `tabPatient` as p ON p.name=lt.patient
 				SET ntr.result_value='{result}'
-				WHERE sc.collection_serial='bar-{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}'
+				WHERE sc.collection_serial='bar-{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}' AND ntr.status NOT IN ('Rejected', 'Finalized')
 								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
 			frappe.db.sql(query)
 	frappe.db.commit()
@@ -1116,7 +1116,7 @@ def receive_lision_results():
 			INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
 			INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
 			SET ntr.result_value='{result}'
-			WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
+			WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}' AND ntr.status NOT IN ('Rejected', 'Finalized')
 							""".format(result=lab_test['result'], test_code=lab_test['code'], order_id=lab_test['order_id'])
 		frappe.db.sql(query)
 	frappe.db.commit()
@@ -1140,7 +1140,7 @@ def receive_sysmex_results():
 				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
 				SET {set_stmt}='{result}'
-				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}'
+				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}' AND ntr.status NOT IN ('Rejected', 'Finalized')
 								""".format(set_stmt = set_stmt, result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
 			#log_result("sysmex", query)
 			frappe.db.sql(query)
