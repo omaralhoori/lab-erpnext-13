@@ -268,7 +268,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			foundTrue = False
 			for key in value_fields:
 				#row[key] = fmt_money(flt(d.get(key, 0.0), 0),precision=0,currency=None)
-				row[key] = flt(d.get(key, 0.0), 0)
+				row[key] = flt(d.get(key, 0.0), 3)
 				if abs(flt(row[key])) >= 0.005:
 					# ignore zero values
 					has_value = True
