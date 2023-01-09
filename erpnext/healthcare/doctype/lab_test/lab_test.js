@@ -88,6 +88,36 @@ if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest
 const disable_input = (status) => {
 	return status == "Rejected" || status == "Finalized" ? 'disabled' : ''; 
 }
+
+
+function moreOptionsOnclick (obj) {
+	
+	let test_row = cur_frm.doc.normal_test_items.find(o => o.name === $(obj).attr('name'));
+	if (test_row){
+		let d = new frappe.ui.Dialog({
+			title: __('Other Options'),
+			fields: [
+				{
+					label: 'Custom Normal Range',
+					fieldname: 'custom_normal_range',
+					fieldtype: 'Small Text',
+					default: test_row.custom_normal_range,
+					description: "To use custom normal range it should be entered as shown: conventional range;criteria text;si range"
+				},
+			],
+			primary_action_label: 'Save',
+			primary_action(values) {
+				frappe.model.set_value('Normal Test Result',$(obj).attr('name'), "custom_normal_range", values.custom_normal_range);
+				cur_frm.save()
+				d.hide();
+			}
+		});
+		
+		d.show();
+	}
+	
+}
+
 const format_tests_html = (tests) => {
 	var html = "";
 	//	<button class='btn test-selected-btn' name='Received' disabled>Receive Selected</button>
@@ -147,7 +177,9 @@ const format_tests_html = (tests) => {
 						
 						</div>
 					</span>
-					<span><label class="test-status">${childTest['status'] || ""} </label>&nbsp;<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" /></span>
+					<span><label class="test-status">${childTest['status'] || ""} </label>&nbsp;<input type="checkbox" value="${childTest['name']}" class="result-checkbox" tabindex="-1" />
+					<span class="dots3 more-test-options" name="${childTest.name}"></span>
+					</span>
 					
 				</div>
 			`;
@@ -320,6 +352,10 @@ const setup_input_listeners = (frm) => {
 
 		frm.refresh()
 	})
+
+	$('.more-test-options').click(function() {
+		moreOptionsOnclick(this);
+	})
 	
 }
 const round_percentge = (frm) => {
@@ -398,6 +434,27 @@ frappe.ui.form.on('Lab Test', {
 					callback: function(res){
 						if (res.message){
 							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}`
+							window. open(url, '_blank')
+						}else{
+							frappe.msgprint({
+								title: __('Warning'),
+								indicator: 'red',
+								message: __("The invoice for this test has not been paid")
+							});
+						}
+					}
+			})
+			})
+			frm.add_custom_button(__('Print With Previous Results'), function(){
+				//let url = `/printview?doctype=Lab%20Test&name=${frm.doc.name}&trigger_print=1&format=Lab%20Test%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`;
+				frappe.call({
+					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.check_invoice_paid",
+					args: {
+						invoice: frm.doc.sales_invoice
+					},
+					callback: function(res){
+						if (res.message){
+							let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${frm.doc.name}&previous=1`
 							window. open(url, '_blank')
 						}else{
 							frappe.msgprint({

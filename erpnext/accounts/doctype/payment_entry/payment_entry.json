@@ -147,6 +147,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "print_hide": 1,
@@ -798,7 +799,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-19 00:50:40.544856",
+ "modified": "2022-12-22 10:26:43.052484",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

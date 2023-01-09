@@ -44,6 +44,10 @@
   "add_item_group_btn",
   "normal_range_section",
   "attribute_normal_range",
+  "custom_normal_ranges_section",
+  "normal_range_branch",
+  "copy_normal_ranges",
+  "branch_normal_ranges",
   "section_break_special",
   "sensitivity",
   "descriptive_test_templates",
@@ -62,6 +66,7 @@
   "order",
   "is_microscopy",
   "print_all_normal_ranges",
+  "highlight_abnormal_result",
   "group_tests",
   "left_blank",
   "dont_print_title",
@@ -232,11 +237,10 @@
   },
   {
    "fieldname": "lab_test_uom",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "ignore_user_permissions": 1,
    "in_list_view": 1,
-   "label": "SI Unit",
-   "options": "Lab Test UOM"
+   "label": "SI Unit"
   },
   {
    "fieldname": "lab_test_normal_range",
@@ -365,9 +369,8 @@
   },
   {
    "fieldname": "secondary_uom",
-   "fieldtype": "Link",
-   "label": "Conventional Unit",
-   "options": "Lab Test UOM"
+   "fieldtype": "Data",
+   "label": "Conventional Unit"
   },
   {
    "depends_on": "eval:!in_list([\"Free Text\", \"Date\", \"Date\"], doc.control_type)",
@@ -842,6 +845,36 @@
    "fieldname": "dont_print_title",
    "fieldtype": "Check",
    "label": "Dont Print Title"
+  },
+  {
+   "default": "0",
+   "fieldname": "highlight_abnormal_result",
+   "fieldtype": "Check",
+   "label": "Highlight Abnormal Result"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.lab_test_template_type == 'Single'",
+   "fieldname": "custom_normal_ranges_section",
+   "fieldtype": "Section Break",
+   "label": "Custom Normal Ranges"
+  },
+  {
+   "fieldname": "normal_range_branch",
+   "fieldtype": "Link",
+   "label": "Normal Range Branch",
+   "options": "Company"
+  },
+  {
+   "fieldname": "copy_normal_ranges",
+   "fieldtype": "Button",
+   "label": "Copy Normal Ranges"
+  },
+  {
+   "fieldname": "branch_normal_ranges",
+   "fieldtype": "Table",
+   "label": "Branch Normal Ranges",
+   "options": "Custom Normal Range"
   }
  ],
  "links": [
@@ -853,7 +886,7 @@
    "table_fieldname": "test_results"
   }
  ],
- "modified": "2022-09-18 07:09:56.108375",
+ "modified": "2022-12-27 12:36:06.196434",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

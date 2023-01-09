@@ -100,9 +100,60 @@ frappe.ui.form.on('Lab Test Template', {
 				};
 			});
 		}
+	},
+	copy_normal_ranges: function(frm) {
+		if (! frm.doc.normal_range_branch){
+			return frappe.msgprint(__("Please fill branch field!"));
+		}
+		
+
+		for (var range of frm.doc.branch_normal_ranges){
+			 if (range.company == frm.doc.normal_range_branch){
+				return frappe.confirm(__("There are Normal Ranges related to this branch. Do you want to proceed?"), ()=> {
+					console.log('Test');
+					add_normal_ranges(frm,frm.doc.normal_range_branch )
+				}, () => {
+
+				})
+			}
+		}
+		add_normal_ranges(frm,frm.doc.normal_range_branch )
 	}
 });
-
+const add_normal_ranges = (frm, branch) => {
+	for(var range of frm.doc.attribute_normal_range) {
+		// var rangeCopy = {...range}
+		// delete rangeCopy.owner;delete rangeCopy.creation;delete rangeCopy.idx;
+		// delete rangeCopy.name;delete rangeCopy.modified; delete rangeCopy.modified_by;
+		
+		// rangeCopy.parentfield='branch_normal_ranges';
+		// rangeCopy.company = branch;
+		// console.log(rangeCopy);
+		var child = frm.add_child("branch_normal_ranges" );
+		child.range_type= range.range_type;
+		child.result_type= range.result_type;
+		child.gender= range.gender;
+		child.effective_date= range.effective_date;
+		child.criteria_text= range.criteria_text;
+		child.range_order= range.range_order;
+		child.expiry_date= range.expiry_date;
+		child.hide_normal_range= range.hide_normal_range;
+		child.age_range= range.age_range;
+		child.from_age_period= range.from_age_period;
+		child.from_age= range.from_age;
+		child.to_age_period= range.to_age_period;
+		child.to_age= range.to_age;
+		child.range_text= range.range_text;
+		child.range_from= range.range_from;
+		child.range_to= range.range_to;
+		child.si_range_text= range.si_range_text;
+		child.min_si_value= range.min_si_value;
+		child.max_si_value= range.max_si_value;
+		child.company= branch;
+		frm.refresh_field("branch_normal_ranges");
+		
+	}
+}
 cur_frm.cscript.custom_refresh = function(doc) {
 	cur_frm.set_df_property('lab_test_code', 'read_only', doc.__islocal ? 0 : 1);
 

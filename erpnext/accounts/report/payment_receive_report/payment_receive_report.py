@@ -8,10 +8,16 @@ def execute(filters=None):
 	columns, data = [], []
 	columns = [
 		{
+			"fieldname": "company",
+			"label": _("Branch"),
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
 			"fieldname": "payment_type",
 			"label": _("Payment Type"),
 			"fieldtype": "Data",
-			"width": 80
+			"width": 120
 		},
 		{
 			"fieldname": "paid_amount",
@@ -22,9 +28,9 @@ def execute(filters=None):
 	]
 	conditions = get_conditions(filters)
 	payments = frappe.db.sql(f"""
-		SELECT payment_type, SUM(paid_amount) FROM `tabPayment Entry`
+		SELECT company,payment_type, SUM(paid_amount) FROM `tabPayment Entry`
 		{conditions}
-		GROUP BY payment_type
+		GROUP BY payment_type, company
 	""")
 	for payment in payments:
 		if payment[0] == "Pay":

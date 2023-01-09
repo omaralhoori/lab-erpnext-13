@@ -3,6 +3,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from frappe.core.doctype.sms_settings.sms_settings import send_sms
+
 from erpnext.healthcare.doctype.lab_test.lab_test import send_received_msg_order
 
 import frappe
@@ -41,6 +43,31 @@ class SampleCollection(Document):
 				UPDATE `tabNormal Test Result` SET status='Received'
 			WHERE parent='{test_name}' AND status IS NULL
 			""".format(test_name=test_name))
+		if not self.sms_sent and frappe.db.get_single_value("Healthcare Settings", "sample_collection_sms"):
+			self.send_survey_message()
+	def send_survey_message(self):
+		survey_msg = frappe.db.get_single_value("Healthcare Settings", "patient_survey_message")
+		if not survey_msg:
+			frappe.msgprint("Patient Survey Message is not provided in the Healthcare Settings!")
+			return
+		if not self.patient_mobile:
+			frappe.msgprint("Patient Mobile Number is not provided!")
+			return
+		result_url = frappe.db.get_single_value("Healthcare Settings", "result_url")
+		if not result_url or result_url == "":
+			frappe.msgprint(_("Failed to send sms. Result url is empty in Healthcare Settings."))
+			return
+
+		if result_url[-1] != "/":
+			result_url += '/'
+		patient_password = frappe.db.get_value("Patient", self.patient, ["patient_password"])
+		if not patient_password:
+			frappe.msgprint(_("Failed to send sms. Patient information is incomplete."))
+			return
+		result_url += "patient-satisfaction-survey?new=1&invoice=" + self.sales_invoice +"_"+ patient_password
+		survey_msg = survey_msg.format(url=result_url, patient=self.patient_name)
+		send_sms(msg=survey_msg, receiver_list=[self.patient_mobile])
+		self.db_set('sms_sent', 1)
 
 import json
 @frappe.whitelist()

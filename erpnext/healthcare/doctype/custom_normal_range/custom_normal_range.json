@@ -1,12 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2022-07-06 22:40:02.246473",
+ "creation": "2022-12-27 12:35:19.651122",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "normal_range_id",
+  "company",
   "filter_options_section",
   "range_type",
   "result_type",
@@ -39,11 +39,17 @@
  "fields": [
   {
    "columns": 1,
-   "fieldname": "normal_range_id",
+   "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Normal Range ID",
-   "options": "Normal Range"
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "filter_options_section",
+   "fieldtype": "Section Break",
+   "label": "Filter Options"
   },
   {
    "columns": 1,
@@ -51,6 +57,12 @@
    "fieldtype": "Select",
    "label": "Range Type",
    "options": "Normal\nAbnormal"
+  },
+  {
+   "fieldname": "result_type",
+   "fieldtype": "Select",
+   "label": "Result Type",
+   "options": "Numeric\nText"
   },
   {
    "columns": 1,
@@ -61,6 +73,16 @@
    "options": "Gender"
   },
   {
+   "fieldname": "effective_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Effective Date"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
    "columns": 2,
    "fieldname": "criteria_text",
    "fieldtype": "Data",
@@ -68,24 +90,11 @@
    "label": "Criteria Text"
   },
   {
-   "columns": 1,
-   "fieldname": "range_text",
-   "fieldtype": "Small Text",
+   "default": "0",
+   "fieldname": "range_order",
+   "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Range Text"
-  },
-  {
-   "columns": 2,
-   "fieldname": "si_range_text",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "label": "SI Range Text"
-  },
-  {
-   "fieldname": "effective_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Effective Date"
+   "label": "Range Order"
   },
   {
    "fieldname": "expiry_date",
@@ -94,15 +103,10 @@
    "label": "Expiry Date"
   },
   {
-   "fieldname": "column_break_6",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
-   "fieldname": "range_order",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Range Order"
+   "fieldname": "hide_normal_range",
+   "fieldtype": "Check",
+   "label": "Hide Normal Range"
   },
   {
    "fieldname": "age_filters_section",
@@ -116,6 +120,10 @@
    "options": "All\n<\n>\n=\nBetween"
   },
   {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "from_age_period",
    "fieldtype": "Select",
    "label": "From Age Period",
@@ -125,6 +133,10 @@
    "fieldname": "from_age",
    "fieldtype": "Int",
    "label": "From Age"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "to_age_period",
@@ -143,6 +155,17 @@
    "label": "Conventional Attributes"
   },
   {
+   "columns": 1,
+   "fieldname": "range_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Range Text"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "range_from",
    "fieldtype": "Float",
    "label": "Range From"
@@ -158,6 +181,17 @@
    "label": "SI Attributes"
   },
   {
+   "columns": 2,
+   "fieldname": "si_range_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "SI Range Text"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "min_si_value",
    "fieldtype": "Float",
    "label": "Min SI Value"
@@ -166,48 +200,15 @@
    "fieldname": "max_si_value",
    "fieldtype": "Float",
    "label": "Max SI Value"
-  },
-  {
-   "fieldname": "filter_options_section",
-   "fieldtype": "Section Break",
-   "label": "Filter Options"
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "result_type",
-   "fieldtype": "Select",
-   "label": "Result Type",
-   "options": "Numeric\nText"
-  },
-  {
-   "default": "0",
-   "fieldname": "hide_normal_range",
-   "fieldtype": "Check",
-   "label": "Hide Normal Range"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-11 03:35:59.671241",
+ "modified": "2022-12-27 12:41:34.206996",
  "modified_by": "Administrator",
  "module": "Healthcare",
- "name": "Attribute Normal Range",
+ "name": "Custom Normal Range",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
