@@ -61,8 +61,8 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
-
-	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+	#ibrahim
+	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type,level, lft, rgt
 
 		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
 	company_currency = filters.presentation_currency or erpnext.get_company_currency(filters.company)
@@ -233,33 +233,140 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			prepare_opening_closing(d)
 
 		has_value = False
-		row = {
-			"account": d.name,
-			"parent_account": d.parent_account,
-			"indent": d.indent,
-			"from_date": filters.from_date,
-			"to_date": filters.to_date,
-			"currency": company_currency,
-			"account_name": ('{} - {}'.format(d.account_number, d.account_name)
-				if d.account_number else d.account_name)
-		}
+		has_value = get_account_level(d.account_number,filters)
 
-		for key in value_fields:
-			row[key] = flt(d.get(key, 0.0), 3)
+		#ibrahim
+		if has_value:
+			row = {
+				"account": d.name,
+				"account_number": d.account_number,
+				"account_level": d.level,
+				"account_fname": d.account_name,
+				"parent_account": d.parent_account,
+				"indent": d.indent,
+				"from_date": filters.from_date,
+				"to_date": filters.to_date,
+				"currency": company_currency,
+				"account_name": ('{} - {}'.format(d.account_number, d.account_name)
+					if d.account_number else d.account_name)
+			}
 
-			if abs(row[key]) >= 0.005:
-				# ignore zero values
-				has_value = True
+		#ibrahim
+		#row = {
+		#	"account": d.name,
+		#	"parent_account": d.parent_account,
+		#	"indent": d.indent,
+		#	"from_date": filters.from_date,
+		#	"to_date": filters.to_date,
+		#	"currency": company_currency,
+		#	"account_name": ('{} - {}'.format(d.account_number, d.account_name)
+		#		if d.account_number else d.account_name)
+		#}
+		
+		#ibrahim
+		if has_value:
+			foundTrue = False
+			for key in value_fields:
+				#row[key] = fmt_money(flt(d.get(key, 0.0), 0),precision=0,currency=None)
+				row[key] = flt(d.get(key, 0.0), 3)
+				if abs(flt(row[key])) >= 0.005:
+					# ignore zero values
+					has_value = True
+					foundTrue = True
+				else:
+					if foundTrue == False:
+						has_value = False
 
-		row["has_value"] = has_value
-		data.append(row)
+			#msgprint(_(d.account_number) + " dd " + cstr(has_value))
+			row["has_value"] = has_value
+			data.append(row)
 
 	data.extend([{},total_row])
 
+
+	#	for key in value_fields:
+	#		row[key] = flt(d.get(key, 0.0), 3)
+
+	#		if abs(row[key]) >= 0.005:
+	#			# ignore zero values
+	#			has_value = True
+
+	#	row["has_value"] = has_value
+	#	data.append(row)
+
+	#data.extend([{},total_row])
+
 	return data
+
+#ibrahim
+def get_account_level(account_number, filters):
+	level_flg = 1
+	level_string = "9"
+	level_conditions = ""
+
+	if flt(filters.lvl_1):
+		level_flg = 1
+		if level_string:
+			level_string += ","
+		level_string += "1"
+
+	if flt(filters.lvl_2):
+		level_flg = 1
+		if level_string:
+			level_string += ","
+		level_string += "2"		
+
+	if flt(filters.lvl_3):
+		level_flg = 1
+		if level_string:
+			level_string += ","
+		level_string += "3"		
+
+	if flt(filters.lvl_4):
+		level_flg = 1
+		if level_string:
+			level_string += ","
+		level_string += "4"		
+
+	if flt(filters.lvl_5):
+		level_flg = 1
+		if level_string:
+			level_string += ","
+		level_string += "5"
+	
+	level_conditions += " and level in ({0}) ".format(level_string)
+
+	query_filters = {
+		"company": filters.company,
+		"account_number":account_number
+	}
+
+	data_lvl = frappe.db.sql(""" SELECT count(account_number) wcount
+		FROM `tabAccount`
+		where company=%(company)s
+		and account_number=%(account_number)s
+		{level_conditions}
+		""".format(level_conditions=level_conditions), query_filters, as_dict=1)
+
+	rec_found = False
+	for d in data_lvl:
+		if d.wcount==0:
+			rec_found = False
+		else:
+			rec_found = True
+
+	return rec_found
+	#return frappe._dict(data_lvl)
 
 def get_columns():
 	return [
+		{
+			"fieldname": "account_level",
+			"label": _("Account Level"),
+			"fieldtype": "Data",
+			"width": 1,
+			"hidden": 1
+		},
 		{
 			"fieldname": "account",
 			"label": _("Account"),

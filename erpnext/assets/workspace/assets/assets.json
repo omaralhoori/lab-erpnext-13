@@ -13,8 +13,9 @@
  "doctype": "Workspace",
  "extends_another_page": 0,
  "hide_custom": 0,
- "icon": "assets",
+ "icon": "/assets/erpnext/images/ibm_icon/FA.gif",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Assets",
  "links": [
@@ -160,7 +161,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:37.977119",
+ "modified": "2022-12-15 09:31:35.158519",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
@@ -172,11 +173,13 @@
   {
    "label": "Asset",
    "link_to": "Asset",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/CSM01DIS.gif",
    "type": "DocType"
   },
   {
    "label": "Asset Category",
    "link_to": "Asset Category",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/FA.gif",
    "type": "DocType"
   },
   {

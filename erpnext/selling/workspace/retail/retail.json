@@ -8,8 +8,9 @@
  "doctype": "Workspace",
  "extends_another_page": 0,
  "hide_custom": 0,
- "icon": "retail",
+ "icon": "/assets/erpnext/images/ibm_icon/healt_pos.gif",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Retail",
  "links": [
@@ -95,7 +96,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:36.758038",
+ "modified": "2022-12-17 10:10:25.602074",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",

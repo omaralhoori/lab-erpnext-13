@@ -99,7 +99,32 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Include Default Book Entries"),
 				"fieldtype": "Check",
 				"default": 1
+			},
+			{
+				"fieldname": "lvl_1",
+				"label": __("Level 1"),
+				"fieldtype": "Check",
+				"default": 1
+			},
+			{
+				"fieldname": "lvl_2",
+				"label": __("Level 2"),
+				"fieldtype": "Check",
+				"default": 1
+			},
+			{
+				"fieldname": "lvl_3",
+				"label": __("Level 3"),
+				"fieldtype": "Check",
+				"default": 1
+			},
+			{
+				"fieldname": "lvl_4",
+				"label": __("Level 4"),
+				"fieldtype": "Check",
+				"default": 1
 			}
+
 		],
 		"formatter": erpnext.financial_statements.formatter,
 		"tree": true,

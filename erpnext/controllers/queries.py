@@ -240,9 +240,12 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	if isinstance(filters, str):
 		filters = json.loads(filters)
-	if filters.get("add_filter_lab_inv") or filters.get("add_filter_lab_inv") == 0:
-		add_filter_lab_inv = filters.get("add_filter_lab_inv")
-		del filters["add_filter_lab_inv"]
+	if filters :
+		if filters.get("add_filter_lab_inv") or filters.get("add_filter_lab_inv") == 0:
+			add_filter_lab_inv = filters.get("add_filter_lab_inv")
+			del filters["add_filter_lab_inv"]
+	else:
+		add_filter_lab_inv = 0
 	#Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()

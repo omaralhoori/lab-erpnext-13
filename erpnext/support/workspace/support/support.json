@@ -8,8 +8,9 @@
  "doctype": "Workspace",
  "extends_another_page": 0,
  "hide_custom": 0,
- "icon": "support",
+ "icon": "/assets/erpnext/images/ibm_icon/EMM07SMS.gif",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Support",
  "links": [
@@ -156,7 +157,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:37.073482",
+ "modified": "2022-12-12 08:23:21.591327",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
