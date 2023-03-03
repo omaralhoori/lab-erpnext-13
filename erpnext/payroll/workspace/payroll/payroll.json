@@ -13,8 +13,9 @@
  "doctype": "Workspace",
  "extends_another_page": 0,
  "hide_custom": 0,
- "icon": "money-coins-1",
+ "icon": "/assets/erpnext/images/ibm_icon/healt_salary.gif",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Payroll",
  "links": [
@@ -287,7 +288,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:37.205628",
+ "modified": "2022-12-17 09:52:27.419865",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",

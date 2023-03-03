@@ -13,7 +13,7 @@
  "doctype": "Workspace",
  "extends_another_page": 0,
  "hide_custom": 0,
- "icon": "accounting",
+ "icon": "/assets/erpnext/images/ibm_icon/healt_accounting.gif",
  "idx": 0,
  "is_default": 0,
  "is_standard": 1,
@@ -23,6 +23,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Accounting Masters",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/BDM01CC.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -110,6 +111,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "General Ledger",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/GLM01MAS.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -167,6 +169,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Accounts Receivable",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/CSM01TRX.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -274,6 +277,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Accounts Payable",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/UNM63TRX.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -371,6 +375,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Reports",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/BDM01CAT.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -526,6 +531,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Multi Currency",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/CSM01CNT.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -563,6 +569,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Settings",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_tools.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -600,6 +607,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Banking and Payments",
+   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_bank.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -1129,7 +1137,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-10-04 21:36:34.611197",
+ "modified": "2022-12-17 10:39:56.841575",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -1141,52 +1149,62 @@
   {
    "label": "Chart of Accounts",
    "link_to": "Account",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/BDM01UNIT.gif",
    "type": "DocType"
   },
   {
    "label": "Sales Invoice",
    "link_to": "Sales Invoice",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/CSM01ACC.gif",
    "type": "DocType"
   },
   {
    "label": "Purchase Invoice",
    "link_to": "Purchase Invoice",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/BDR12CHR.gif",
    "type": "DocType"
   },
   {
    "label": "Journal Entry",
    "link_to": "Journal Entry",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/BDR12CHR.gif",
    "type": "DocType"
   },
   {
    "label": "Payment Entry",
    "link_to": "Payment Entry",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/CHM05TRX.gif",
    "type": "DocType"
   },
   {
    "label": "Accounts Receivable",
    "link_to": "Accounts Receivable",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/GLM04CHB.gif",
    "type": "Report"
   },
   {
    "label": "General Ledger",
    "link_to": "General Ledger",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/DGM01TRX.gif",
    "type": "Report"
   },
   {
    "label": "Trial Balance",
    "link_to": "Trial Balance",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/GLR01CHR.gif",
    "type": "Report"
   },
   {
    "label": "Dashboard",
    "link_to": "Accounts",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/DGM01STD.gif",
    "type": "Dashboard"
   },
   {
    "doc_view": "",
    "label": "Receivable Invoice",
    "link_to": "Receivable Invoice",
+   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/CSM01STR.gif",
    "type": "DocType"
   }
  ]
