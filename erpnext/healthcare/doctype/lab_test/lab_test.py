@@ -1140,9 +1140,9 @@ def receive_sysmexxn_results():
 		results = lab_test['results']
 		for test in results:
 			#if test['result'].isnumeric():
-			set_stmt = 'ntr.result_value'
-			if test['code'].endswith("%"):
-				set_stmt = 'ntr.result_percentage'
+			# set_stmt = 'ntr.result_value'
+			# if test['code'].endswith("%"):
+			# 	set_stmt = 'ntr.result_percentage'
 			# elif test['code'].endswith("#"):
 			# 	test['code'] = test['code'][:-1] + "%"
 			query = """ UPDATE `tabNormal Test Result` as ntr 
@@ -1150,10 +1150,10 @@ def receive_sysmexxn_results():
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
 				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
 				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
-				SET {set_stmt}=%(result)s
+				SET ntr.result_percentage=IF(mtt.is_percentage=1, %(result)s , ntr.result_percentage), ntr.result_value=IF(mtt.is_percentage=1, ntr.result_value, %(result)s )
 				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
 				AND mtlt.machine_type='sysmex XN'
-								""".format(set_stmt = set_stmt, order_id=lab_test['order_id'])
+								""".format( order_id=lab_test['order_id'])
 			#log_result("sysmex", query)
 			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
 	frappe.db.commit()
@@ -1165,20 +1165,20 @@ def receive_sysmexxp_results():
 		results = lab_test['results']
 		for test in results:
 			#if test['result'].isnumeric():
-			set_stmt = 'ntr.result_value'
-			if test['code'].endswith("%"):
-				set_stmt = 'ntr.result_percentage'
+			# set_stmt = 'ntr.result_value'
+			# if test['code'].endswith("%"):
+			# 	set_stmt = 'ntr.result_percentage'
 			# elif test['code'].endswith("#"):
 			# 	test['code'] = test['code'][:-1] + "%"
 			query = """ UPDATE `tabNormal Test Result` as ntr 
 				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
 				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
-				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mttp.arent=mtlt.name AND mtlt.company=lt.company
-				SET {set_stmt}=%(result)s 
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
+				SET ntr.result_percentage=IF(mtt.is_percentage=1, %(result)s , ntr.result_percentage), ntr.result_value=IF(mtt.is_percentage=1, ntr.result_value, %(result)s )
 				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
 				AND mtlt.machine_type='sysmex XP 300'
-								""".format(set_stmt = set_stmt, order_id=lab_test['order_id'])
+								""".format(order_id=lab_test['order_id'])
 			#log_result("sysmex", query)
 			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
 	frappe.db.commit()
@@ -1190,21 +1190,24 @@ def receive_rubycd_results():
 		results = lab_test['results']
 		for test in results:
 			#if test['result'].isnumeric():
-			set_stmt = 'ntr.result_value'
-			if test['code'].endswith("%"):
-				set_stmt = 'ntr.result_percentage'
+			# set_stmt = 'ntr.result_value'
+			# print(test)
+			# if test['code'].startswith("%"):
+			# 	print("precentatge")
+			# 	set_stmt = 'ntr.result_percentage'
 			# elif test['code'].endswith("#"):
 			# 	test['code'] = test['code'][:-1] + "%"
 			query = """ UPDATE `tabNormal Test Result` as ntr 
 				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
 				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
-				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mttp.arent=mtlt.name AND mtlt.company=lt.company
-				SET {set_stmt}=%(result)s 
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
+				SET ntr.result_percentage=IF(mtt.is_percentage=1, %(result)s , ntr.result_percentage), ntr.result_value=IF(mtt.is_percentage=1, ntr.result_value, %(result)s )
 				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
 				AND mtlt.machine_type='Ruby CD'
-								""".format(set_stmt = set_stmt, order_id=lab_test['order_id'])
+								""".format(order_id=lab_test['order_id'])
 			#log_result("sysmex", query)
+			print(query)
 			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
 	frappe.db.commit()
 

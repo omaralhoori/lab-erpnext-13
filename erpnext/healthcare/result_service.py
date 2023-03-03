@@ -81,36 +81,48 @@ def connect_db():
     conn = sqlite3.connect("results.db")
     return conn
 
-def read_results_from_db():
-    conn= connect_db()
-    results = conn.execute(f"""
-        SELECT * FROM results WHERE is_sent=0;
-    """)
-    #result_messages = [{result.name} for result in results]
-    result_messages = results.fetchall()
-    #result_names = result_messages.keys()
-    conn.close()
-    return  result_messages#results.fetchall()#, results.keys#.description
+def read_results_from_db(depth=0):
+    try:
+        conn= connect_db()
+        results = conn.execute(f"""
+            SELECT * FROM results WHERE is_sent=0;
+        """)
+        #result_messages = [{result.name} for result in results]
+        result_messages = results.fetchall()
+        #result_names = result_messages.keys()
+        conn.close()
+        return  result_messages#results.fetchall()#, results.keys#.description
+    except sqlite3.OperationalError:
+        if depth < 5:
+            return read_results_from_db(depth+1)
+        else: return []
 
-def insert_db_result_message(message, machine):
-    conn = connect_db()
-    conn.execute(f"""
-        INSERT INTO results(result_msg, machine_type, result_date)
-        VALUES('{message}', "{machine}", datetime('now'))
-    """)
-    conn.commit()
-    conn.close()
+def insert_db_result_message(message, machine, depth=0):
+    try:        
+        conn = connect_db()
+        conn.execute(f"""
+            INSERT INTO results(result_msg, machine_type, result_date)
+            VALUES(?, ?, datetime('now'))
+        """, (message, machine))
+        conn.commit()
+        conn.close()
+    except sqlite3.OperationalError:
+        if depth < 5:
+            return insert_db_result_message(message, machine, depth+1)
 
-def mark_result_message(result_id):
-    print("marking results")
-    conn = connect_db()
-    conn.execute(f"""
-       UPDATE results SET is_sent=1
-        WHERE result_id={result_id}
-    """)
-    conn.commit()
-    conn.close()
-
+def mark_result_message(result_id, depth=0):
+    try:
+        print("marking results")
+        conn = connect_db()
+        conn.execute(f"""
+        UPDATE results SET is_sent=1
+            WHERE result_id={result_id}
+        """)
+        conn.commit()
+        conn.close()
+    except sqlite3.OperationalError:
+        if depth < 5:
+            return mark_result_message(result_id, depth+1)
 
 #-----------------------------------------Parsing Messages-------------------------------
 def parse_result_message(message, machine_type):
@@ -128,9 +140,9 @@ def parse_result_message(message, machine_type):
 def get_url(site):
     print("sent results to ", site)
     if site == "embassy":
-        return "direct-embassy.erp:8085"
+        return "josante-emb.erp:8002"
     elif site == "lab":
-        return "direct-lab.erp:8085"
+        return "josante-outpatient.erp:8085"
     else: return site
 
 
@@ -331,6 +343,7 @@ def get_results_liaison(liason_msg):
 def parse_rubycd_message(message):
     try:
         results, embassy_results = parse_ruby_cd_msg(message.encode())
+        print(results, embassy_results)
         if len(results) > 0:
             requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_rubycd_results", data=json.dumps(results))
         if len(embassy_results) > 0:

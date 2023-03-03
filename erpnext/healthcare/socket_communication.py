@@ -113,6 +113,7 @@ def save_order_msgs_db(machine_orders):
 def parse_inifinty_msg(msg_json):
     try:
         msg_dict = json.loads(msg_json)
+        print(msg_dict)
         tests_joined = "\\".join(list(map(map_test_code, msg_dict['order']['tests'])))
         msg = tcode("ENQ") + get_msg(msg_dict['patient']['file_no'], msg_dict['patient']['dob'], msg_dict['patient']['gender'], msg_dict['order']['id'], msg_dict['order']['date'], tests_joined) + tcode("EOT")
         # print("receiving msg")
@@ -298,41 +299,61 @@ def connect_db():
     conn = sqlite3.connect("orders.db")
     return conn
 
-def read_orders_from_db(machine):
-    conn= connect_db()
-    orders = conn.execute(f"""
-        SELECT * FROM orders WHERE machine='{machine}' AND is_sent=0;
-    """)
-    result = [order for order in orders]
-    conn.close()
-    return result
+def read_orders_from_db(machine,  depth=0):
+    try:
+        conn= connect_db()
+        orders = conn.execute(f"""
+            SELECT * FROM orders WHERE machine='{machine}' AND is_sent=0;
+        """)
+        result = [order for order in orders]
+        conn.close()
+        return result
+    except sqlite3.OperationalError:
+        if depth < 5:
+            return read_orders_from_db(machine, depth+1)
+        else: return []
 
-def read_orders_in_list_from_db(machine, ids=[]):
-    conn= connect_db()
-    tests = ",".join([f"'{_id}'" for _id in ids])
-    orders = conn.execute(f"""
-        SELECT * FROM orders WHERE machine='{machine}' AND is_sent=0 AND id in ({tests});
-    """)
-    result = [order for order in orders]
-    conn.close()
-    return result
+def read_orders_in_list_from_db(machine, ids=[], depth=0):
+    try:
+        conn= connect_db()
+        tests = ",".join([f"'{_id}'" for _id in ids])
+        orders = conn.execute(f"""
+            SELECT * FROM orders WHERE machine='{machine}' AND is_sent=0 AND id in ({tests});
+        """)
+        result = [order for order in orders]
+        conn.close()
+        return result
+    except sqlite3.OperationalError:
+        if depth < 5:
+            return read_orders_in_list_from_db(machine, ids, depth+1)
+        else: return []
 
-def db_insert_msg(sample_id, msg, machine):
-    conn = connect_db()
-    conn.execute(f"""
-        INSERT INTO orders(id, msg, machine)
-        VALUES("{sample_id}", '{msg}', "{machine}")
-    """)
-    conn.commit()
-    conn.close()
+def db_insert_msg(sample_id, msg, machine, depth=0):
+    try:
+        conn = connect_db()
+        conn.execute(f"""
+            INSERT INTO orders(id, msg, machine,result_date)
+            VALUES(?, ?, ?, datetime('now'))
+        """, (sample_id, msg, machine))
+        conn.commit()
+        conn.close()
+    except sqlite3.OperationalError:
+        print("error")
+        if depth < 5:
+            db_insert_msg(sample_id, msg, machine, depth+1)
 
-def delete_or_mark_order(order_id, machine):
-    conn = connect_db()
-    conn.execute(f"""
-        UPDATE orders SET is_sent=1 WHERE id='{order_id}' AND machine='{machine}';
-    """)
-    conn.commit()
-    conn.close()
+def delete_or_mark_order(order_id, machine, depth=0):
+    try:
+        conn = connect_db()
+        conn.execute(f"""
+            UPDATE orders SET is_sent=1 WHERE order_id={order_id} AND machine='{machine}';
+        """)
+        conn.commit()
+        conn.close()
+    except sqlite3.OperationalError:
+        if depth < 5:
+            delete_or_mark_order(order_id, machine, depth+1)
+
 from datetime import datetime
 
 
@@ -363,10 +384,11 @@ def start_infinty_order_listener(ip_address, port, local_ip, local_port):
                             start_time = 0
                             log_result("infinty_order", "send check")
                         orders = read_orders_from_db("Inifinty")
-                        print(orders)
+                        
                         for order in orders:
-                            msg_json = order[1]
+                            msg_json = order[2]
                             msg = parse_inifinty_msg(msg_json)
+                            print(msg)
                             if msg:
                                 start_time = 0
                                 log_result("infinty_order",msg.decode())
@@ -552,7 +574,7 @@ def start_ruby_cd_listener(ip_address, port):
                         log_result("rubycd",str(data))
                         if data:
                             msg += data
-                        if msg.endswith(b'L|1|N\r'):
+                        if msg.endswith(chr(4).encode()):
                             insert_db_result_message(msg.decode(), 'Ruby CD')
                             msg = b'' 
                         conn.sendall(chr(6).encode())
@@ -590,7 +612,8 @@ def start_lision_listener(ip_address, port):
                         # log_result("lision",str(data))
                         if data:
                             msg += data
-                          
+                        print("recv")
+                        print(data)  
                         conn.sendall(chr(6).encode())
                         if msg.endswith(chr(4).encode()):
                             print("msg received-------------------------------------------------------")
@@ -643,7 +666,7 @@ def make_lision_msg(orders, s=None):
         patient_frame, frame_count = make_frame(f'P|{patient_count}||||||||||||', frame_count, s)
         patient_count += 1
         msgq += patient_frame
-        order= json.loads(order_json[1])
+        order= json.loads(order_json[2])
         tests = "\\".join(["^^^" + test + "^" for test in order["order"]["tests"]])
         order_frame, frame_count= make_frame(f'O|1|{order["order"]["id"]}||{tests}|||||||||||N||||||||||O', frame_count, s)
         msgq += order_frame
