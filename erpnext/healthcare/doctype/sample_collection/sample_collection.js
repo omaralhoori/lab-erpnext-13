@@ -3,13 +3,9 @@
 
 frappe.ui.form.on('Sample Collection', {
 	refresh: function(frm) {
-		if (frappe.defaults.get_default('create_sample_collection_for_lab_test')) {
-			frm.add_custom_button(__('View Lab Tests'), function() {
-				frappe.route_options = {'sample': frm.doc.name};
-				frappe.set_route('List', 'Lab Test');
-			});
-		}
 		if (!frm.is_new()){
+			$('.prev-doc').hide()
+			$('.next-doc').hide()
 			if(frm.doc.docstatus == 1){
 				frm.page.add_menu_item(__('Uncollect'), function () {
 					frappe.call({
@@ -49,7 +45,12 @@ frappe.ui.form.on('Sample Collection', {
 				});
 			
 			})
-
+			if (frappe.defaults.get_default('create_sample_collection_for_lab_test')) {
+				frm.add_custom_button(__('View Lab Tests'), function() {
+					frappe.route_options = {'sample': frm.doc.name};
+					frappe.set_route('List', 'Lab Test');
+				});
+			}
 			frappe.call({
 				method: "erpnext.healthcare.utils.is_embassy",
 				callback: (res) => {

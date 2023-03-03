@@ -698,10 +698,13 @@ def get_price_list_rate(args, item_doc, out=None):
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
 
+		#ibrahim	zero to rate if item proce not define for health care
 		if not out.price_list_rate and args.transaction_type=="buying":
-			from erpnext.stock.doctype.item.item import get_last_purchase_details
-			out.update(get_last_purchase_details(item_doc.name,
-				args.name, args.conversion_rate))
+			out.price_list_rate = 0.0
+		# ibrahim remake to disable getting last price rate
+		#	from erpnext.stock.doctype.item.item import get_last_purchase_details
+		#	out.update(get_last_purchase_details(item_doc.name,
+		#		args.name, args.conversion_rate))
 
 	return out
 

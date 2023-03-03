@@ -1429,9 +1429,9 @@ cur_frm.cscript.update_total_incoming_cheques = function(doc) {
 	var total_incoming_cheques=0.0;
 	var cheque_data = doc.cheque_data || [];
 	for(var i in cheque_data) {
-		total_incoming_cheques += flt(cheque_data[i].cheque_amount);
+		total_incoming_cheques += flt(cheque_data[i].cheque_amount, precision('total_incoming_cheques'));
 	}
-	doc.total_incoming_cheques = total_incoming_cheques;
+	doc.total_incoming_cheques = flt(total_incoming_cheques, precision('total_incoming_cheques'));
 	refresh_many(['total_incoming_cheques']);
 }
 
@@ -1451,9 +1451,9 @@ cur_frm.cscript.update_total_issued_cheques = function(doc) {
 	var total_issued_cheques=0.0;
 	var issue_cheque_data = doc.issue_cheque_data || [];
 	for(var i in issue_cheque_data) {
-		total_issued_cheques += flt(issue_cheque_data[i].cheque_amount);
+		total_issued_cheques += flt(issue_cheque_data[i].cheque_amount, precision('total_issued_cheques'));
 	}
-	doc.total_issued_cheques = total_issued_cheques;
+	doc.total_issued_cheques = flt(total_issued_cheques,precision('total_issued_cheques'));
 	refresh_many(['total_issued_cheques']);
 }
 
