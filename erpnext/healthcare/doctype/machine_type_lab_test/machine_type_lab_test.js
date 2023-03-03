@@ -6,7 +6,7 @@ frappe.ui.form.on('Machine Type Lab Test', {
 		frm.set_query('lab_test_template', 'machine_type_lab_test_template', function() {
 			return {
 				filters: {
-					lab_test_template_type: ['in', ['Multiline','Single']],
+					lab_test_template_type: ['in', ['Single']],
 					disabled: ['in', ['0','1']]
 				}
 			};

@@ -9,6 +9,8 @@ import re, json
 import time
 import sqlite3
 
+from erpnext.healthcare.result_service import insert_db_result_message
+
 
 #------------------------------------------infinty-----------------------------------------
 def patient_info(result):
@@ -238,56 +240,8 @@ def prepare_infinty_msg(file_no, dob, gender, sample_id, sample_date, tests):
 
 #-----------------------------------Listeners---------------------------------
 
-def patient_info_infinty(result, p):
-    p_start = result.find(f"P|{p}|")
-    if p_start < 0 : return False
-    p_end=result.find("||||",p_start)
-    if p_end < 0: return False
-    patient_data = result[p_start + 4: p_end].split("|")
-    if len(patient_data) < 2: return False
-    n_p_start = result.find(f"P|{p+1}|")
-    return patient_data[0], patient_data[1], p_end,n_p_start
-
-def results_info_infinty(result, p_end, n_p_start):
-    res_no = 1
-    results = []
-    while True:
-        if n_p_start > 0:
-            r_start = result.find(f"R|{res_no}|",p_end, n_p_start)
-        else: r_start = result.find(f"R|{res_no}|",p_end)
-        if r_start < 0: break
-        r_end = result.find("|||",r_start)
-        if r_end < 0: break
-        result_data = result[r_start + 4: r_end].split("|")
-        if len(result_data) < 2: break
-       
-        res = {"code": result_data[-2].split("^")[-1], "result": result_data[-1]}
-        results.append(res)
-        res_no += 1
-        if res_no == 200: return []
-    return results
-
 def is_embassy_order(order):
     return order[0] == "E"
-
-def get_patient_results_infinty(res_msg):
-    res_msg = re.sub(b'\x17..\r\n\x02.', b'', res_msg)
-    res_msg = res_msg.decode()
-    p = 1
-    results, embassy_results = [], []
-    while True:
-        res = patient_info_infinty(res_msg, p)
-        if not res or res[2] < 0: break
-        test_reuslts = results_info_infinty(res_msg, res[2], res[3])
-        p += 1
-        if len(test_reuslts) == 0: continue
-        if is_embassy_order(res[0]):
-            embassy_results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
-        else:
-            results.append({"order_id": res[0], "file_no": res[1], "results": test_reuslts})
-        if p == 300:
-            return []
-    return results, embassy_results
 
 def start_infinty_listener(ip_address, port):
     while True:
@@ -314,12 +268,8 @@ def start_infinty_listener(ip_address, port):
                         log_result("infinty",str(data))
                         if data:
                             msg += data
-                        if msg.endswith(chr(4).encode()):                    
-                            results, embassy_results = get_patient_results_infinty(msg)
-                            if len(results) > 0:
-                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(results))
-                            if len(embassy_results) > 0:
-                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_infinty_results", data=json.dumps(embassy_results))
+                        if msg.endswith(chr(4).encode()):     
+                            insert_db_result_message(msg.decode(), 'Infinity')
                             msg = b""   
                         conn.sendall(chr(6).encode())
                         if not data:
@@ -495,51 +445,7 @@ def start_infinty_order_listener_old(ip_address, port, local_ip, local_port):
             continue
 
 #--------------------------------sysmex------------------------
-def get_sysmex_order(res_msg, o):
-    o_start = res_msg.find(f"O|{o}|")
-    if o_start < 0: return False
-    o_second_start =  res_msg.find(f"O|{o+1}|")
-    o_end = res_msg.find("^B|", o_start)
-    if o_end < 0 : return False
-    order = res_msg[o_start:o_end ].split("^")[-1].strip()
-    return order, o_end, o_second_start
 
-def get_sysmex_results(res_msg, order_start, second_order):
-    r = 1
-    results = []
-    while True:
-        if second_order > 0:
-            r_start = res_msg.find(f"R|{r}|", order_start, second_order)
-        else:
-            r_start = res_msg.find(f"R|{r}|", order_start)
-        if r_start < 0: break
-        result_code = res_msg[r_start: r_start + 30].split("|")
-        r += 1
-        if len(result_code) < 4: continue
-        code = result_code[2].split("^")[4]
-        result = result_code[3]
-        if result: result = result.replace(" ", "").replace("\n", "")
-        results.append({"code": code, "result": result})
-        
-    return results
-
-def parse_sysmex_msg(res_msg):
-    o = 1
-    res_msg = res_msg.decode()
-    parsed_results = []
-    embassy_results = []
-    while True:
-        order_info = get_sysmex_order(res_msg, o)
-        if not order_info: break
-        order, o_end, o_second_start = order_info
-        results = get_sysmex_results(res_msg,o_end,o_second_start)
-        o += 1
-        if len(results) == 0: continue
-        if is_embassy_order(order):
-            embassy_results.append({"order_id": order, "results": results })
-        else:
-            parsed_results.append({"order_id": order, "results": results })
-    return parsed_results, embassy_results
 
 def start_sysmex_listener(ip_address, port):
     while True:
@@ -568,14 +474,8 @@ def start_sysmex_listener(ip_address, port):
                         if data:
                             msg += data
                         if msg.endswith(b'L|1|N\r'):
-                            results, embassy_results = parse_sysmex_msg(msg)
-                            msg = b''
-                            print(results)
-                            log_result("sysmex", "Result " + json.dumps(results))
-                            if len(results) > 0:
-                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
-                            if len(embassy_results) > 0:
-                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(embassy_results))
+                            insert_db_result_message(msg.decode(), 'sysmex XN')
+                            msg = b''                           
                         conn.sendall(chr(6).encode())
                         if not data:
                             break
@@ -614,20 +514,53 @@ def start_sysmex_xp_listener(ip_address, port):
                         if data:
                             msg += data
                         if msg.endswith(b'L|1|N\r'):
-                            results, embassy_results = parse_sysmex_msg(msg)
-                            msg = b''
-                            print(results)
-                            log_result("sysmexxp", "Result " + json.dumps(results))
-                            if len(results) > 0:
-                                requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(results))
-                            if len(embassy_results) > 0:
-                                requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_sysmex_results", data=json.dumps(embassy_results))
+                            insert_db_result_message(msg.decode(), 'sysmex XP 300')
+                            msg = b'' 
                         conn.sendall(chr(6).encode())
                         if not data:
                             break
             except socket.error:
                 print("Socket cannot connect")
                 log_result("sysmex", "Socket cannot connect to:" + ip_address +":" + str(port))
+                sleep(5)
+                continue
+
+#------------------------------------Ruby CD--------------------------------
+def start_ruby_cd_listener(ip_address, port):
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind((ip_address, port))
+                s.listen()
+                print("listening")
+                log_result("rubycd", "listening")
+
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    log_result("rubycd", "Connected by " + str(addr))
+                    conn.settimeout(3600)
+                    msg = b""
+                    while True:
+                        try:
+                            data = conn.recv(63000)
+                        except:
+                            send_check_msg(conn)
+                            continue
+                        print("Data Received-----------------------------------------------")
+                        log_result("rubycd", "data received---------------------")
+                        log_result("rubycd",str(data))
+                        if data:
+                            msg += data
+                        if msg.endswith(b'L|1|N\r'):
+                            insert_db_result_message(msg.decode(), 'Ruby CD')
+                            msg = b'' 
+                        conn.sendall(chr(6).encode())
+                        if not data:
+                            break
+            except socket.error:
+                print("Socket cannot connect")
+                log_result("rubycd", "Socket cannot connect to:" + ip_address +":" + str(port))
                 sleep(5)
                 continue
 
@@ -664,11 +597,6 @@ def start_lision_listener(ip_address, port):
                             print(msg)
                             log_result("lision", "msg received----------------------------------")
                             log_result("lision",str(msg))                   
-                            # results, embassy_results = get_patient_results_lision(msg)
-                            # if len(results) > 0:
-                            #     requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
-                            # if len(embassy_results) > 0:
-                            #     requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(embassy_results))
                             query = get_liaison_query_orders(msg)
                             if query:
                                 orders = read_orders_in_list_from_db("Liaison XL", query)
@@ -686,13 +614,7 @@ def start_lision_listener(ip_address, port):
                                         delete_or_mark_order(order[0], "Liaison XL")
                                     time.sleep(1)
                             else:
-                                results = get_results_liaison(msg)
-                                print("results-----------------------------")
-                                print(results)
-                                log_result("lision", "results received----------------------------------")
-                                log_result("lision", json.dumps(results))
-                                if len(results) > 0:
-                                    requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_lision_results", data=json.dumps(results))
+                                insert_db_result_message(msg.decode(), 'Liaison XL')
                             msg = b""
 
                         if not data:
@@ -743,34 +665,3 @@ def get_liaison_query_orders(query_msg):
             orders.append(query_list[2].decode())
         index = query_msg.find(b"Q|" + str(query_count).encode() + b"|")
     return orders if len(orders) > 0 else False
-
-def get_results_liaison(liason_msg):
-    formated_result = []
-    result_list = []
-    result_msg_list = liason_msg.split(b'\x02')
-    result = {}
-    found = False
-    for res in result_msg_list:
-        if len(res) > 1 and res[1] == 79:
-            result['order'] = res
-            found = True
-        if len(res) > 1 and res[1] == 82 and found:
-            found = False
-            result['result'] = res
-            result_list.append(result)
-            result = {}
-    for result in result_list:
-        res = {}
-        order_list = result['order'].split(b"|")
-        if len(order_list)> 4:
-            res['order_id'] = order_list[2].decode()
-            test_list =  order_list[4].split(b"^")
-            if len(test_list) < 2:
-                continue
-            res['code'] = test_list[-2].decode()
-        else: continue
-        res_list = result['result'].split(b"|")
-        if len(res_list) > 3:
-            res['result'] = res_list[3].decode()
-            formated_result.append(res)
-    return formated_result

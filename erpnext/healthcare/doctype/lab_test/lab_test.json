@@ -232,7 +232,8 @@
    "options": "Sample Collection",
    "print_hide": 1,
    "read_only": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "search_index": 1
   },
   {
    "default": "Today",
@@ -591,7 +592,7 @@
   }
  ],
  "links": [],
- "modified": "2022-08-24 07:49:10.311877",
+ "modified": "2023-01-16 12:59:58.163408",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

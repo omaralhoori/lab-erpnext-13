@@ -37,7 +37,7 @@ class SampleCollection(Document):
 		#validate_invoice_paid(self.patient, self.sales_invoice)
 		test_name = frappe.db.get_value("Lab Test", {"sample": self.name}, ["name"])
 		if test_name:
-			send_received_msg_order(self.name, test_name)
+			send_received_msg_order(self.name, test_name, self.company)
 			frappe.db.set_value("Lab Test", test_name, {"status": "Received", "sample_collected": 1})
 			frappe.db.sql("""
 				UPDATE `tabNormal Test Result` SET status='Received'

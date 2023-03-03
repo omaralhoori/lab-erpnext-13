@@ -266,7 +266,7 @@ def add_test_from_template(lab_test,  added_items):
 		#sample.submit()
 		print("sssssssssssssssssssssssssssssssssssssssssss")
 		frappe.db.set_value("Sample Collection", lab_test.sample, {"docstatus": 1})
-		get_receive_sample( lab_test.sample,  lab_test.name)
+		get_receive_sample( lab_test.sample,  lab_test.name, lab_test.company)
 		
 
 @frappe.whitelist()
@@ -935,7 +935,7 @@ def get_lab_test_prescribed(patient):
 from erpnext.healthcare.socket_communication import send_infinty_msg_order, save_order_msgs_db
 
 @frappe.whitelist()
-def get_receive_sample(sample, test_name=None):
+def get_receive_sample(sample, test_name=None, company=''):
 	print("receiving--------------------------------")
 	sample_docstatus = frappe.db.get_value("Sample Collection",{"name": sample}, "docstatus")
 
@@ -943,7 +943,7 @@ def get_receive_sample(sample, test_name=None):
 		frappe.throw(_("Sample not collected / not submitted. {0}").format(sample), title=_("Sample Collection"))
 	
 	if test_name:
-		send_received_msg_order(sample, test_name)
+		send_received_msg_order(sample, test_name, company)
 	# 	tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name"])
 	# 	tests = list(set([code['host_code'] for code in tests if code['host_name'] == "Inifinty" ]))
 	# 	print(tests)
@@ -965,10 +965,16 @@ def get_receive_sample(sample, test_name=None):
 	print(query)
 	frappe.db.sql(query)
 	return str(sample_docstatus)
-def send_received_msg_order(sample, test_name):
+def send_received_msg_order(sample, test_name, company=''):
 	sent = False
 	if frappe.get_cached_value("Healthcare Settings",None, "send_test_order"):
-		tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name", "status"])
+		#tests = frappe.db.get_all("Normal Test Result", {"parent": test_name}, ["host_code", "host_name", "status"])
+		tests = frappe.db.sql("""
+		SELECT tmtlt.host_code, tmtl.machine_type as host_name FROM `tabNormal Test Result` tntr 
+			INNER JOIN `tabMachine Type Lab Test Template` tmtlt ON tmtlt.lab_test_template=tntr.template
+			INNER JOIN `tabMachine Type Lab Test` tmtl ON tmtl.name=tmtlt.parent
+			where tntr.parent=%(test_name)s AND tmtlt.host_code is not null AND tmtl.company=%(company)s AND tmtlt.is_disabled=0 AND tntr.status NOT IN ('Rejected', 'Finalized', 'Released');
+		""",{"test_name":test_name,"company": company}, as_dict=True)
 		#infinty_tests = list(set([code['host_code'] for code in tests if (code['host_name'] == "Inifinty" and code['status'] != 'Rejected' and code['host_code'] and code['host_code'] != "") ]))
 		#print(infinty_tests)
 		tests_dict = get_tests_dict(tests)
@@ -1096,11 +1102,13 @@ def receive_infinty_results():
 			query = """ UPDATE `tabNormal Test Result` as ntr 
 				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-				INNER JOIN `tabPatient` as p ON p.name=lt.patient
-				SET ntr.result_value='{result}'
-				WHERE sc.collection_serial='bar-{order_id}' AND p.patient_number='{file_no}' AND ntr.host_code='{test_code}' AND ntr.status NOT IN ('Rejected', 'Finalized')
-								""".format(result=test['result'], test_code=test['code'], order_id=lab_test['order_id'], file_no=lab_test['file_no'])
-			frappe.db.sql(query)
+				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
+				SET ntr.result_value=%(result)s
+				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
+				AND mtlt.machine_type='Inifinty'
+								""".format( order_id=lab_test['order_id'])
+			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
 	frappe.db.commit()
 
 @frappe.whitelist(allow_guest=True)
@@ -1113,20 +1121,21 @@ def receive_lision_results():
 		#results = lab_test['results']
 		#for test in results:
 		query = """ UPDATE `tabNormal Test Result` as ntr 
-			INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
-			INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-			SET ntr.result_value='{result}'
-			WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}' AND ntr.status NOT IN ('Rejected', 'Finalized')
-							""".format(result=lab_test['result'], test_code=lab_test['code'], order_id=lab_test['order_id'])
-		frappe.db.sql(query)
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
+				SET ntr.result_value=%(result)s
+				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
+				AND mtlt.machine_type='Liaison XL'
+							""".format( order_id=lab_test['order_id'])
+		frappe.db.sql(query,{"result": lab_test['result'], "test_code": lab_test['code']})
 	frappe.db.commit()
 	
 from erpnext.healthcare.socket_communication import log_result
 @frappe.whitelist(allow_guest=True)
-def receive_sysmex_results():
+def receive_sysmexxn_results():
 	lab_tests = json.loads(frappe.request.data)
-	print("results received---------------------------------------------")
-	log_result("sysmex", "results received--------------------")
 	for lab_test in lab_tests:
 		results = lab_test['results']
 		for test in results:
@@ -1134,16 +1143,69 @@ def receive_sysmex_results():
 			set_stmt = 'ntr.result_value'
 			if test['code'].endswith("%"):
 				set_stmt = 'ntr.result_percentage'
-			elif test['code'].endswith("#"):
-				test['code'] = test['code'][:-1] + "%"
+			# elif test['code'].endswith("#"):
+			# 	test['code'] = test['code'][:-1] + "%"
 			query = """ UPDATE `tabNormal Test Result` as ntr 
 				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
 				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
-				SET {set_stmt}='{result}'
-				WHERE sc.collection_serial='bar-{order_id}' AND ntr.host_code='{test_code}' AND ntr.status NOT IN ('Rejected', 'Finalized')
-								""".format(set_stmt = set_stmt, result=test['result'], test_code=test['code'], order_id=lab_test['order_id'])
+				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
+				SET {set_stmt}=%(result)s
+				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
+				AND mtlt.machine_type='sysmex XN'
+								""".format(set_stmt = set_stmt, order_id=lab_test['order_id'])
 			#log_result("sysmex", query)
-			frappe.db.sql(query)
+			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
+	frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def receive_sysmexxp_results():
+	lab_tests = json.loads(frappe.request.data)
+	for lab_test in lab_tests:
+		results = lab_test['results']
+		for test in results:
+			#if test['result'].isnumeric():
+			set_stmt = 'ntr.result_value'
+			if test['code'].endswith("%"):
+				set_stmt = 'ntr.result_percentage'
+			# elif test['code'].endswith("#"):
+			# 	test['code'] = test['code'][:-1] + "%"
+			query = """ UPDATE `tabNormal Test Result` as ntr 
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mttp.arent=mtlt.name AND mtlt.company=lt.company
+				SET {set_stmt}=%(result)s 
+				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
+				AND mtlt.machine_type='sysmex XP 300'
+								""".format(set_stmt = set_stmt, order_id=lab_test['order_id'])
+			#log_result("sysmex", query)
+			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
+	frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def receive_rubycd_results():
+	lab_tests = json.loads(frappe.request.data)
+	for lab_test in lab_tests:
+		results = lab_test['results']
+		for test in results:
+			#if test['result'].isnumeric():
+			set_stmt = 'ntr.result_value'
+			if test['code'].endswith("%"):
+				set_stmt = 'ntr.result_percentage'
+			# elif test['code'].endswith("#"):
+			# 	test['code'] = test['code'][:-1] + "%"
+			query = """ UPDATE `tabNormal Test Result` as ntr 
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mttp.arent=mtlt.name AND mtlt.company=lt.company
+				SET {set_stmt}=%(result)s 
+				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
+				AND mtlt.machine_type='Ruby CD'
+								""".format(set_stmt = set_stmt, order_id=lab_test['order_id'])
+			#log_result("sysmex", query)
+			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
 	frappe.db.commit()
 
 @frappe.whitelist()
