@@ -512,10 +512,14 @@ class PaymentEntry(AccountsController):
 	def validate_cheque_amounts(self):
 		if self.cheque_data:
 			if self.paid_amount != self.total_incoming_cheques:
+				frappe.msgprint(_("Paid Amount is {0} , Total Incoming Cheques {1} .")
+					.format(self.paid_amount, self.total_incoming_cheques))
 				frappe.throw(_("Paid amount should be equal to total incoming cheques"))
 
 		if self.issue_cheque_data:
 			if self.paid_amount != self.total_issued_cheques:
+				frappe.msgprint(_("Paid Amount is {0} , Total Issued Cheques {1} .")
+					.format(self.paid_amount, self.total_issued_cheques))
 				frappe.throw(_("Paid amount should be equal to total Issued cheques"))
 
 	def set_received_amount(self):
