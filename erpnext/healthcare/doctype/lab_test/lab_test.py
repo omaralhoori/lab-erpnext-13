@@ -973,7 +973,7 @@ def send_received_msg_order(sample, test_name, company=''):
 		SELECT tmtlt.host_code, tmtl.machine_type as host_name FROM `tabNormal Test Result` tntr 
 			INNER JOIN `tabMachine Type Lab Test Template` tmtlt ON tmtlt.lab_test_template=tntr.template
 			INNER JOIN `tabMachine Type Lab Test` tmtl ON tmtl.name=tmtlt.parent
-			where tntr.parent=%(test_name)s AND tmtlt.host_code is not null AND tmtl.company=%(company)s AND tmtlt.is_disabled=0 AND tntr.status NOT IN ('Rejected', 'Finalized', 'Released');
+			where tntr.parent=%(test_name)s AND tmtlt.host_code is not null AND tmtl.company=%(company)s AND tmtlt.is_disabled=0 AND (tntr.status IS NULL OR tntr.status NOT IN ('Rejected', 'Finalized', 'Released'));
 		""",{"test_name":test_name,"company": company}, as_dict=True)
 		#infinty_tests = list(set([code['host_code'] for code in tests if (code['host_name'] == "Inifinty" and code['status'] != 'Rejected' and code['host_code'] and code['host_code'] != "") ]))
 		#print(infinty_tests)
@@ -1207,7 +1207,6 @@ def receive_rubycd_results():
 				AND mtlt.machine_type='Ruby CD'
 								""".format(order_id=lab_test['order_id'])
 			#log_result("sysmex", query)
-			print(query)
 			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
 	frappe.db.commit()
 

@@ -569,13 +569,15 @@ def start_ruby_cd_listener(ip_address, port):
                         except:
                             send_check_msg(conn)
                             continue
-                        print("Data Received-----------------------------------------------")
-                        log_result("rubycd", "data received---------------------")
-                        log_result("rubycd",str(data))
+                        if data != chr(4).encode() and data != chr(5).encode():
+                            print("Data Received-----------------------------------------------")
+                            log_result("rubycd", "data received---------------------")
+                            log_result("rubycd",str(data))
                         if data:
                             msg += data
                         if msg.endswith(chr(4).encode()):
-                            insert_db_result_message(msg.decode(), 'Ruby CD')
+                            if len(msg) > 10:
+                                insert_db_result_message(msg.decode(), 'Ruby CD')
                             msg = b'' 
                         conn.sendall(chr(6).encode())
                         if not data:
