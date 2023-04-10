@@ -6,6 +6,7 @@ import json
 import requests
 
 def results_service_process():
+    log_result("results", "starting")
     # If not exists create results db
     create_results_db()
     create_orders_db()
@@ -17,6 +18,10 @@ def results_service_process():
             time.sleep(1)
         time.sleep(60)
 
+def log_result(log,msg):
+    with open(log + "-log.txt", "a") as f:
+        f.write(msg + "\n")
+        f.close()
 
 #------------------------------------results db---------------------------
 """
@@ -244,9 +249,16 @@ def get_sysmex_order(res_msg, o):
     o_start = res_msg.find(f"O|{o}|")
     if o_start < 0: return False
     o_second_start =  res_msg.find(f"O|{o+1}|")
-    o_end = res_msg.find("^B|", o_start)
+    o_end = res_msg.find("|", o_start + 6)
     if o_end < 0 : return False
-    order = res_msg[o_start:o_end ].split("^")[-1].strip()
+    try:
+        order = res_msg[o_start:o_end ].split("^")[-2].strip()
+        log_result("results", "Parsed")
+        log_result("results", order)
+    except: 
+        log_result("results", "error parsing")
+        log_result("results", res_msg)
+        return False
     return order, o_end, o_second_start
 
 def get_sysmex_results(res_msg, order_start, second_order):
