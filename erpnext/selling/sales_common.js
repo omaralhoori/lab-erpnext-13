@@ -173,18 +173,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		
 	},
 	apply_custom_additional_discount(frm, cdt, cdn){
-		if(frappe.model.get_value(cdt, cdn, 'item_code') && (frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value())){
+		if(frappe.model.get_value(cdt, cdn, 'item_code') && ( frm.doc['insurance_party_child'] || frm.doc['insurance_party'])){
 			frappe.call({
 				method: "erpnext.selling.doctype.customer.customer.get_payer_additional_discount_percentage",
 				args: {
-					customer_name: frm.fields_dict['insurance_party_child'].get_value() || frm.fields_dict['insurance_party'].get_value(),
+					customer_name: frm.doc['insurance_party_child'] || frm.doc['insurance_party'],
 					item_name: frappe.model.get_value(cdt, cdn, 'item_code'),
 				},
 				callback: function(res){
 					if(res.message || res.message == 0){
 						frappe.model.set_value(cdt, cdn, 'contract_percentage',res.message);
-						for(var item in frm.doc.items){
-							item.contract_discount = flt(item.rate * item.qty  * (item.contract_percentage/100) * -1, precision("contract_discount", item)); // me.frm.doc.additional_discount_percentage
+						for(var item of frm.doc.items){
+							item.contract_discount = flt(item.rate * item.qty  * (flt(item.contract_percentage)/100) * -1, precision("contract_discount", item)); // me.frm.doc.additional_discount_percentage
 							item.base_contract_discount = flt(item.contract_discount * frm.doc.conversion_rate, precision("contract_discount", item));
 						}						
 					}
