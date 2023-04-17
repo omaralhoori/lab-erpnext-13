@@ -184,7 +184,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					if(res.message || res.message == 0){
 						frappe.model.set_value(cdt, cdn, 'contract_percentage',res.message);
 						for(var item of frm.doc.items){
-							item.contract_discount = flt(item.rate * item.qty  * (flt(item.contract_percentage)/100) * -1, precision("contract_discount", item)); // me.frm.doc.additional_discount_percentage
+							item.contract_discount = flt(item.rate * item.qty  * (flt(item.contract_percentage)/100) , precision("contract_discount", item)); // me.frm.doc.additional_discount_percentage
 							item.base_contract_discount = flt(item.contract_discount * frm.doc.conversion_rate, precision("contract_discount", item));
 						}						
 					}
