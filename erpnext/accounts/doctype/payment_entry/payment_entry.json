@@ -780,8 +780,9 @@
   {
    "default": "0",
    "fieldname": "total_incoming_cheques",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Total Incoming Cheques",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -791,15 +792,16 @@
   {
    "default": "0",
    "fieldname": "total_issued_cheques",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Total Issued Cheques",
+   "options": "Company:company:default_currency",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-22 10:26:43.052484",
+ "modified": "2023-02-06 06:44:20.788790",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

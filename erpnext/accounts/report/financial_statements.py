@@ -363,24 +363,38 @@ def sort_accounts(accounts, is_root=False, key="name"):
 	accounts.sort(key = functools.cmp_to_key(compare_accounts))
 
 def set_gl_entries_by_account(
-		company, from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account, ignore_closing_entries=False):
+		company, from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account, ignore_closing_entries=False,all_company=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
-	accounts = frappe.db.sql_list("""select name from `tabAccount`
-		where lft >= %s and rgt <= %s and company = %s""", (root_lft, root_rgt, company))
+	if all_company :
+		accounts = frappe.db.sql_list("""select name from `tabAccount`
+			where lft >= %s and rgt <= %s """, (root_lft, root_rgt))
+	else:
+		accounts = frappe.db.sql_list("""select name from `tabAccount`
+			where lft >= %s and rgt <= %s and company = %s""", (root_lft, root_rgt, company))
 
 	if accounts:
 		additional_conditions += " and account in ({})"\
 			.format(", ".join(frappe.db.escape(d) for d in accounts))
 
-		gl_filters = {
-			"company": company,
-			"from_date": from_date,
-			"to_date": to_date,
-			"finance_book": cstr(filters.get("finance_book"))
-		}
+		if all_company :
+			gl_filters = {
+				"all_companys": "1",
+				"company": company,
+				"from_date": from_date,
+				"to_date": to_date,
+				"finance_book": cstr(filters.get("finance_book"))
+			}
+		else:
+			gl_filters = {
+				"all_companys": "0",
+				"company": company,
+				"from_date": from_date,
+				"to_date": to_date,
+				"finance_book": cstr(filters.get("finance_book"))
+			}
 
 		if filters.get("include_default_book_entries"):
 			gl_filters["company_fb"] = frappe.db.get_value("Company",
@@ -413,7 +427,7 @@ def set_gl_entries_by_account(
 				AND parent NOT IN %(cost_center)s
 				GROUP BY parent
 			) as DCC_allocation
-			WHERE company=%(company)s
+			WHERE (company=%(company)s or %(all_companys)s = '1')
 			{additional_conditions}
 			AND posting_date <= %(to_date)s
 			AND is_cancelled = 0
@@ -421,7 +435,7 @@ def set_gl_entries_by_account(
 			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
 
 		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
-			where company=%(company)s
+			where (company=%(company)s or %(all_companys)s = '1')
 			{additional_conditions}
 			and posting_date <= %(to_date)s
 			and is_cancelled = 0
