@@ -13,6 +13,7 @@
   "code",
   "lab_test_parent_parent",
   "interface_order",
+  "is_percentage",
   "test_parent_code",
   "is_disabled"
  ],
@@ -37,7 +38,6 @@
    "fetch_from": "lab_test_template.medical_service_id",
    "fieldname": "medical_service_id",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Medical Service ID",
    "read_only": 1
   },
@@ -85,12 +85,19 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Is Disabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_percentage",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Percentage"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-09-27 02:40:54.355983",
+ "modified": "2023-02-24 04:01:43.931932",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Machine Type Lab Test Template",

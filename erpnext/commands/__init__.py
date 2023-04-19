@@ -117,9 +117,34 @@ def start_lision_results(
 ):
 	"Start Test Command"
 	from erpnext.healthcare.socket_communication import start_lision_listener
-	print(f"Starting Infinty results server on {ip}:{port}")
+	print(f"Starting Lision server on {ip}:{port}")
 	start_lision_listener(ip, int(port))
 
+@click.command("start-rubycd-results")
+@click.option("--ip", default="10.123.4.150")
+@click.option("--port", default=9097)
+@click.option("--back", is_flag=True, default=True)
+@pass_context
+def start_rubycd_results(
+	context, ip="10.123.4.150",port=9097, back=True
+):
+	"Start Test Command"
+	from erpnext.healthcare.socket_communication import start_ruby_cd_listener
+	print(f"Starting Ruby CD server on {ip}:{port}")
+	start_ruby_cd_listener(ip, int(port))
+
+
+@click.command("start-results-service")
+@pass_context
+def start_results_service(
+	context
+):
+	"Start Test Command"
+	from erpnext.healthcare.result_service import results_service_process
+	print(f"Starting Results Service")
+	results_service_process()
+
 commands = [
-	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders, start_sysmex_xp_results, start_lision_results
+	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders, 
+	start_sysmex_xp_results, start_lision_results,start_rubycd_results, start_results_service
 ]

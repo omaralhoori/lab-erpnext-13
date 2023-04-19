@@ -17,7 +17,10 @@ const create_tests_result_type =  (childTest) => {
 		${childTest["conv_unit"] || "" }
 	</label>
 `
-if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest['result_percentage']){
+if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest['result_percentage'] || 
+childTest['host_code'] == 'MXD#' || childTest['host_code'] == 'LYM#'|| childTest['host_code'] == 'NEUT#' || (childTest['host_code'] && childTest['host_code'].includes("%") )||
+childTest['host_code'] == 'BASO' || childTest['host_code'] == 'NEU' || childTest['host_code'] == 'LYM' || childTest['host_code'] == 'MONO' || childTest['host_code'] == 'EOS' 
+){
 	result_type += `
 	<input ${disable_input(childTest['status'])} type="number" step="any" class="test-input-control percentage-input" name="${childTest['name']}" value="${childTest['result_percentage'] || ""}"/>
 	<label>

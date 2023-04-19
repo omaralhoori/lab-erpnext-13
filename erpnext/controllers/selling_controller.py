@@ -545,6 +545,7 @@ class SellingController(StockController):
 				else:
 					check_list.append(stock_items)
 			else:
+				duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
 				if non_stock_items in chk_dupl_itm:
 					frappe.throw(duplicate_items_msg)
 				else:
