@@ -123,6 +123,12 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Level 4"),
 				"fieldtype": "Check",
 				"default": 1
+			},
+			{
+				"fieldname": "all_company",
+				"label": __("All Companies and Branches"),
+				"fieldtype": "Check",
+				"default": "0"
 			}
 
 		],
