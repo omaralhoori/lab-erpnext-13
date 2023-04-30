@@ -43,7 +43,18 @@
 		</tr>
 	</thead>
 	<tbody>
+		{% let pervious_account = "" %}
 		{% for(var i=0, l=data.length; i<l; i++) { %}
+			{% if (pervious_account != data[i].account && data[i].voucher_no != "") { %}
+				<td></td>
+				<td>{%= data[i].account %}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				{% pervious_account = data[i].account %}
+			{% } %}
 			<tr>
 			
 				<td>{% if(data[i].posting_date) { %} {%= frappe.datetime.str_to_user(data[i].posting_date) %} {% } %}</td>
