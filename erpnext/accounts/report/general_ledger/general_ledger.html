@@ -43,9 +43,9 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% let pervious_account = "" %}
+		{% let previous_account = "" %}
 		{% for(var i=0, l=data.length; i<l; i++) { %}
-			{% if (pervious_account != data[i].account && data[i].voucher_no != "") { %}
+			{% if (previous_account != data[i].account && data[i].voucher_no != "") { %}
 				<td></td>
 				<td>{%= data[i].account %}</td>
 				<td></td>
@@ -53,7 +53,7 @@
 				<td></td>
 				<td></td>
 				<td></td>
-				{% pervious_account = data[i].account %}
+				{% previous_account = data[i].account %}
 			{% } %}
 			<tr>
 			
