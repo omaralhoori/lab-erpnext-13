@@ -400,6 +400,17 @@
    "link_to": "Employee Checkin",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Checkin Log Import",
+   "link_to": "Checkin Log Import",
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "",
    "type": "Link"
   },
   {
@@ -839,9 +850,18 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Checkin Summary",
+   "link_to": "Employee Checkin Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-17 09:49:18.461415",
+ "modified": "2023-05-02 09:17:22.417587",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
