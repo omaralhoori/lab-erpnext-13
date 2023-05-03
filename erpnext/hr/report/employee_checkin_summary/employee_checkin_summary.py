@@ -27,7 +27,8 @@ def get_data(filters):
 			tst.enable_entry_grace_period,
 			tst.enable_exit_grace_period,
 			tst.late_entry_grace_period,
-			tst.early_exit_grace_period
+			tst.early_exit_grace_period,
+			tst.holiday_list
 		FROM `tabEmployee Checkin` as echk
 		INNER JOIN `tabEmployee` as empl ON empl.name=echk.employee
 		LEFT JOIN `tabShift Assignment` tsa ON tsa.employee=echk.employee
@@ -36,25 +37,24 @@ def get_data(filters):
 			IF(tsa.end_date is not null , DATE(echk.time) <=tsa.end_date and DATE(echk.time) >= tsa.start_date and tsa.status='Active', True) {condations} 
 			ORDER BY echk.time
 	""".format(condations=condations), {"company": company}, as_dict=True)
-	print(checkins)
 	if filters.get("filter_based_on") == "Date":
-		return get_data_for_single_day(checkins)
+		return get_data_for_single_day(checkins, filters.get("holiday_as_overtime"))
 	else:
-		return get_data_for_range_date(checkins)
+		return get_data_for_range_date(checkins,  filters.get("holiday_as_overtime"))
 
-def get_data_for_range_date(checkins):
+def get_data_for_range_date(checkins, holiday_as_overtime=False):
 	data = []
 	new_checkins = []
 	for chk in checkins:
 		if len(new_checkins) > 0 and new_checkins[0]['time'].date() == chk['time'].date():
 			new_checkins.append(chk)
 		else:
-			data.extend(get_data_for_single_day(new_checkins))
+			data.extend(get_data_for_single_day(new_checkins, holiday_as_overtime))
 			new_checkins = [chk]
-	data.extend(get_data_for_single_day(new_checkins))
+	data.extend(get_data_for_single_day(new_checkins, holiday_as_overtime))
 	return data	
 
-def get_data_for_single_day(checkins):
+def get_data_for_single_day(checkins, holiday_as_overtime=False):
 	data = {}
 	for chk in checkins:
 		if data.get(chk['employee']):
@@ -69,14 +69,17 @@ def get_data_for_single_day(checkins):
 			if compare_two_dates(data[chk['employee']].get('exit_datetime'), data[chk['employee']].get('enrty_datetime_2')):
 				data[chk['employee']]['total_work_hours'] += get_total_work_hours(data[chk['employee']].get('enrty_datetime_2'), data[chk['employee']].get('exit_datetime'))
 				overtime = get_overtime(data[chk['employee']], chk)
-				data[chk['employee']]['total_overtime_hours'] = overtime[0]
-				data[chk['employee']]['late_entry'] = overtime[1]
-				data[chk['employee']]['early_exit'] = overtime[2]
+				if holiday_as_overtime and is_date_holiday(data[chk['employee']]['enrty_datetime'], chk['holiday_list']):
+					data[chk['employee']]['total_overtime_hours'] =  data[chk['employee']]['total_work_hours']
+				else:
+					data[chk['employee']]['total_overtime_hours'] = overtime[0]
+					data[chk['employee']]['late_entry'] = overtime[1]
+					data[chk['employee']]['early_exit'] = overtime[2]
 		else:
 			data[chk['employee']] = {
 				"employee": chk['employee'],
-				"total_overtime_hours": 0,
-				"total_work_hours": 0,
+				"total_overtime_hours": "00:00",
+				"total_work_hours": datetime.timedelta(0),
 				"late_entry": False,
 				"early_exit": False,
 				"total_shift_hours": get_hours_between_times(chk['shift_start_time'], chk['shift_end_time']),
@@ -96,7 +99,7 @@ def get_overtime(employee_data, checkin):
 	# begin_check_in_before_shift_start_time, allow_check_out_after_shift_end_time
 	checkin_date = employee_data['enrty_datetime'].date()
 	shift_start_datetime = datetime.datetime(checkin_date.year, checkin_date.month, checkin_date.day) + checkin['shift_start_time']
-	if shift_start_datetime > employee_data['enrty_datetime'] :
+	if shift_start_datetime >= employee_data['enrty_datetime'] :
 		diff = shift_start_datetime - employee_data['enrty_datetime']
 		if checkin['begin_check_in_before_shift_start_time'] and \
 		checkin['begin_check_in_before_shift_start_time'] > 0 and \
@@ -105,7 +108,7 @@ def get_overtime(employee_data, checkin):
 		else:
 			overtime += diff.seconds
 	else:
-		diff = employee_data['exit_datetime']  - shift_start_datetime
+		diff = employee_data['enrty_datetime']  - shift_start_datetime
 		if checkin['enable_entry_grace_period'] and checkin['late_entry_grace_period'] > 0:
 			diff_seconds = diff.seconds - (checkin['late_entry_grace_period'] * 60)
 			if diff_seconds > 0:
@@ -116,7 +119,7 @@ def get_overtime(employee_data, checkin):
 			overtime -= diff.seconds
 
 	shift_end_datetime = datetime.datetime(checkin_date.year, checkin_date.month, checkin_date.day) + checkin['shift_end_time']
-	if shift_end_datetime < employee_data['exit_datetime'] :
+	if shift_end_datetime <= employee_data['exit_datetime'] :
 		diff = employee_data['exit_datetime'] - shift_end_datetime
 		if checkin['allow_check_out_after_shift_end_time'] and \
 		checkin['allow_check_out_after_shift_end_time'] > 0 and \
@@ -136,8 +139,12 @@ def get_overtime(employee_data, checkin):
 			overtime -= diff.seconds
 	
 		
+	return format_time_in_seconds(overtime), entry_late, exit_early
 
-	return int(overtime / 60), entry_late, exit_early
+def is_date_holiday(date, holiday_list):
+	if type(date) == datetime.datetime:
+		date = date.date()
+	return frappe.db.exists("Holiday", {"parent": holiday_list, "holiday_date": date})
 
 def compare_two_dates(first_date, second_date):
 	if not first_date or not second_date: return False
@@ -150,8 +157,19 @@ def get_total_work_hours(first_time, second_time):
 	# end_time = datetime.strptime(second_time, '%Y-%m-%d %H:%M:%S')
 
 	time_delta = second_time - first_time
-	hours = time_delta.total_seconds() / 3600.0
-	return float("{:.1f}".format(hours))
+	#hours = time_delta.total_seconds() / 60
+	return time_delta#float("{:.1f}".format(hours))
+
+def format_time_in_seconds(time):
+	formated_time = ""
+	if time < 0:
+		formated_time = "-"
+		time = 0 - time
+	hours = int(time / 3600)
+	time = time % 3600
+	minutes = int(time / 60)
+	formated_time = f"{formated_time}{str(hours).zfill(2)}:{str(minutes).zfill(2)}"
+	return formated_time
 
 def get_hours_between_times(first_time, second_time):
 	# time_obj_1 = datetime.strptime(first_time, '%H:%M:%S').time()
@@ -163,8 +181,8 @@ def get_hours_between_times(first_time, second_time):
 	# else:
 	# 	time_diff = datetime.combine(default_date, time_obj_2) - datetime.combine(default_date, time_obj_1)
 	time_diff = second_time - first_time
-	hours = time_diff.total_seconds() / 3600.0
-	return float("{:.1f}".format(hours))
+	#hours = time_diff.total_seconds() / 60
+	return time_diff#float("{:.1f}".format(hours))
 
 def get_columns(filters=None):
 	columns =  [
@@ -196,13 +214,13 @@ def get_columns(filters=None):
 		{
 			"fieldname": "total_work_hours",
 			"label": _("Total Work Hours"),
-			"fieldtype": "float",
+			"fieldtype": "Time",
 			"width": 120
 		},
 		{
 			"fieldname": "total_overtime_hours",
 			"label": _("Total Overtime Hours"),
-			"fieldtype": "float",
+			"fieldtype": "Data",
 			"width": 120
 		},
 		{
