@@ -51,5 +51,11 @@ frappe.query_reports["Employee Checkin Summary"] = {
 			"reqd": 1,
 			"default": frappe.datetime.get_today()
 		},
+		{
+			"fieldname":"holiday_as_overtime",
+			"label": __("Holidays As Overtime"),
+			"fieldtype": "Check",
+			"default": true
+		},
 	]
 };
