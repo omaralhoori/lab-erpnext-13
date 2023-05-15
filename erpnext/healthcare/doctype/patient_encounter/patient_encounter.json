@@ -49,6 +49,7 @@
   "section_break_33",
   "encounter_comment",
   "sb_refs",
+  "sales_invoice",
   "amended_from"
  ],
  "fields": [
@@ -331,11 +332,17 @@
    "fieldname": "get_applicable_treatment_plans",
    "fieldtype": "Button",
    "label": "Get Applicable Treatment Plans"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-27 11:39:12.347704",
+ "modified": "2023-05-16 01:51:46.752248",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

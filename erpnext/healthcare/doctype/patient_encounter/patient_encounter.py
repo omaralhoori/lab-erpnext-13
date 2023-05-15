@@ -180,3 +180,16 @@ def delete_ip_medication_order(encounter):
 	record = frappe.db.exists('Inpatient Medication Order', {'patient_encounter': encounter.name})
 	if record:
 		frappe.delete_doc('Inpatient Medication Order', record, force=1)
+
+
+def create_patient_encounter_from_invoice(sales_invoice, patient, practitioner):
+	if frappe.db.exists("Patient Encounter", {"sales_invoice": sales_invoice}):
+		return
+	frappe.get_doc({
+		"doctype": "Patient Encounter",
+		"patient": patient,
+		"sales_invoice": sales_invoice,
+		"practitioner": practitioner,
+		"encounter_date": frappe.utils.nowdate(),
+		"encounter_time": frappe.utils.nowtime(),
+	}).save(ignore_permissions=True)

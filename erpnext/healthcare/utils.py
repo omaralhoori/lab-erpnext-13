@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import json
 import math
+from erpnext.healthcare.doctype.patient_encounter.patient_encounter import create_patient_encounter_from_invoice
 
 import frappe
 from frappe import _
@@ -426,6 +427,8 @@ def manage_invoice_submit_cancel(doc, method, removed_item=[], added_items=[]):
 		create_multiple('Sales Invoice', doc.name)
 	elif method=='on_update_after_submit' and frappe.db.get_single_value('Healthcare Settings', 'create_lab_test_on_si_submit'):
 		create_or_delete_items(doc, removed_item, added_items)
+	if frappe.db.get_single_value('Healthcare Settings', 'create_patient_encounter_from_invoice'):
+		create_patient_encounter_from_invoice(doc.name, doc.patient, doc.ref_practitioner)
 
 def are_items_tests(items):
 	for item in items:
