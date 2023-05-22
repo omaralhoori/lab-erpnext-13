@@ -141,6 +141,8 @@ def parse_result_message(message, machine_type):
         return parse_liaisonxl_message(message)
     if machine_type == 'Ruby CD':
         return parse_rubycd_message(message)
+    if machine_type == 'BioRad D10':
+        return parse_bioradd10_message(message)
 
 def get_url(site):
     print("sent results to ", site)
@@ -351,6 +353,75 @@ def get_results_liaison(liason_msg):
     return formated_result, embassy_result
 
 
+#-----------------------------------BioRad D10----------------------------------------------------------
+def parse_bioradd10_message(message):
+    try:
+        results, embassy_results = parse_bioradd10_msg(message.encode())
+        print(results, embassy_results)
+        if len(results) > 0:
+            requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_bioradd10_results", data=json.dumps(results))
+        if len(embassy_results) > 0:
+            requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_bioradd10_results", data=json.dumps(embassy_results))
+        return True
+    except:
+        print("Cannot Parse Bioradd10 Message: ", message)
+        return False
+
+def parse_bioradd10_msg(msg):
+    order_start = 1
+    results, embassy_results = [], []
+    while True:
+        result_start = 1
+        order_msg_start = msg.find(f"O|{order_start}|".encode())
+        order_msg_end = msg.find(f"O|{order_start+1}|".encode())
+        order_msg = msg[order_msg_start:order_msg_end]
+        order_id_start = len(f"O|{order_start}|")
+        order_id_end = order_msg[order_id_start:].find(b"|")
+        order_id = order_msg[order_id_start: order_id_start+order_id_end]
+        order_delimiter_index = order_id.find(b"^")
+        if order_delimiter_index >= 0:
+            order_id = order_id[:order_delimiter_index]
+        order_dict = {
+            "order_id": order_id.decode(),
+            "results": []
+        }
+
+        while True:
+            result_msg_start = order_msg.find(f"R|{result_start}|".encode())
+            result_msg_end = order_msg.find(f"R|{result_start+1}|".encode())
+            result_msg = order_msg[result_msg_start:result_msg_end]
+
+            test_result = parse_bioradd10_result_msg(result_msg, result_start)
+            if test_result:
+                order_dict['results'].append(test_result)
+            result_start += 1
+            if result_msg_end == -1: break
+        order_start += 1
+        if order_id:
+            if is_embassy_order(order_id.decode()):
+                embassy_results.append(order_dict)
+            else:
+                results.append(order_dict)
+        if order_msg_end == -1: break
+    return results, embassy_results
+
+def parse_bioradd10_result_msg(result_msg, result_num):
+    result_id_start = len(f"R|{result_num}|")
+    result_msg = result_msg[result_id_start:]
+    result_id_end = result_msg.find(b"|")
+    result_id = result_msg[:result_id_end]
+    result_msg= result_msg[result_id_end + 1:]
+    #test_name_start = result_id.rfind(b"^")
+    results_splited = result_id.split(b"^")
+    if len(results_splited) > 4:
+        test_name = results_splited[3] + b'-' + results_splited[4]
+    else:test_name = None
+    result_end = result_msg.find(b"|")
+    result = result_msg[:result_end]
+    
+    if test_name:
+        return {"code":test_name.decode(), "result":result.decode()}
+    
 #-----------------------------------Ruby CD----------------------------------------------------------
 def parse_rubycd_message(message):
     try:
