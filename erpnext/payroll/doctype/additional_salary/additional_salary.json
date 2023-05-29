@@ -14,6 +14,8 @@
   "column_break_5",
   "company",
   "department",
+  "internal_regulation",
+  "description",
   "salary_details_section",
   "salary_component",
   "type",
@@ -201,12 +203,25 @@
    "fieldname": "properties_and_references_section",
    "fieldtype": "Section Break",
    "label": "Properties and References"
+  },
+  {
+   "fieldname": "internal_regulation",
+   "fieldtype": "Link",
+   "label": "Internal Regulation",
+   "options": "Internal Regulation"
+  },
+  {
+   "fetch_from": "internal_regulation.internal_regulation",
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description ",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
  "migration_hash": "25cc3854dfede33b27adc6a402942a46",
- "modified": "2022-06-24 21:18:09.265954",
+ "modified": "2023-05-17 09:17:04.251438",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Additional Salary",

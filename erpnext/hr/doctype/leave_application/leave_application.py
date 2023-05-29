@@ -229,8 +229,9 @@ class LeaveApplication(Document):
 
 	def validate_balance_leaves(self):
 		if self.from_date and self.to_date:
-			self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
-				self.from_date, self.to_date, self.half_day, self.half_day_date)
+			if not self.total_leave_days:	#ibrahim
+				self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
+					self.from_date, self.to_date, self.half_day, self.half_day_date)
 
 			if self.total_leave_days <= 0:
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))

@@ -109,6 +109,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Internal Regulation",
+   "link_to": "Internal Regulation",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Employee Lifecycle",
    "onboard": 0,
    "type": "Card Break"
@@ -199,6 +208,15 @@
    "link_to": "Employee Separation Template",
    "link_type": "DocType",
    "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Punishment",
+   "link_to": "Punishment",
+   "link_type": "DocType",
+   "onboard": 1,
    "type": "Link"
   },
   {
@@ -841,7 +859,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-17 09:49:18.461415",
+ "modified": "2023-05-17 09:31:30.553345",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",

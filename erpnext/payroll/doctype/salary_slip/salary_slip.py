@@ -371,12 +371,34 @@ class SalarySlip(TransactionBase):
 
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
+#			leave = frappe.db.sql("""
+#				SELECT t1.name,
+#					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
+#					THEN t1.half_day else 0 END,
+#					t2.is_ppl,
+#					t2.fraction_of_daily_salary_per_leave
+#				FROM `tabLeave Application` t1, `tabLeave Type` t2
+#				WHERE t2.name = t1.leave_type
+#				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
+#				AND t1.docstatus = 1
+#				AND t1.employee = %(employee)s
+#				AND ifnull(t1.salary_slip, '') = ''
+#				AND CASE
+#					WHEN t2.include_holiday != 1
+#						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
+#					WHEN t2.include_holiday
+#						THEN %(dt)s between from_date and to_date
+#					END
+#				""".format(holidays), {"employee": self.employee, "dt": dt})
+
+#ibrahim
 			leave = frappe.db.sql("""
 				SELECT t1.name,
 					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
 					THEN t1.half_day else 0 END,
 					t2.is_ppl,
-					t2.fraction_of_daily_salary_per_leave
+					t2.fraction_of_daily_salary_per_leave,
+					t1.total_leave_days
 				FROM `tabLeave Application` t1, `tabLeave Type` t2
 				WHERE t2.name = t1.leave_type
 				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
@@ -391,13 +413,16 @@ class SalarySlip(TransactionBase):
 					END
 				""".format(holidays), {"employee": self.employee, "dt": dt})
 
+#ibrahim
 			if leave:
 				equivalent_lwp_count = 0
 				is_half_day_leave = cint(leave[0][1])
 				is_partially_paid_leave = cint(leave[0][2])
 				fraction_of_daily_salary_per_leave = flt(leave[0][3])
-
-				equivalent_lwp_count =  (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+				total_leave_days=flt(leave[0][4])
+				#ibrahim
+				#equivalent_lwp_count =  (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+				equivalent_lwp_count =  total_leave_days
 
 				if is_partially_paid_leave:
 					equivalent_lwp_count *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
