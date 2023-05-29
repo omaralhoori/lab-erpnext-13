@@ -8,7 +8,7 @@
  "field_order": [
   "radiology_reports_section",
   "radiology_finalizer_name",
-  "radiology_finalizer_signature"
+  "radiology_assets"
  ],
  "fields": [
   {
@@ -23,16 +23,16 @@
    "label": "Radiology Reports"
   },
   {
-   "fieldname": "radiology_finalizer_signature",
+   "fieldname": "radiology_assets",
    "fieldtype": "Table",
-   "label": "Radiology Finalizer Signature",
+   "label": "Radiology Assets",
    "options": "Branch User Print Format Asset"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-09-25 09:13:54.267868",
+ "modified": "2023-05-05 11:24:15.019045",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Report Settings",

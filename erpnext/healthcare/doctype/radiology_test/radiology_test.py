@@ -72,14 +72,40 @@ def create_results(template, lab_test, item=None):
 
 
 import json
+import re
+
+def add_doctor_signature(tests):
+	company = frappe.defaults.get_user_default("Company")
+	user = frappe.session.user
+	where_stmt = ""
+	if company:
+		where_stmt = f' AND company= "{company}"'
+	print_formats = frappe.db.sql("""
+		SELECT usr.user_name_format as print_format FROM `tabBranch User Print Format` as userFormat
+		INNER JOIN `tabUser` as usr ON userFormat.finalizer=usr.name
+		WHERE user=%(user)s {where_stmt}
+	""".format(where_stmt=where_stmt), {"user": user}, as_dict=True)
+
+	if len(print_formats) > 0:
+		print_format = re.sub('<.*ql-editor.*?>', '', print_formats[0]["print_format"])
+		frappe.db.sql("""
+			UPDATE `tabRadiology Test Result` SET test_result=CONCAT(TRIM(TRAILING '</div>' FROM test_result), %(print_format)s), status="Finalized"
+			WHERE parent in ({tests}) AND (status is NULL or status not in ("Finalized", "Rejected"))
+		""".format(tests=tests),{"print_format": print_format})
+
+
 @frappe.whitelist()
 def finalize_selected(tests):
 	tests = json.loads(tests)
+	tests=",".join(tests)
+
+	add_doctor_signature(tests)
+
 	now = datetime.datetime.now()
 	frappe.db.sql("""
 	UPDATE `tabRadiology Test` SET record_status="Finalized" , finalize_date='{now}'
 	WHERE name in ({tests}) AND record_status IN ('Released')
-	""".format(tests=",".join(tests), now=str(now)))
+	""".format(tests=tests, now=str(now)))
 
 @frappe.whitelist()
 def definalize_selected(tests):

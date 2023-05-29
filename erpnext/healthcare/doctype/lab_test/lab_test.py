@@ -1210,6 +1210,25 @@ def receive_rubycd_results():
 			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
 	frappe.db.commit()
 
+@frappe.whitelist(allow_guest=True)
+def receive_bioradd10_results():
+	lab_tests = json.loads(frappe.request.data)
+	for lab_test in lab_tests:
+		results = lab_test['results']
+		for test in results:
+			query = """ UPDATE `tabNormal Test Result` as ntr 
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
+				SET ntr.result_percentage=IF(mtt.is_percentage=1, %(result)s , ntr.result_percentage), ntr.result_value=IF(mtt.is_percentage=1, ntr.result_value, %(result)s )
+				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
+				AND mtlt.machine_type='BioRad D10'
+								""".format(order_id=lab_test['order_id'])
+			#log_result("sysmex", query)
+			frappe.db.sql(query, {"result": test['result'], "test_code": test['code']})
+	frappe.db.commit()
+
 @frappe.whitelist()
 def get_test_attribute_options(lab_test):
 	options = frappe.db.sql("""

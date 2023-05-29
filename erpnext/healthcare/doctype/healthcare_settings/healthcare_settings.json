@@ -66,6 +66,7 @@
   "create_lab_test_on_si_submit",
   "create_lab_test_separated",
   "create_sample_collection_for_lab_test",
+  "create_patient_encounter_from_invoice",
   "column_break_34",
   "lab_test_approval_required",
   "employee_name_and_designation_in_print",
@@ -489,11 +490,17 @@
    "fieldname": "show_machine_comment",
    "fieldtype": "Check",
    "label": "Show Machine Comment"
+  },
+  {
+   "default": "0",
+   "fieldname": "create_patient_encounter_from_invoice",
+   "fieldtype": "Check",
+   "label": "Create Patient Encounter From Invoice"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2023-01-04 09:54:43.226891",
+ "modified": "2023-05-16 01:50:37.637414",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

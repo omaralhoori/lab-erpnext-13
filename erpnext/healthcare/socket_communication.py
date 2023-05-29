@@ -588,6 +588,47 @@ def start_ruby_cd_listener(ip_address, port):
                 sleep(5)
                 continue
 
+#------------------------------------BioRad d10--------------------------------
+def start_biorad_d10_listener(ip_address, port):
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind((ip_address, port))
+                s.listen()
+                print("listening")
+                log_result("bioradd10", "listening")
+
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    log_result("bioradd10", "Connected by " + str(addr))
+                    conn.settimeout(3600)
+                    msg = b""
+                    while True:
+                        try:
+                            data = conn.recv(63000)
+                        except:
+                            send_check_msg(conn)
+                            continue
+                        if data != chr(4).encode() and data != chr(5).encode():
+                            print("Data Received-----------------------------------------------")
+                            log_result("bioradd10", "data received---------------------")
+                            log_result("bioradd10",str(data))
+                        if data:
+                            msg += data
+                        if msg.endswith(chr(4).encode()):
+                            if len(msg) > 10:
+                                insert_db_result_message(msg.decode(), 'BioRad D10')
+                            msg = b'' 
+                        conn.sendall(chr(6).encode())
+                        if not data:
+                            break
+            except socket.error:
+                print("Socket cannot connect")
+                log_result("bioradd10", "Socket cannot connect to:" + ip_address +":" + str(port))
+                sleep(5)
+                continue
+
 #------------------------------------LISION--------------------------------
 def start_lision_listener(ip_address, port):
     while True:

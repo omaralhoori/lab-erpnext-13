@@ -113,7 +113,7 @@ def get_data(filters):
 	#####################################################################
 	if filters.all_company == 1:
 		accounts1 = frappe.db.sql("""
-				select distinct a.account_number,CONCAT(a.account_number , ' - ' , a.account_name) as full_account_name,
+				select distinct a.account_number,CONCAT(a.account_number , ' - ' , a.account_name) as full_account_name, CONCAT(a.account_number , ' - ' , a.account_name) as name,
 				(select CONCAT(b.account_number , ' - ' , b.account_name)  from `tabAccount` b where b.name = a.parent_account ) as parent_account, 
 				a.account_name, a.root_type, a.report_type,a.level
 				from `tabAccount` a 

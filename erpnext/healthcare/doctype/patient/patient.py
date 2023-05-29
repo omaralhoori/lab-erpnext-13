@@ -474,6 +474,17 @@ def match_fingerprint():
 	return None
 
 @frappe.whitelist()
+def match_fingerprint_encounter():
+	if frappe.request.files['file']:
+		file = frappe.request.files['file']
+		file_content = file.stream.read()
+		patient = verify_fingerprint(file_content)
+		if patient and patient != "":
+			sample = frappe.db.get_value("Patient Encounter", {"patient": patient}, ["name"])
+			return {"path": "/app/patient-encounter/" + str(sample)}
+	return None
+
+@frappe.whitelist()
 def match_fingerprint_radiology():
 	if frappe.request.files['file']:
 		file = frappe.request.files['file']

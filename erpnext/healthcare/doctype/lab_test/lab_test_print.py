@@ -1375,8 +1375,12 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         if not with_header:
             options["--margin-top" ] ="50mm"
         if xray_test.record_status == "Finalized":
-            options["--footer-html"] = "templates/xray_footer.html"
-            options["--margin-bottom"] = "20mm"
+            # options["--footer-html"] = "templates/xray_footer.html"
+            # options["--margin-bottom"] = "20mm"
+            footer =  get_print_asset('radiology_assets', 'Footer', xray_test.company, True)
+            if footer:
+                options["--footer-html"] = footer[0]
+                options["--margin-bottom"] = footer[1] or "20mm"
         # with open("xray.html", "w") as f:
         #     f.write(html)
         pdf_content =  pdfkit.from_string( html, False, options)  or ''
@@ -1447,6 +1451,23 @@ def format_xray_header(xray_test, with_header=False, url=""):
     </table>
     """
 
+#------------------------------------ASSETS--------------------------------------------
+
+def get_print_asset(parent_field, asset_type, company, return_link=False):
+    user = frappe.session.user
+    assets = frappe.db.sql(f"""
+            SELECT ast.asset_link, ast.margin FROM `tabBranch User Print Format Asset` as ast
+            WHERE parentfield='{parent_field}' AND asset_type='{asset_type}' AND company='{company}' AND (user IS NULL OR user='' OR user='{user}')
+            ORDER BY user 
+    """, as_dict=True)
+    if len(assets) == 0: return None
+    if return_link: return assets[0]['asset_link'], assets[0]['margin']
+    file_content = ''
+    with open(assets[0]['asset_link'], 'r') as f:
+        file_content = f.read()
+    return file_content, assets[0]['margin']
+
+#----------------------------------------------------------------------------------------
 
 def get_normal_xray_tbody(reports, header):
     html = ""
