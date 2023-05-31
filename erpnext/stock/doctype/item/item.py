@@ -563,7 +563,8 @@ class Item(Document):
 					'expense_account': item.expense_account,
 					'selling_cost_center': item.selling_cost_center,
 					'income_account': item.income_account,
-					'discount_account': item.default_discount_account
+					'discount_account': item.default_discount_account,
+					'default_discount_account': item.default_discount_account
 				})
 		else:
 			defaults = frappe.defaults.get_defaults() or {}

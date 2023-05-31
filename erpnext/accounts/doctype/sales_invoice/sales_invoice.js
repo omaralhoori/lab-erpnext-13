@@ -95,7 +95,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			// hide new msgbox
 			cur_frm.msgbox.hide();
 		}
-
+	
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
 		if (this.frm.doc.is_return) {
@@ -1038,8 +1038,8 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	insurance_party_type: function (frm) {
-		frm.toggle_display("insurance_party_child", false);
-		frm.toggle_reqd("insurance_party_child", false);
+		//frm.toggle_display("insurance_party_child", false);
+		//frm.toggle_reqd("insurance_party_child", false);
 		if (frm.doc.insurance_party_type == "Insurance Company" ) {
 			frappe.db.get_single_value("Selling Settings", "default_insurance_price_list").then(default_pl => {
 				if(default_pl){
@@ -1231,6 +1231,16 @@ frappe.ui.form.on('Sales Invoice', {
 					})
 				}
 			})
+			
+			frappe.db.get_value('Customer', frm.doc.insurance_party_child, ["additional_discount_percentage"]).then(result => {
+				if (result.message){
+					if(result.message.additional_discount_percentage){
+						frm.set_value("additional_discount_percentage", result.message.additional_discount_percentage)
+					}else{
+						frm.set_value("additional_discount_percentage", 0)
+					}
+				}
+			})
 		}
 	},
 
@@ -1358,6 +1368,10 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.insurance_party_child){
+			frm.toggle_display("insurance_party_child", true);
+		}
+
 		frm.get_field("items").grid.set_multiple_add("item_code");
 		frm.toggle_reqd("ref_practitioner", true);
 		frm.set_df_property("ref_practitioner", "read_only", false);

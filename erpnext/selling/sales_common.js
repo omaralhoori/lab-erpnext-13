@@ -46,7 +46,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.set_query("insurance_party", function(doc) {
 			return {
 				filters: {
-					'customer_type': doc.insurance_party_type
+					'customer_type': doc.insurance_party_type,
+					"is_child_customer": 0,
 				},
 			};
 		});
@@ -158,6 +159,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.set_value("coverage_percentage",0)
 		if (this.frm.doc.insurance_party){
 			frappe.db.get_doc("Customer", me.frm.doc.insurance_party)
+				.then((doc) => {
+					this.frm.set_value({
+						"coverage_percentage": doc.coverage_percentage
+					})
+				});
+		}
+	},
+
+	//ibrahim
+	insurance_party_child:function() {
+		var me = this;
+		this.frm.set_value("coverage_percentage",0)
+		if (this.frm.doc.insurance_party_child){
+			frappe.db.get_doc("Customer", me.frm.doc.insurance_party_child)
 				.then((doc) => {
 					this.frm.set_value({
 						"coverage_percentage": doc.coverage_percentage

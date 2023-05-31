@@ -1013,7 +1013,7 @@ class SalesInvoice(SellingController):
 		self.make_item_gl_entries(gl_entries)
 		# self.make_discount_gl_entries(gl_entries) ## ibrahim
 		# merge gl entries before adding pos entries
-		gl_entries = merge_similar_entries(gl_entries)
+		# gl_entries = merge_similar_entries(gl_entries) //ibrahim
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
@@ -1057,47 +1057,149 @@ class SalesInvoice(SellingController):
 
 			if self.insurance_party_type:
 				if base_total_discount_provider_in_company_currency > 0:
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": self.insurancepayer_account,
-							"party_type": "Customer",
-							"party": self.insurance_party,
-							"due_date": self.due_date,
-							"against": self.against_income_account,
-							"debit": base_total_discount_provider_in_company_currency if self.payer_account_currency==self.company_currency else self.total_discount_provider,
-							"debit_in_account_currency": base_total_discount_provider_in_company_currency , #if self.party_account_currency==self.company_currency else total_discount_provider,
-									# grand_total_in_company_currency if self.party_account_currency==self.company_currency else grand_total,
-							"cost_center": self.cost_center,
-							"project": self.project
-						}, self.payer_account_currency, item=self)
-					)
+					if self.insurance_party_child:
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party_child,
+								"due_date": self.due_date,
+								"against": self.against_income_account,
+								"debit": base_total_discount_provider_in_company_currency if self.payer_account_currency==self.company_currency else self.total_discount_provider,
+								"debit_in_account_currency": base_total_discount_provider_in_company_currency , #if self.party_account_currency==self.company_currency else total_discount_provider,
+										# grand_total_in_company_currency if self.party_account_currency==self.company_currency else grand_total,
+								"cost_center": self.cost_center,
+								"project": self.project
+							}, self.payer_account_currency, item=self)
+						)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party,
+								"due_date": self.due_date,
+								"against": self.insurancepayer_account,
+								"debit": base_total_discount_provider_in_company_currency if self.payer_account_currency==self.company_currency else self.total_discount_provider,
+								"debit_in_account_currency": base_total_discount_provider_in_company_currency , #if self.party_account_currency==self.company_currency else total_discount_provider,
+										# grand_total_in_company_currency if self.party_account_currency==self.company_currency else grand_total,
+								"cost_center": self.cost_center,
+								"project": self.project,
+								"remarks": "Close coverage to sub insurance company"
+							}, self.payer_account_currency, item=self)
+						)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party_child,
+								"due_date": self.due_date,
+								"against": self.insurancepayer_account,
+								"credit": base_total_discount_provider_in_company_currency if self.payer_account_currency==self.company_currency else self.total_discount_provider,
+								"credit_in_account_currency": base_total_discount_provider_in_company_currency , #if self.party_account_currency==self.company_currency else total_discount_provider,
+										# grand_total_in_company_currency if self.party_account_currency==self.company_currency else grand_total,
+								"cost_center": self.cost_center,
+								"project": self.project,
+								"remarks": "Close coverage to sub insurance company"
+							}, self.payer_account_currency, item=self)
+						)
+					else:
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party,
+								"due_date": self.due_date,
+								"against": self.against_income_account,
+								"debit": base_total_discount_provider_in_company_currency if self.payer_account_currency==self.company_currency else self.total_discount_provider,
+								"debit_in_account_currency": base_total_discount_provider_in_company_currency , #if self.party_account_currency==self.company_currency else total_discount_provider,
+										# grand_total_in_company_currency if self.party_account_currency==self.company_currency else grand_total,
+								"cost_center": self.cost_center,
+								"project": self.project
+							}, self.payer_account_currency, item=self)
+						)
 			additional_discount_account_currency = get_account_currency(self.additional_discount_account)
 			if self.insurance_party_type:
 				if self.discount_amount > 0:
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": self.additional_discount_account,
-							"against": self.insurancepayer_account,
-							"debit": self.discount_amount,
-							"debit_in_account_currency": base_discount_amount_in_company_currency if additional_discount_account_currency==self.company_currency else self.discount_amount,
-							"cost_center": self.cost_center,
-							"project": self.project
-						}, additional_discount_account_currency, item=self)
-					)
+					if self.insurance_party_child:
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.additional_discount_account,
+								"against": self.insurancepayer_account,
+								"debit": self.discount_amount,
+								"debit_in_account_currency": base_discount_amount_in_company_currency if additional_discount_account_currency==self.company_currency else self.discount_amount,
+								"cost_center": self.cost_center,
+								"project": self.project
+							}, additional_discount_account_currency, item=self)
+						)
 
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": self.insurancepayer_account,
-							"party_type": "Customer",
-							"party": self.insurance_party,
-							"against": self.additional_discount_account,
-							"credit": self.discount_amount,
-							"credit_in_account_currency": base_discount_amount_in_company_currency if self.party_account_currency==self.company_currency else self.discount_amount,
-							"cost_center": self.cost_center,
-							"project": self.project
-						}, self.payer_account_currency, item=self)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party_child,
+								"against": self.additional_discount_account,
+								"credit": self.discount_amount,
+								"credit_in_account_currency": base_discount_amount_in_company_currency if self.party_account_currency==self.company_currency else self.discount_amount,
+								"cost_center": self.cost_center,
+								"project": self.project
+							}, self.payer_account_currency, item=self)
+						)
 
-					)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party_child,
+								"against": self.insurancepayer_account,
+								"debit": self.discount_amount,
+								"debit_in_account_currency": base_discount_amount_in_company_currency if additional_discount_account_currency==self.company_currency else self.discount_amount,
+								"cost_center": self.cost_center,
+								"project": self.project,
+								"remarks": "Close contract discount to parent"
+							}, self.payer_account_currency, item=self)
+						)
+
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party,
+								"against": self.additional_discount_account,
+								"credit": self.discount_amount,
+								"credit_in_account_currency": base_discount_amount_in_company_currency if self.party_account_currency==self.company_currency else self.discount_amount,
+								"cost_center": self.cost_center,
+								"project": self.project,
+								"remarks": "Close contract discount to parent"
+							}, self.payer_account_currency, item=self)
+						)
+
+
+
+					else:
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.additional_discount_account,
+								"against": self.insurancepayer_account,
+								"debit": self.discount_amount,
+								"debit_in_account_currency": base_discount_amount_in_company_currency if additional_discount_account_currency==self.company_currency else self.discount_amount,
+								"cost_center": self.cost_center,
+								"project": self.project
+							}, additional_discount_account_currency, item=self)
+						)
+
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.insurancepayer_account,
+								"party_type": "Customer",
+								"party": self.insurance_party,
+								"against": self.additional_discount_account,
+								"credit": self.discount_amount,
+								"credit_in_account_currency": base_discount_amount_in_company_currency if self.party_account_currency==self.company_currency else self.discount_amount,
+								"cost_center": self.cost_center,
+								"project": self.project
+							}, self.payer_account_currency, item=self)
+
+						)
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
