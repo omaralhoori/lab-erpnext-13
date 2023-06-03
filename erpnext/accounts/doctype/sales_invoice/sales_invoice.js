@@ -1038,8 +1038,8 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	insurance_party_type: function (frm) {
-		//frm.toggle_display("insurance_party_child", false);
-		//frm.toggle_reqd("insurance_party_child", false);
+		frm.toggle_display("insurance_party_child", false);
+		frm.toggle_reqd("insurance_party_child", false);
 		if (frm.doc.insurance_party_type == "Insurance Company" ) {
 			frappe.db.get_single_value("Selling Settings", "default_insurance_price_list").then(default_pl => {
 				if(default_pl){
