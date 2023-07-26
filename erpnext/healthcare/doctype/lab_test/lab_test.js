@@ -19,7 +19,8 @@ const create_tests_result_type =  (childTest) => {
 `
 if((childTest['host_code'] && childTest['host_code'].endsWith("%") )|| childTest['result_percentage'] || 
 childTest['host_code'] == 'MXD#' || childTest['host_code'] == 'LYM#'|| childTest['host_code'] == 'NEUT#' || (childTest['host_code'] && childTest['host_code'].includes("%") )||
-childTest['host_code'] == 'BASO' || childTest['host_code'] == 'NEU' || childTest['host_code'] == 'LYM' || childTest['host_code'] == 'MONO' || childTest['host_code'] == 'EOS' 
+childTest['host_code'] == 'BASO' || childTest['host_code'] == 'NEU' || childTest['host_code'] == 'LYM' || childTest['host_code'] == 'MONO' || childTest['host_code'] == 'EOS' || 
+childTest['host_code'] == 'EO#' || childTest['host_code'] == 'MONO#' || childTest['host_code'] == 'BASO#'
 ){
 	result_type += `
 	<input ${disable_input(childTest['status'])} type="number" step="any" class="test-input-control percentage-input" name="${childTest['name']}" value="${childTest['result_percentage'] || ""}"/>
