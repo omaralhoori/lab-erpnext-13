@@ -143,6 +143,8 @@ def parse_result_message(message, machine_type):
         return parse_rubycd_message(message)
     if machine_type == 'BioRad D10':
         return parse_bioradd10_message(message)
+    if machine_type == 'Architect ci82':
+        return parse_architect_ci82_message(message)
 
 def get_url(site):
     print("sent results to ", site)
@@ -487,3 +489,55 @@ def parse_ruby_cd_result_msg(result_msg, result_num):
     
     if test_name:
         return {"code":test_name.decode(), "result":result.decode()}
+    
+
+#----------------------------architect_ci82 Parsing-------------------------------------
+def parse_architect_ci82_message(message):
+    try:
+        results, embassy_results = get_results_architect_ci82(message.encode())
+        print("results-----------------------------")
+        print(results)
+        if len(results) > 0:
+            requests.post(f"http://{get_url('lab')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_architect_ci82_results", data=json.dumps(results))
+        if len(embassy_results) > 0:
+            requests.post(f"http://{get_url('embassy')}/api/method/erpnext.healthcare.doctype.lab_test.lab_test.receive_architect_ci82_results", data=json.dumps(embassy_results))
+        return True
+    except:
+        print("Cannot Parse Liaisonxl Message: ", message)
+        return False
+
+
+def get_results_architect_ci82(architect_ci82_msg):
+    formated_result = []
+    embassy_result = []
+    result_list = []
+    result_msg_list = architect_ci82_msg.split(b'\x02')
+    result = {}
+    found = False
+    for res in result_msg_list:
+        if len(res) > 1 and res[1] == 79:
+            result['order'] = res
+            found = True
+        if len(res) > 1 and res[1] == 82 and found:
+            found = False
+            result['result'] = res
+            result_list.append(result)
+            result = {}
+    for result in result_list:
+        res = {}
+        order_list = result['order'].split(b"|")
+        if len(order_list)> 4:
+            res['order_id'] = order_list[2].decode()
+            test_list =  order_list[4].split(b"^")
+            if len(test_list) < 2:
+                continue
+            res['code'] = test_list[3].decode()
+        else: continue
+        res_list = result['result'].split(b"|")
+        if len(res_list) > 3:
+            res['result'] = res_list[3].decode()
+            if is_embassy_order(res.get('order_id')):
+                embassy_result.append(res)
+            else:
+                formated_result.append(res)
+    return formated_result, embassy_result
