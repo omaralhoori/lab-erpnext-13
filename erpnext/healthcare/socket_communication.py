@@ -771,6 +771,7 @@ def start_abbott_architect_ci82_listener(ip_address, port):
                             query = get_architect_query_orders(msg)
                             if query:
                                 orders = read_orders_in_list_from_db("Architect ci82", query)
+                                log_result("architect_ci82",str(orders))        
                                 for order in orders:
                                     order_msg = make_architect_msg([order])
                                     print("order msg--------------------------")
@@ -806,10 +807,10 @@ def make_architect_msg(orders, s=None):
     header, frame_count = make_frame("H|\^&||||||||||P|1", frame_count, s)
     msgq = header
     for order_json in orders:
-        patient_frame, frame_count = make_frame(f'P|{patient_count}||{order["order"]["id"]}||Doe^John^Q||||||||||||||||||||', frame_count, s)
+        order= json.loads(order_json[2])
+        patient_frame, frame_count = make_frame(f'P|{patient_count}||{order["order"]["id"]}||{order["patient"]["file_no"]}^^||||||||||||||||||||', frame_count, s)
         patient_count += 1
         msgq += patient_frame
-        order= json.loads(order_json[2])
         tests = "\\".join(["^^^" + test  for test in order["order"]["tests"]])
         order_frame, frame_count= make_frame(f'O|1|{order["order"]["id"]}||{tests}|||||||A||||||||||||||Q', frame_count, s)
         msgq += order_frame
@@ -827,7 +828,8 @@ def get_architect_query_orders(query_msg):
     while index > 0:
         query_count += 1
         query_list = query_msg[index:index + 20].split(b"|")
+        log_result("architect_ci82", str(query_list))
         if len(query_list) > 2:
-            orders.append(query_list[2].decode())
+            orders.append(query_list[2].decode().replace("^", ""))
         index = query_msg.find(b"Q|" + str(query_count).encode() + b"|")
     return orders if len(orders) > 0 else False
