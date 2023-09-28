@@ -20,6 +20,7 @@ def execute():
                 "include_holidays_in_total_working_days",
                 "max_working_hours_against_timesheet",
                 "payroll_based_on",
+                "working_days_count_based_on",
                 "password_policy"
             )
             ''', as_dict=1)

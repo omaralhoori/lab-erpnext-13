@@ -229,7 +229,8 @@ class LeaveApplication(Document):
 
 	def validate_balance_leaves(self):
 		if self.from_date and self.to_date:
-			if not self.total_leave_days:	#ibrahim
+			#ibrahim
+			if  not self.total_leave_days:
 				self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
 					self.from_date, self.to_date, self.half_day, self.half_day_date)
 
@@ -640,9 +641,10 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date, do_not_skip_
 				half_day = 1
 				half_day_date = frappe.db.get_value('Leave Application',
 					{'name': leave_entry.transaction_name}, ['half_day_date'])
-
-			leave_days += get_number_of_leave_days(employee, leave_type,
-				leave_entry.from_date, leave_entry.to_date, half_day, half_day_date, holiday_list=leave_entry.holiday_list) * -1
+			#ibrahim
+			leave_days += leave_entry.leaves
+			#leave_days += get_number_of_leave_days(employee, leave_type,
+			#	leave_entry.from_date, leave_entry.to_date, half_day, half_day_date, holiday_list=leave_entry.holiday_list) * -1
 
 	return leave_days
 
