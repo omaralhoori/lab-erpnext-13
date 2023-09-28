@@ -420,6 +420,7 @@ let check_and_set_availability = function(frm) {
 	}
 
 	function get_slots(slot_details) {
+		console.log(slot_details);
 		let slot_html = '';
 		let appointment_count = 0;
 		let disabled = false;

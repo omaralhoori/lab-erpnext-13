@@ -731,3 +731,105 @@ def get_liaison_query_orders(query_msg):
             orders.append(query_list[2].decode())
         index = query_msg.find(b"Q|" + str(query_count).encode() + b"|")
     return orders if len(orders) > 0 else False
+
+
+
+#------------------------------------abbott_architect--------------------------------
+def start_abbott_architect_ci82_listener(ip_address, port):
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind((ip_address, port))
+                print("listening")
+                log_result("architect_ci82", "listening")
+                s.listen()
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    log_result("architect_ci82",str(addr))
+                    conn.settimeout(3600)
+                    msg = b""
+                    while True:
+                        try:
+                            data = conn.recv(63000)
+                        except:
+                            send_check_msg(conn)
+                            continue
+                        # print("data received-------------------------------------------------------")
+                        # print(data)
+                        # log_result("lision",str(data))
+                        if data:
+                            msg += data
+                        print("recv")
+                        print(data)  
+                        conn.sendall(chr(6).encode())
+                        if msg.endswith(chr(4).encode()):
+                            print("msg received-------------------------------------------------------")
+                            print(msg)
+                            log_result("architect_ci82", "msg received----------------------------------")
+                            log_result("architect_ci82",str(msg))                   
+                            query = get_architect_query_orders(msg)
+                            if query:
+                                orders = read_orders_in_list_from_db("Architect ci82", query)
+                                log_result("architect_ci82",str(orders))        
+                                for order in orders:
+                                    order_msg = make_architect_msg([order])
+                                    print("order msg--------------------------")
+                                    print(order_msg)
+                                    log_result("architect_ci82", "order received----------------------------------")
+                                    log_result("architect_ci82", str(order_msg))
+                                    conn.sendall(order_msg)
+                                    data = conn.recv(1024)
+                                    if data and data.endswith(tcode("ACK")):
+                                        print("ORder deleted")
+                                        #for order in orders:
+                                        delete_or_mark_order(order[0], "Architect ci82")
+                                    time.sleep(1)
+                            else:
+                                insert_db_result_message(msg.decode(), 'Architect ci82')
+                                # print("received Msg")
+                                # print(msg)
+                            msg = b""
+
+                        if not data:
+                            break
+        except socket.error:
+            print("Socket cannot connect")
+            log_result("architect_ci82", "Socket cannot connect")
+            sleep(5)
+            continue
+
+    
+def make_architect_msg(orders, s=None):
+    frame_count = 1
+    patient_count = 1
+    
+    header, frame_count = make_frame("H|\^&||||||||||P|1", frame_count, s)
+    msgq = header
+    for order_json in orders:
+        order= json.loads(order_json[2])
+        patient_frame, frame_count = make_frame(f'P|{patient_count}||{order["order"]["id"]}||{order["patient"]["file_no"]}^^||||||||||||||||||||', frame_count, s)
+        patient_count += 1
+        msgq += patient_frame
+        tests = "\\".join(["^^^" + test  for test in order["order"]["tests"]])
+        order_frame, frame_count= make_frame(f'O|1|{order["order"]["id"]}||{tests}|||||||A||||||||||||||Q', frame_count, s)
+        msgq += order_frame
+    termination_end = "N" if len(orders) > 0  else "I"
+    msg_end, frame_count = make_frame(f"L|1|{termination_end}", frame_count, s)
+    msgq += msg_end
+    msgq  = tcode("ENQ") + msgq + tcode("EOT")
+    return msgq
+
+def get_architect_query_orders(query_msg):
+    query_count = 1
+    query_msg = re.sub(b'\x17..\r\n\x02.', b'', query_msg)
+    orders = []
+    index = query_msg.find(b"Q|1|")
+    while index > 0:
+        query_count += 1
+        query_list = query_msg[index:index + 20].split(b"|")
+        log_result("architect_ci82", str(query_list))
+        if len(query_list) > 2:
+            orders.append(query_list[2].decode().replace("^", ""))
+        index = query_msg.find(b"Q|" + str(query_count).encode() + b"|")
+    return orders if len(orders) > 0 else False

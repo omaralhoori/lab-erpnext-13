@@ -1131,6 +1131,27 @@ def receive_lision_results():
 							""".format( order_id=lab_test['order_id'])
 		frappe.db.sql(query,{"result": lab_test['result'], "test_code": lab_test['code']})
 	frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def receive_architect_ci82_results():
+	lab_tests = json.loads(frappe.request.data)
+	print("results received---------------------------------------------")
+	print(len(lab_tests))
+	print(lab_tests)
+	for lab_test in lab_tests:
+		#results = lab_test['results']
+		#for test in results:
+		query = """ UPDATE `tabNormal Test Result` as ntr 
+				INNER JOIN `tabLab Test` as lt ON lt.name=ntr.parent
+				INNER JOIN `tabSample Collection` as sc ON sc.name=lt.sample
+				INNER JOIN `tabMachine Type Lab Test Template` AS mtt ON mtt.lab_test_template=ntr.template
+				INNER JOIN `tabMachine Type Lab Test` as mtlt ON mtt.parent=mtlt.name AND mtlt.company=lt.company
+				SET ntr.result_value=%(result)s
+				WHERE sc.collection_serial='bar-{order_id}' AND mtt.host_code=%(test_code)s AND ntr.status NOT IN ('Rejected', 'Finalized', 'Released')
+				AND mtlt.machine_type='Architect ci82'
+							""".format( order_id=lab_test['order_id'])
+		frappe.db.sql(query,{"result": lab_test['result'], "test_code": lab_test['code']})
+	frappe.db.commit()
 	
 from erpnext.healthcare.socket_communication import log_result
 @frappe.whitelist(allow_guest=True)

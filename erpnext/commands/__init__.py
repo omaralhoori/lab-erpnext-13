@@ -135,16 +135,29 @@ def start_rubycd_results(
 
 @click.command("start-bioradd10-results")
 @click.option("--ip", default="10.123.4.150")
-@click.option("--port", default=9098)
+@click.option("--port", default=9192)
 @click.option("--back", is_flag=True, default=True)
 @pass_context
 def start_bioradd10_results(
-	context, ip="10.123.4.150",port=9098, back=True
+	context, ip="10.123.4.150",port=9192, back=True
 ):
 	"Start Test Command"
 	from erpnext.healthcare.socket_communication import start_biorad_d10_listener
 	print(f"Starting Lision server on {ip}:{port}")
 	start_biorad_d10_listener(ip, int(port))
+
+@click.command("start-architect-ci82-listener")
+@click.option("--ip", default="10.123.4.150")
+@click.option("--port", default=9193)
+@click.option("--back", is_flag=True, default=True)
+@pass_context
+def start_architect_ci82_listener(
+	context, ip="10.123.4.150",port=9193, back=True
+):
+	"Start Test Command"
+	from erpnext.healthcare.socket_communication import start_abbott_architect_ci82_listener
+	print(f"Starting architect server on {ip}:{port}")
+	start_abbott_architect_ci82_listener(ip, int(port))
 
 
 @click.command("start-results-service")
@@ -159,5 +172,6 @@ def start_results_service(
 
 commands = [
 	make_demo, start_infinty_results, start_sysmex_results, start_infinty_orders, 
-	start_sysmex_xp_results, start_lision_results,start_rubycd_results, start_results_service, start_bioradd10_results
+	start_sysmex_xp_results, start_lision_results,start_rubycd_results, start_results_service, 
+	start_bioradd10_results, start_architect_ci82_listener
 ]

@@ -93,8 +93,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Allow Overlap",
-   "no_copy": 1,
-   "read_only": 1
+   "no_copy": 1
   },
   {
    "bold": 1,
@@ -207,7 +206,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2021-08-19 14:09:11.643464",
+ "modified": "2023-06-17 15:13:13.046143",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit",
