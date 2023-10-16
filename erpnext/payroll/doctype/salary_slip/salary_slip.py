@@ -267,9 +267,16 @@ class SalarySlip(TransactionBase):
 
 	def get_working_days_details(self, joining_date=None, relieving_date=None, lwp=None, for_preview=0):
 		payroll_based_on = frappe.db.get_value("Payroll Settings", None, "payroll_based_on")
+		#ibrahim
+		working_days_count_based_on = frappe.db.get_value("Payroll Settings", None, "working_days_count_based_on")
 		include_holidays_in_total_working_days = frappe.db.get_single_value("Payroll Settings", "include_holidays_in_total_working_days")
 
-		working_days = date_diff(self.end_date, self.start_date) + 1
+		#ibrahim
+		if working_days_count_based_on == 'Month':
+			working_days = date_diff(self.end_date, self.start_date) + 1
+		else:
+			working_days = cint(working_days_count_based_on)
+		
 		if for_preview:
 			self.total_working_days = working_days
 			self.payment_days = working_days
@@ -333,6 +340,9 @@ class SalarySlip(TransactionBase):
 
 
 	def get_payment_days(self, joining_date, relieving_date, include_holidays_in_total_working_days):
+		#ibrahim
+		working_days_count_based_on = frappe.db.get_value("Payroll Settings", None, "working_days_count_based_on")
+
 		if not joining_date:
 			joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 				["date_of_joining", "relieving_date"])
@@ -341,6 +351,7 @@ class SalarySlip(TransactionBase):
 		if joining_date:
 			if getdate(self.start_date) <= joining_date <= getdate(self.end_date):
 				start_date = joining_date
+				working_days_count_based_on='Month'
 			elif joining_date > getdate(self.end_date):
 				return
 
@@ -348,11 +359,17 @@ class SalarySlip(TransactionBase):
 		if relieving_date:
 			if getdate(self.start_date) <= relieving_date <= getdate(self.end_date):
 				end_date = relieving_date
+				working_days_count_based_on='Month'
 			elif relieving_date < getdate(self.start_date):
 				frappe.throw(_("Employee relieved on {0} must be set as 'Left'")
 					.format(relieving_date))
 
 		payment_days = date_diff(end_date, start_date) + 1
+		#ibrahim
+		#working_days_count_based_on = frappe.db.get_value("Payroll Settings", None, "working_days_count_based_on")
+		if not working_days_count_based_on == 'Month':
+			payment_days = cint(working_days_count_based_on)
+
 
 		if not cint(include_holidays_in_total_working_days):
 			holidays = self.get_holidays_for_employee(start_date, end_date)
@@ -413,16 +430,14 @@ class SalarySlip(TransactionBase):
 					END
 				""".format(holidays), {"employee": self.employee, "dt": dt})
 
-#ibrahim
 			if leave:
 				equivalent_lwp_count = 0
 				is_half_day_leave = cint(leave[0][1])
 				is_partially_paid_leave = cint(leave[0][2])
 				fraction_of_daily_salary_per_leave = flt(leave[0][3])
-				total_leave_days=flt(leave[0][4])
-				#ibrahim
+
 				#equivalent_lwp_count =  (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
-				equivalent_lwp_count =  total_leave_days
+				equivalent_lwp_count =  flt(leave[0][4])
 
 				if is_partially_paid_leave:
 					equivalent_lwp_count *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1

@@ -132,7 +132,7 @@
    "in_list_view": 1,
    "label": "Total Leave Days",
    "no_copy": 1,
-   "precision": "1"
+   "precision": "3"
   },
   {
    "fieldname": "column_break1",
@@ -249,7 +249,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2023-05-13 06:59:33.323084",
+ "modified": "2023-06-24 17:16:08.377013",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
