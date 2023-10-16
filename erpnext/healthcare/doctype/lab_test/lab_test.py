@@ -1280,7 +1280,7 @@ def get_lab_test_form_tests(lab_test):
 	return frappe.db.sql(f"""
 	SELECT tntr.name, tntr.template, tntr.report_code as parent_template, tltt.attribute_options, tntr.result_percentage,  tntr.control_type, 
 		tntr.lab_test_uom as conv_unit, tntr.secondary_uom as si_unit, tntr.lab_test_comment, tntr.status, tntr.lab_test_name, tntr.result_value,
-		tntr.host_code, tntr.secondary_uom_result
+		tntr.host_code, tntr.secondary_uom_result, tntr.is_modified
 		FROM `tabNormal Test Result` tntr 
 		INNER JOIN `tabLab Test Template` tltt ON tntr.template=tltt.name
 		LEFT JOIN `tabLab Test Template` tltt2 ON tntr.report_code=tltt2.name

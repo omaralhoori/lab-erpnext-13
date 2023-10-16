@@ -171,8 +171,12 @@ const format_tests_html = (tests) => {
 						<textarea class="test-comment" placeholder="Comment" name="${childTest.name}">${childTest['lab_test_comment'] || ''}</textarea>
 					`
 				}
+				var test_class = "";
+				if (childTest['is_modified'] && childTest['status'] != "Finalized" &&childTest != "Rejected"){
+					test_class = "modified";
+				}
 				child_tests_html += `
-				<div class="child-test-container ${childTest['status']}">
+				<div class="child-test-container ${childTest['status']} ${test_class}">
 					<span>
 						<label> <strong>${childTest['lab_test_name']} </strong></label>
 						<div class="test_result_container">
@@ -252,6 +256,7 @@ const setup_input_listeners = (frm) => {
 	$('.child-tests .input').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
 		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "result_value", $(this).val());
+		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "is_modified", 1);
 	})
 	$('.child-tests .test-comment').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
@@ -262,11 +267,13 @@ const setup_input_listeners = (frm) => {
 		// var rounded = round_result($(this).val())
 		// $(this).val(rounded)
 		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "result_percentage", $(this).val());
+		frappe.model.set_value('Normal Test Result',$(this).attr('name'), "is_modified", 1);
 	})
 	$('.child-tests .freetext-select').change(function(value) {
 		//console.log($(this).attr('name'), $(this).val());
 		$(this).parent().find(".input").val($(this).val())
 		frappe.model.set_value('Normal Test Result',$(this).parent().find(".input").attr('name'), "result_value", $(this).val());
+		frappe.model.set_value('Normal Test Result',$(this).parent().find(".input").attr('name'), "is_modified", 1);
 	})
 	$('.child-tests .upload-btn').each(function(){
 		let me = this;

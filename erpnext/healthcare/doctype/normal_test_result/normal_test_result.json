@@ -32,7 +32,8 @@
   "host_code",
   "host_name",
   "status",
-  "item"
+  "item",
+  "modified1"
  ],
  "fields": [
   {
@@ -227,11 +228,18 @@
    "fieldtype": "Small Text",
    "label": "Machine Comment",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "modified1",
+   "fieldtype": "Check",
+   "label": "Modified",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-09-28 21:14:31.047747",
+ "modified": "2023-09-29 08:39:06.018296",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Result",

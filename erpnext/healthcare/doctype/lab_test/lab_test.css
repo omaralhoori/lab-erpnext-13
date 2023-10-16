@@ -53,6 +53,11 @@
     padding: 5px 0;
 }
 
+.child-test-container.modified .test_result_container{
+    background-color: rgba(252, 176, 14, 0.8);
+    padding: 5px 0;
+}
+
 /* .result-checkbox{
     float: right;
 } */
