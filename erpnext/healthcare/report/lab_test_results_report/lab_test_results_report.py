@@ -123,16 +123,20 @@ def get_tests(filters, additional_query_columns=[]):
 		cover_btn = """
 		,  CONCAT('<a target="_blank" class=''btn btn-sm'' href="/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.get_embassy_cover?sales_invoice=',si.name,'">Print Cover</a>') as cover_btn
 		"""
+	print_permission = ''
+	user_roles = frappe.get_roles()
+	if "Operation User Print" not in user_roles or "Operation User Print Previous":
+		print_permission = 'hide'
 	invoices = frappe.db.sql("""
 		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient as patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
-		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Test</button>'), '' )as print_btn,
+		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {2}'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Test</button>'), '' )as print_btn,
 		IF(rt.record_status IN ('Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', si.name ,''' onClick=''print_xray(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Xray</button>'), '' ) as xray_btn
 		 {0}
 		from`tabSales Invoice` as si 
 		LEFT JOIN  `tabLab Test` as lt  ON si.name=lt.sales_invoice
 		INNER JOIN `tabPatient` as p ON p.name=si.patient
 		LEFT JOIN `tabRadiology Test` as rt ON rt.sales_invoice=si.name
-		where %s order by si.creation""".format(cover_btn or '', with_header) %
+		where %s order by si.creation""".format(cover_btn or '', with_header, print_permission) %
 		conditions, filters, as_dict=1)
 	return invoices
