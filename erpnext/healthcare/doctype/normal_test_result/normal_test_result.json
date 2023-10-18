@@ -33,7 +33,7 @@
   "host_name",
   "status",
   "item",
-  "modified1"
+  "is_modified"
  ],
  "fields": [
   {
@@ -171,7 +171,6 @@
    "fieldtype": "Check",
    "label": "Allow Blank",
    "print_hide": 1,
-   "read_only": 1,
    "report_hide": 1
   },
   {
@@ -231,15 +230,15 @@
   },
   {
    "default": "0",
-   "fieldname": "modified1",
+   "fieldname": "is_modified",
    "fieldtype": "Check",
-   "label": "Modified",
+   "label": "Is Modified",
    "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-09-29 08:39:06.018296",
+ "modified": "2023-10-18 03:36:43.732021",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Result",

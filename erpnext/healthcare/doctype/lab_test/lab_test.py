@@ -144,17 +144,21 @@ class LabTest(Document):
 
 	def set_test_status(self):
 		status = self.status
-		all_finalized, all_released = True, True
+		all_finalized, all_released, all_rejected = True, True, True
 		partially_finalized, partially_released = False, False
 		for item in self.normal_test_items:
 			if item.status!='Finalized' and not item.allow_blank and item.status != "Rejected": all_finalized=False
 			if item.status!='Released' and not item.allow_blank and item.status != "Rejected": all_released= False
 			if item.status=='Finalized': partially_finalized=True
 			if item.status=='Released': partially_released= True
-		if all_finalized: status = 'Finalized'
+			if item.status != 'Rejected': all_rejected = False
+		if all_rejected:status = 'Cancelled'	
+		elif all_finalized: status = 'Finalized'
 		elif partially_finalized: status='Partially Finalized'
 		elif all_released: status='Released'
 		elif partially_released: status='Partially Released'
+		if len(self.normal_test_items) == 0: status = 'Draft'
+		print(all_finalized, all_released, all_rejected, partially_finalized, partially_released)
 		self.db_set('status', status)
 		self.check_result_sms()
 	def check_result_sms(self):
@@ -351,6 +355,8 @@ def remove_items_lab_test(lab_test, removed_items, rad_test=None):
 					UPDATE `tabLab Test Template Table` as ntr set is_rejected=1
 					WHERE ntr.parent=%(lab_test)s AND ntr.item=%(item)s
 				""", {"lab_test": lab_test.sample, "item":rmv_item.item_code})
+		lab_test = frappe.get_doc("Lab Test", lab_test.name)
+		lab_test.set_test_status()
 	print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 		#if not template: continue
 		# if template.lab_test_template_type == "Grouped":
