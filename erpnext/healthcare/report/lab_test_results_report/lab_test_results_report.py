@@ -125,7 +125,7 @@ def get_tests(filters, additional_query_columns=[]):
 		"""
 	print_permission = ''
 	user_roles = frappe.get_roles()
-	if "Operation User Print" not in user_roles or "Operation User Print Previous":
+	if "Operation User Print" not in user_roles and "Operation User Print Previous" not in user_roles:
 		print_permission = 'hide'
 	invoices = frappe.db.sql("""
 		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient as patient, si.mobile_no as mobile,

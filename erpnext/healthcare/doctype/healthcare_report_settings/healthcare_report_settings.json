@@ -8,7 +8,9 @@
  "field_order": [
   "radiology_reports_section",
   "radiology_finalizer_name",
-  "radiology_assets"
+  "radiology_assets",
+  "lab_reports_section",
+  "lab_assets"
  ],
  "fields": [
   {
@@ -27,12 +29,23 @@
    "fieldtype": "Table",
    "label": "Radiology Assets",
    "options": "Branch User Print Format Asset"
+  },
+  {
+   "fieldname": "lab_reports_section",
+   "fieldtype": "Section Break",
+   "label": "Lab Reports"
+  },
+  {
+   "fieldname": "lab_assets",
+   "fieldtype": "Table",
+   "label": "Lab Assets",
+   "options": "Branch User Print Format Asset"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-05 11:24:15.019045",
+ "modified": "2023-10-18 12:54:40.835311",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Report Settings",

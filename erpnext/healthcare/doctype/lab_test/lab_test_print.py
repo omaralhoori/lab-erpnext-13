@@ -250,68 +250,131 @@ def lab_test_result_selected(lab_test, selected_tests):
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
+
     html = get_print_html_base()
     header = get_print_header(test_doc)
+
+    document_status = "Released"
+    if test_doc.status == 'Finalized':
+        document_status = 'Finalized'
+    footer, margin_bottom =  get_print_asset('lab_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
+    if footer:
+        result_link = format_patient_result_link(test_doc)
+        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
+    footer_link = get_asset_file(lab_test,footer)
+    options = {"--margin-top" : "45mm", "--margin-left" : "0",
+                "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
+                "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
+    "quiet":""}
+    
     tbody = get_print_tbody(test_doc, header, selected_tests=selected_tests)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
-    footer = get_lab_result_footer(test_doc)
-    options = {"--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
-   "--footer-html" : footer, "footer-center": "Page [page]/[topage]",
-    "quiet":""}
+
     output = pdfkit.from_string(html, False, options)
     uploaded_tests = get_uploaded_tests(test_doc, True, selected_tests)
     if len(uploaded_tests) > 0:
         output = get_uploaded_tests_with_content(uploaded_tests, output)
+    remove_asset(footer_link)
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = output  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
 
 @frappe.whitelist()
-def lab_test_result(lab_test, previous=None):
+def lab_test_result(lab_test, previous=None, only_finilized=False, head=None):
     # f = open("test-print.html", "r")
     # html  = f.read()
     # f.close()
     if frappe.local.conf.is_embassy:
-        embassy_test_result(lab_test)
+        embassy_test_result(lab_test, only_finilized=only_finilized, head=head)
         return
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
     html = get_print_html_base()
-    header = get_print_header(test_doc)
-    tbody = get_print_tbody(test_doc, header, previous=previous)
+    margin_top = None
+    if head:
+        head = get_print_asset('lab_assets', 'Header', test_doc.company, False)
+        if head:
+            head, margin_top = head
+    header = get_print_header(test_doc, head)
+    document_status = "Released"
+    if test_doc.status == 'Finalized' or only_finilized:
+        document_status = 'Finalized'
+    footer, margin_bottom =  get_print_asset('lab_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
+    if footer:
+        result_link = format_patient_result_link(test_doc)
+        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
+    footer_link = get_asset_file(lab_test,footer)
+    tbody = get_print_tbody(test_doc, header, previous=previous, only_finalized=only_finilized)
     body = get_print_body(header, tbody)
-    html = html.format(body=body,style=get_print_style())
-    footer = get_lab_result_footer(test_doc)
-    options = {"--margin-top" : "45mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "25mm", 
-   "--footer-html" : footer, "footer-center": "Page [page]/[topage]",
+    html = html.format(body=body,style=get_print_style(), footer='')
+    # with open("testss.html", "w") as f:
+    #     f.write(html)
+    options = {"--margin-top" : margin_top or "45mm", "--margin-left" : "0",
+                "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
+                "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
     output = pdfkit.from_string(html, False, options)
     uploaded_tests = get_uploaded_tests(test_doc, True)
     if len(uploaded_tests) > 0:
         output = get_uploaded_tests_with_content(uploaded_tests, output)
+    remove_asset(footer_link)
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = output  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
+def format_patient_result_link(test_doc):
+    patient_password = frappe.db.get_value("Patient", test_doc.patient, 'patient_password') or ''
+    result_link = frappe.db.get_single_value("Healthcare Settings", 'result_url' ) or ''
+    if not result_link.endswith('/'):
+        result_link += '/'
+    result_link += 'api/method/erpnext.api.patient_results?invoice=' + test_doc.name + '&password=' + patient_password
+    return result_link
+
+import os
+def remove_asset(asset_link):
+    os.remove(asset_link)
+def get_asset_file(file_name, asset):
+    with open(file_name + ".html", "w") as f:
+        f.write(asset)
+    return file_name + ".html"
 
 @frappe.whitelist()
-def embassy_test_result(lab_test, return_html = False, selected_tests=[]):
+def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=None, only_finilized=False):
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
+    margin_top = None
+    if head:
+        head = get_print_asset('lab_assets', 'Header', test_doc.company, False)
+        if head:
+            head, margin_top = head
     html = get_print_html_base()
-    header = get_print_header_embassy(test_doc)
+    header = get_print_header_embassy(test_doc, head)
     tbody = get_print_tbody_embassy(test_doc, header, selected_tests= selected_tests)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
-    footer = get_lab_result_footer(test_doc)
-    options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "30mm", 
-   "--footer-html" : footer,
+    # footer = get_lab_result_footer(test_doc)
+    document_status = "Released"
+    if test_doc.status == 'Finalized' or only_finilized:
+        document_status = 'Finalized'
+    footer, margin_bottom =  get_print_asset('lab_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
+    if footer:
+        result_link = format_patient_result_link(test_doc)
+        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
+    footer_link = get_asset_file(lab_test,footer)
+
+    options = {"--margin-top" : margin_top or "45mm", "--margin-left" : "0",
+                "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
+                "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
+#     options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "30mm", 
+#    "--footer-html" : footer,
+#     "quiet":""}
     pdf_content =  pdfkit.from_string( html, False, options)  or ''
+    remove_asset(footer_link)
     if return_html: return pdf_content
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = pdf_content#get_pdf(html)
@@ -405,6 +468,7 @@ def get_print_header(test_doc, head=None):
 
 def get_print_body(header, tbody):
     "        <thead>{header}</thead>"
+    return tbody
     return f"""
     <table>
         <tbody>{tbody}</tbody>
@@ -1377,10 +1441,11 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         if xray_test.record_status == "Finalized":
             # options["--footer-html"] = "templates/xray_footer.html"
             # options["--margin-bottom"] = "20mm"
-            footer =  get_print_asset('radiology_assets', 'Footer', xray_test.company, True)
+            footer =  get_print_asset('radiology_assets', 'Footer', xray_test.company, True, document_status='Finalized')
             if footer:
-                options["--footer-html"] = footer[0]
-                options["--margin-bottom"] = footer[1] or "20mm"
+                if footer[0]:
+                    options["--footer-html"] = footer[0]
+                    options["--margin-bottom"] = footer[1] or "20mm"
         # with open("xray.html", "w") as f:
         #     f.write(html)
         pdf_content =  pdfkit.from_string( html, False, options)  or ''
@@ -1453,14 +1518,17 @@ def format_xray_header(xray_test, with_header=False, url=""):
 
 #------------------------------------ASSETS--------------------------------------------
 
-def get_print_asset(parent_field, asset_type, company, return_link=False):
+def get_print_asset(parent_field, asset_type, company, return_link=False, document_status='All'):
     user = frappe.session.user
-    assets = frappe.db.sql(f"""
+    assets = frappe.db.sql("""
             SELECT ast.asset_link, ast.margin FROM `tabBranch User Print Format Asset` as ast
-            WHERE parentfield='{parent_field}' AND asset_type='{asset_type}' AND company='{company}' AND (user IS NULL OR user='' OR user='{user}')
+            WHERE parentfield=%(parent_field)s AND asset_type=%(asset_type)s AND company=%(company)s 
+            AND (user IS NULL OR user='' OR user=%(user)s)
+            AND document_status=%(document_status)s
             ORDER BY user 
-    """, as_dict=True)
-    if len(assets) == 0: return None
+    """,{"parent_field": parent_field, "asset_type": asset_type, 
+         "company": company, "user": user, "document_status": document_status}, as_dict=True)
+    if len(assets) == 0: return '', 0
     if return_link: return assets[0]['asset_link'], assets[0]['margin']
     file_content = ''
     with open(assets[0]['asset_link'], 'r') as f:
@@ -1530,7 +1598,7 @@ def get_print_html_base():
         {style}
     </head>
     <body>
-        {body}       
+        {body}
     </body>
     </html>
     """
@@ -1578,6 +1646,13 @@ def get_print_header_embassy(test_doc, head=None):
         <tr>
     </table>
     """
+
+import pyqrcode
+
+def qrcode_gen(value, scale=3):
+    qr = pyqrcode.create(value, error='M')
+    return qr.png_as_base64_str(scale)
+
 
 def get_break():
     return "<div class='break'> </div>"

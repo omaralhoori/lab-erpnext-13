@@ -644,3 +644,9 @@ global_search_doctypes = {
 additional_timeline_content = {
 	'*': ['erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs']
 }
+
+jenv = {
+ "methods": [
+ "qrcode_gen:erpnext.healthcare.doctype.lab_test.lab_test_print.qrcode_gen"
+ ]
+}
