@@ -60,7 +60,7 @@ frappe.query_reports["Lab Test Results Report"] = {
 
 erpnext.utils.add_dimensions('Lab Test Results Report', 7);
 
-const print_result = (msg, with_header) =>
+const print_result = (msg, with_header, print_previous) =>
 {
 	frappe.call({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.check_invoice_paid",
@@ -70,7 +70,11 @@ const print_result = (msg, with_header) =>
 		},
 		callback: function(res){
 			if (res.message){
-				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.print_report_result?lab_test=${msg}&with_header=${with_header}`;
+				var prev= ''
+				if (print_previous){
+					prev = '&previous=1'
+				}
+				let url = `/api/method/erpnext.healthcare.doctype.lab_test.lab_test_print.lab_test_result?lab_test=${msg}&head=${with_header}&only_finilized=1${prev}`;
 				window.open(url, '_blank');
 			}else{
 				frappe.msgprint({
