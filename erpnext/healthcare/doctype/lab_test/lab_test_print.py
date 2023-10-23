@@ -262,7 +262,7 @@ def lab_test_result_selected(lab_test, selected_tests):
         result_link = format_patient_result_link(test_doc)
         footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
     footer_link = get_asset_file(lab_test,footer)
-    options = {"--margin-top" : "45mm", "--margin-left" : "0",
+    options = {"--margin-top" : "35mm", "--margin-left" : "0",  "--margin-right" : "0",
                 "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
                 "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
@@ -312,7 +312,7 @@ def lab_test_result(lab_test, previous=None, only_finilized=False, head=None):
     html = html.format(body=body,style=get_print_style(), footer='')
     # with open("testss.html", "w") as f:
     #     f.write(html)
-    options = {"--margin-top" : margin_top or "45mm", "--margin-left" : "0",
+    options = {"--margin-top" : margin_top or "35mm", "--margin-left" : "0",  "--margin-right" : "0",
                 "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
                 "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
@@ -366,7 +366,7 @@ def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=N
         footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
     footer_link = get_asset_file(lab_test,footer)
 
-    options = {"--margin-top" : margin_top or "45mm", "--margin-left" : "0",
+    options = {"--margin-top" : margin_top or "35mm", "--margin-left" : "0",  "--margin-right" : "0",
                 "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
                 "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
