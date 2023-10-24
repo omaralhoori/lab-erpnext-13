@@ -262,8 +262,12 @@ def lab_test_result_selected(lab_test, selected_tests):
         result_link = format_patient_result_link(test_doc)
         footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
     footer_link = get_asset_file(lab_test,footer)
-    options = {"--margin-top" : "35mm", "--margin-left" : "0",  "--margin-right" : "0",
-                "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
+    default_margin_top = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_top")
+    default_margin_left = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_left")
+    default_margin_right = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_right")
+    default_margin_bottom = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_bottom")
+    options = {"--margin-top" :  default_margin_top, "--margin-left" : default_margin_left,  "--margin-right" : default_margin_right,
+                "margin-bottom": margin_bottom or default_margin_bottom, "--margin-bottom": margin_bottom or default_margin_bottom,
                 "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
     
@@ -312,8 +316,12 @@ def lab_test_result(lab_test, previous=None, only_finilized=False, head=None):
     html = html.format(body=body,style=get_print_style(), footer='')
     # with open("testss.html", "w") as f:
     #     f.write(html)
-    options = {"--margin-top" : margin_top or "35mm", "--margin-left" : "0",  "--margin-right" : "0",
-                "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
+    default_margin_top = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_top")
+    default_margin_left = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_left")
+    default_margin_right = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_right")
+    default_margin_bottom = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_bottom")
+    options = {"--margin-top" :margin_top or default_margin_top, "--margin-left" : default_margin_left,  "--margin-right" : default_margin_right,
+                "margin-bottom": margin_bottom or default_margin_bottom, "--margin-bottom": margin_bottom or default_margin_bottom,
                 "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
     output = pdfkit.from_string(html, False, options)
@@ -365,9 +373,12 @@ def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=N
         result_link = format_patient_result_link(test_doc)
         footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
     footer_link = get_asset_file(lab_test,footer)
-
-    options = {"--margin-top" : margin_top or "35mm", "--margin-left" : "0",  "--margin-right" : "0",
-                "margin-bottom": margin_bottom or "10mm", "--margin-bottom": margin_bottom or "10mm",
+    default_margin_top = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_top")
+    default_margin_left = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_left")
+    default_margin_right = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_right")
+    default_margin_bottom = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_bottom")
+    options = {"--margin-top" : margin_top or default_margin_top, "--margin-left" : default_margin_left,  "--margin-right" : default_margin_right,
+                "margin-bottom": margin_bottom or default_margin_bottom, "--margin-bottom": margin_bottom or default_margin_bottom,
                 "footer-html": footer_link, "footer-center": "Page [page]/[topage]",
     "quiet":""}
 #     options = {"--margin-top" : "50mm", "--margin-left" : "0","--margin-right" : "0","--margin-bottom": "30mm", 
@@ -1233,6 +1244,7 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
     where_stmt = " lt.status IN ('Finalized', 'Released')"
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     order = "tltt.order"
+    previous = get_previous_approve(previous, item_group)
     if item_group == "Chemistry":
         item_group = "NOT IN ('Routine', 'Hematology')"
         order = "ltt.order"
@@ -1283,6 +1295,15 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         ORDER BY ltt.order, tltt.order
         """.format(test_name=test_doc.name, order= order, item_group=item_group, where_stmt=where_stmt, prev_join_stmt=prev_join_stmt, prev_select_stmt=prev_select_stmt), as_dict=True)
+
+def get_previous_approve(previous, item_group):
+    if not previous:return previous
+    if item_group == 'Routine':
+        return frappe.db.get_single_value("Healthcare Report Settings", "print_previous_routine")
+    if item_group == 'Hematology':
+        return frappe.db.get_single_value("Healthcare Report Settings", "print_previous_hematology")
+
+    return previous
 
 def get_embassy_previous_tests(test_name, patient):
     tests =  frappe.db.sql(f"""

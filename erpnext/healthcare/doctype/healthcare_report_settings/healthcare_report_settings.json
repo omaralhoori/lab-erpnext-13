@@ -10,7 +10,15 @@
   "radiology_finalizer_name",
   "radiology_assets",
   "lab_reports_section",
-  "lab_assets"
+  "lab_assets",
+  "print_options_section",
+  "print_previous_hematology",
+  "print_previous_routine",
+  "column_break_9",
+  "default_lab_margin_top",
+  "default_lab_margin_bottom",
+  "default_lab_margin_left",
+  "default_lab_margin_right"
  ],
  "fields": [
   {
@@ -40,12 +48,53 @@
    "fieldtype": "Table",
    "label": "Lab Assets",
    "options": "Branch User Print Format Asset"
+  },
+  {
+   "fieldname": "print_options_section",
+   "fieldtype": "Section Break",
+   "label": "Print Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "print_previous_hematology",
+   "fieldtype": "Check",
+   "label": "Print Previous Hematology"
+  },
+  {
+   "default": "0",
+   "fieldname": "print_previous_routine",
+   "fieldtype": "Check",
+   "label": "Print Previous Routine"
+  },
+  {
+   "fieldname": "default_lab_margin_top",
+   "fieldtype": "Data",
+   "label": "Default Lab Margin Top"
+  },
+  {
+   "fieldname": "default_lab_margin_bottom",
+   "fieldtype": "Data",
+   "label": "Default Lab Margin Bottom"
+  },
+  {
+   "fieldname": "default_lab_margin_left",
+   "fieldtype": "Data",
+   "label": "Default Lab Margin Left"
+  },
+  {
+   "fieldname": "default_lab_margin_right",
+   "fieldtype": "Data",
+   "label": "Default Lab Margin Right"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-18 12:54:40.835311",
+ "modified": "2023-10-25 01:49:42.517659",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Report Settings",
