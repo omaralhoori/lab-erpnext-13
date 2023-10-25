@@ -291,7 +291,7 @@ def lab_test_result(lab_test, previous=None, only_finilized=False, head=None):
     # html  = f.read()
     # f.close()
     if frappe.local.conf.is_embassy:
-        embassy_test_result(lab_test, only_finilized=only_finilized, head=head)
+        embassy_test_result(lab_test, only_finilized=only_finilized, head=head, previous=previous)
         return
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
@@ -350,7 +350,7 @@ def get_asset_file(file_name, asset):
     return file_name + ".html"
 
 @frappe.whitelist()
-def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=None, only_finilized=False):
+def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=None, only_finilized=False, previous=None):
     test_doc = frappe.get_doc("Lab Test", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
@@ -361,7 +361,7 @@ def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=N
             head, margin_top = head
     html = get_print_html_base()
     header = get_print_header_embassy(test_doc, head)
-    tbody = get_print_tbody_embassy(test_doc, header, selected_tests= selected_tests)
+    tbody = get_print_tbody_embassy(test_doc, header, selected_tests= selected_tests, previous=previous)
     body = get_print_body(header, tbody)
     html = html.format(body=body,style=get_print_style())
     # footer = get_lab_result_footer(test_doc)
@@ -511,12 +511,12 @@ def get_print_tbody(test_doc, header, only_finalized=False, selected_tests=[], p
     #         body +=  html
     return body
 
-def get_print_tbody_embassy(test_doc, header, only_finalized=False, selected_tests=[]):
+def get_print_tbody_embassy(test_doc, header, only_finalized=False, selected_tests=[], previous=None):
     body = ""
     embassy_tests = get_embassy_tests(test_doc, only_finalized, selected_tests=selected_tests)
     
     if len(embassy_tests) > 0:
-        embassy_table = format_embassy_tests(embassy_tests, header)
+        embassy_table = format_embassy_tests(embassy_tests, header, previous=previous)
         body += embassy_table
 
     return body
@@ -537,7 +537,7 @@ def get_embassy_tests(test_doc, only_finalized=False, selected_tests=[]):
     return tests
 
 
-def format_embassy_tests(tests, header, previous_tests={}):
+def format_embassy_tests(tests, header, previous_tests={}, previous=None):
     tests_html = ""
     test_num = 1
     for test in tests:
@@ -550,6 +550,11 @@ def format_embassy_tests(tests, header, previous_tests={}):
             if len(test['template']) == 1:
                 normal_crit = test['template'][0]['criteria_text'] or ''
             normal_range = test['template'][0]['range_text']
+        previousResult = ""
+        previousHeader = ""
+        if previous:
+            previousResult = f"""<td class="width-15 center">{test.get('previous') or ''}</td>"""
+            previousHeader = '<td class="width-15 center">Previous Test</td>'
         if test['conv_result']:
             highlight = highlight_abnormal_result(test, test['template'])
             result = format_float_result(test['conv_result'], test['conventional_round_digits'], test['round_conventional_digits'])
@@ -562,7 +567,7 @@ def format_embassy_tests(tests, header, previous_tests={}):
                 <td class="width-10 f-s ">{test['conv_uom'] or ''}</td>
                 <td class="f-s width-10">{normal_crit}</td>
                 <td class="f-s width-10">{normal_range}</td>
-                <td class="width-15 center">{test.get('previous') or ''}</td>
+                {previousResult}
                 </tr>
             """
             test_html = f"<tr><td ><table>" + test_html + "</table></td></tr>"
@@ -583,7 +588,7 @@ def format_embassy_tests(tests, header, previous_tests={}):
             <td class="width-10">Results</td>
             <td class="width-5"></td>
              <td colspan="2" class="width-20 center">Normal Range</td>
-             <td class="width-15 center">Previous Test</td>
+             {previousHeader}
         </tr>
             </table>
         </td>
