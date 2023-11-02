@@ -1092,11 +1092,11 @@ def format_chemistry_tests(tests, header="", patient=None):
                     if prev_si or prev_conv:
                         test_html += f"""
                             <tr>
-                                <td class="width-50">
+                                <td class="width-50 blue">
                                 &emsp;&emsp; Previous Result On {frappe.utils.get_datetime(child_test['prev_creation']).strftime("%d/%m/%Y",)}
                                 </td>
-                                <td class="width-25">{prev_si}</td>
-                                <td class="width-25">{prev_conv}</td>
+                                <td class="width-25 blue">{prev_si}</td>
+                                <td class="width-25 blue">{prev_conv}</td>
                             </tr>
                         """
                     for idx, normal in enumerate(child_test["template"]):
@@ -1150,11 +1150,11 @@ def format_chemistry_tests(tests, header="", patient=None):
                 if prev_si or prev_conv:
                     test_html += f"""
                         <tr>
-                            <td class="width-50">
+                            <td class="width-50 blue">
                             &emsp;&emsp; Previous Result On {frappe.utils.get_datetime(test['prev_creation']).strftime("%d/%m/%Y",)}
                             </td>
-                            <td class="width-25">{prev_si}</td>
-                            <td class="width-25">{prev_conv}</td>
+                            <td class="width-25 blue">{prev_si}</td>
+                            <td class="width-25 blue">{prev_conv}</td>
                         </tr>
                     """
                 normal_idx = 0
@@ -1685,6 +1685,9 @@ def get_break():
 def get_print_style():
     return """
     <style>
+    .blue{
+        color: #0000ff !important;
+    }
     .header td{
         font-size: 17px;
     }
