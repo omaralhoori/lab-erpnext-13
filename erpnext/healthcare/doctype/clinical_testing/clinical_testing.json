@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series",
+ "creation": "2023-11-02 14:56:24.168020",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "practitioner_name",
+  "sales_invoice",
+  "invoice_date",
+  "record_status",
+  "column_break_3",
+  "template",
+  "company",
+  "release_date",
+  "finalize_date",
+  "patient_info_section",
+  "patient",
+  "patient_name",
+  "column_break_8",
+  "patient_sex",
+  "patient_age",
+  "results_section",
+  "test_results",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HLC-CLT-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Practitioner Name"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Invoice",
+   "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date"
+  },
+  {
+   "fieldname": "record_status",
+   "fieldtype": "Select",
+   "label": "Record Status",
+   "options": "Draft\nReleased\nFinalized"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Table",
+   "label": "Test Template",
+   "options": "Lab Test Template Table",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "release_date",
+   "fieldtype": "Datetime",
+   "label": "Release Date"
+  },
+  {
+   "fieldname": "finalize_date",
+   "fieldtype": "Datetime",
+   "label": "Finalize Date"
+  },
+  {
+   "fieldname": "patient_info_section",
+   "fieldtype": "Section Break",
+   "label": "Patient Info"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_sex",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Gender",
+   "options": "Gender",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_age",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "results_section",
+   "fieldtype": "Section Break",
+   "label": "Results"
+  },
+  {
+   "fieldname": "test_results",
+   "fieldtype": "Table",
+   "label": "Test Results",
+   "options": "Clinical Testing Result"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "options": "Clinical Testing"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-11-04 10:51:16.199159",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Clinical Testing",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "patient"
+}
