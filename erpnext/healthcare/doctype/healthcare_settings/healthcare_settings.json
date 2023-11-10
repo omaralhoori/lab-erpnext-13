@@ -40,6 +40,7 @@
   "send_test_order",
   "use_branch_code",
   "show_machine_comment",
+  "print_empty_result",
   "column_break_30",
   "sb_in_ac",
   "income_account",
@@ -496,11 +497,17 @@
    "fieldname": "create_patient_encounter_from_invoice",
    "fieldtype": "Check",
    "label": "Create Patient Encounter From Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "print_empty_result",
+   "fieldtype": "Check",
+   "label": "Print Empty Result"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2023-05-16 01:50:37.637414",
+ "modified": "2023-11-10 03:07:06.671033",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

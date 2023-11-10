@@ -326,6 +326,9 @@ def lab_test_result(lab_test, previous=None, only_finilized=False, head=None):
     "quiet":""}
     output = pdfkit.from_string(html, False, options)
     uploaded_tests = get_uploaded_tests(test_doc, True)
+    if not frappe.db.get_single_value("Healthcare Settings","print_empty_result"):
+        if not tbody or tbody == "":
+            output = None
     if len(uploaded_tests) > 0:
         output = get_uploaded_tests_with_content(uploaded_tests, output)
     remove_asset(footer_link)
@@ -969,15 +972,21 @@ def get_uploaded_tests(test_doc, only_finalized=False, selected_tests=[]):
 
 def get_uploaded_tests_with_content(tests, result_content=None):
     writer = None
+    counter = 0
     if result_content:
         writer = get_pdf_writer(result_content)
     for test in tests:
+        counter += 1
         file_content = get_uploaded_test_content(test["result_value"])
         if not file_content: continue
         if not writer:
             writer = get_pdf_writer(file_content)
-        reader = PdfFileReader(io.BytesIO(file_content))
-        writer.appendPagesFromReader(reader)
+        if not result_content and counter > 1:
+            reader = PdfFileReader(io.BytesIO(file_content))
+            writer.appendPagesFromReader(reader)
+        if result_content:
+            reader = PdfFileReader(io.BytesIO(file_content))
+            writer.appendPagesFromReader(reader)
     output = get_file_data_from_writer(writer)
     return output
 
