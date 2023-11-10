@@ -24,7 +24,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Masters",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_master.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -72,7 +71,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Consultation Setup",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_consultation_setup.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -150,7 +148,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Consultation",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_consultation.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -208,7 +205,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Facility Management",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_section.gif",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -237,7 +233,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Medical Coding",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_medical_coding.gif",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -266,7 +261,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Settings",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_custome.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -295,7 +289,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Laboratory Setup",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_setup.gif",
    "onboard": 0,
    "only_for": "",
    "type": "Card Break"
@@ -354,7 +347,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Laboratory",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_laboratory.gif",
    "onboard": 0,
    "only_for": "",
    "type": "Card Break"
@@ -394,8 +386,17 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Clinical Testing",
+   "link_to": "Clinical Testing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Inpatient",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_inpatient.gif",
    "link_type": "DocType",
    "onboard": 0,
    "only_for": "",
@@ -432,7 +433,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Rehabilitation and Physiotherapy",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_physiotherapy.gif",
    "onboard": 0,
    "only_for": "",
    "type": "Card Break"
@@ -501,7 +501,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Records and History",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/healt_history.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -549,7 +548,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Reports",
-   "link_icon_image": "/assets/erpnext/images/ibm_icon/health_report.gif",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -583,7 +581,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-17 10:35:37.601983",
+ "modified": "2023-11-04 14:43:56.733260",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -598,7 +596,6 @@
    "format": "{} Open",
    "label": "Patient Appointment",
    "link_to": "Patient Appointment",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/DGM01CPR.gif",
    "stats_filter": "{\n    \"status\": \"Open\",\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%']\n}",
    "type": "DocType"
   },
@@ -607,7 +604,6 @@
    "format": "{} Active",
    "label": "Patient",
    "link_to": "Patient",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/healt_patient.gif",
    "stats_filter": "{\n    \"status\": \"Active\"\n}",
    "type": "DocType"
   },
@@ -616,7 +612,6 @@
    "format": "{} Vacant",
    "label": "Healthcare Service Unit",
    "link_to": "Healthcare Service Unit",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/healt_services.gif",
    "stats_filter": "{\n    \"occupancy_status\": \"Vacant\",\n    \"is_group\": 0,\n    \"company\": [\"like\", \"%\" + frappe.defaults.get_global_default(\"company\") + \"%\"]\n}",
    "type": "DocType"
   },
@@ -626,34 +621,29 @@
    "format": "{} Active",
    "label": "Healthcare Practitioner",
    "link_to": "Healthcare Practitioner",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/healt_praticenar.gif",
    "stats_filter": "{\n    \"status\": \"Active\"\n}",
    "type": "DocType"
   },
   {
    "label": "Patient History",
    "link_to": "patient_history",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/healt_p_history.gif",
    "type": "Page"
   },
   {
    "label": "Dashboard",
    "link_to": "Healthcare",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/healt_dashboard.gif",
    "type": "Dashboard"
   },
   {
    "doc_view": "",
    "label": "Lab Result Report",
    "link_to": "Lab Test Results Report",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/healt_lab_report1.gif",
    "type": "Report"
   },
   {
    "doc_view": "",
    "label": "Embassy Report",
    "link_to": "Embassy Report",
-   "shortcut_icon_image": "/assets/erpnext/images/ibm_icon/healt_embassy.gif",
    "type": "Report"
   }
  ]
