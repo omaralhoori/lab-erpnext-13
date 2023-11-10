@@ -47,6 +47,8 @@ from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
+from erpnext.healthcare.doctype.lab_test.lab_test_print import format_patient_result_link, qrcode_gen
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
@@ -1495,15 +1497,22 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def get_qrcode(self):
-		if frappe.local.conf.is_embassy: return ""
-		code_path = ""
-		patient = frappe.get_doc("Patient", self.patient)
-		if patient:
-			if not patient.qrcode_path or patient.qrcode_path == "":
-				patient.generate_qrcode()
-			code_path = patient.qrcode_path
+		lab_test = frappe.db.get_value("Lab Test", {"sales_invoice": self.name}, "name")
+		if lab_test:
+			lab_test_doc = frappe.get_doc("Lab Test", lab_test)
+			result_link = format_patient_result_link(lab_test_doc)
+			qr_code = qrcode_gen(result_link, 2)
+		else:
+			qr_code = ""
+		# if frappe.local.conf.is_embassy: return ""
+		# code_path = ""
+		# patient = frappe.get_doc("Patient", self.patient)
+		# if patient:
+		# 	if not patient.qrcode_path or patient.qrcode_path == "":
+		# 		patient.generate_qrcode()
+		# 	code_path = patient.qrcode_path
 
-		return f'<img class="qr-code" src="{code_path}" />'
+		return f"<img src='data:image/png;base64,{qr_code}' />" #f'<img class="qr-code" src="" />'
 
 	def get_asset(self, item):
 		if item.get('asset'):
