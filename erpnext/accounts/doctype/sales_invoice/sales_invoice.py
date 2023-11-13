@@ -1021,7 +1021,11 @@ class SalesInvoice(SellingController):
 		self.make_gle_for_rounding_adjustment(gl_entries)
 
 		return gl_entries
-
+	def calculate_discount_amount(self):
+		discount_amount = 0
+		for item in self.items:
+			discount_amount += item.contract_discount
+		self.discount_amount = discount_amount
 	def make_customer_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
@@ -1033,6 +1037,8 @@ class SalesInvoice(SellingController):
 
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate, self.precision("grand_total"))
 			# ibrahim
+			if not self.discount_amount:
+				self.calculate_discount_amount()
 			base_discount_amount_in_company_currency = flt(self.discount_amount * self.conversion_rate, self.precision("discount_amount"))
 			base_total_patient_in_company_currency = flt(self.total_patient * self.conversion_rate, self.precision("total_patient"))
 			base_total_discount_provider_in_company_currency = flt(self.total_discount_provider * self.conversion_rate, self.precision("total_discount_provider"))
