@@ -1,0 +1,84 @@
+.test-container{
+    padding: 15px 0;
+    border-bottom: 1px solid;
+}
+
+.test_result_container > *{
+    margin: 0 10px;
+}
+
+.child-test-container {
+    margin: 10px 0;
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+}
+
+
+.test-input-control, .test-comment{
+    display: inline-block;
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--control-bg);
+    background-clip: padding-box;
+    border: 1px solid #C0C6CC;
+    border-radius: var(--border-radius);
+    box-shadow: none;
+    transition: none;
+}
+
+.test-comment{
+    height: 80px;
+}
+
+.free-text-area{
+    height: 80px;
+}
+
+.freetext-select{
+    width: 300px;
+}
+
+.child-test-container.Rejected .test_result_container{
+    background-color: rgba(255,0,0,0.8);
+    padding: 5px 0;
+}
+
+.child-test-container.Finalized .test_result_container{
+    background-color: rgba(6,218,6,0.8);
+    padding: 5px 0;
+}
+
+.child-test-container.modified .test_result_container{
+    background-color: rgba(252, 176, 14, 0.8);
+    padding: 5px 0;
+}
+
+/* .result-checkbox{
+    float: right;
+} */
+.test_result_container {
+    display: flex;
+    align-items: center;
+}
+
+div[data-fieldname="patient_mobile"]  .control-value{
+    font-weight: bold;
+}
+.tests-display-filter{
+    width: 200px;
+    display: inline-block;
+    margin: 5px;
+}
+.dots3{
+    margin-left: 10px;
+    cursor: pointer;
+}
+.dots3:after {
+    content: '\2807';
+    font-size: 1.2em;
+}

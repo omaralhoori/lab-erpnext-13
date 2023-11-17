@@ -957,7 +957,7 @@ def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[], previ
     else: test['template'] = []
     return tests
     
-def get_uploaded_tests(test_doc, only_finalized=False, selected_tests=[]):
+def get_uploaded_tests(test_doc, only_finalized=False, selected_tests=[], parent_type='Lab Test'):
     where_stmt = " lt.status IN ('Finalized', 'Released')"
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     if len(selected_tests)> 0:
@@ -966,8 +966,8 @@ def get_uploaded_tests(test_doc, only_finalized=False, selected_tests=[]):
     tests = frappe.db.sql("""
         SELECT  lt.name as test_id, lt.lab_test_name, lt.result_value , lt.lab_test_comment as comment 
         FROM `tabNormal Test Result` as lt
-         WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND {where_stmt} AND lt.result_value != "" AND lt.result_value IS NOT NULL AND lt.control_type='Upload File'
-    """.format(test_name=test_doc.name, where_stmt=where_stmt), as_dict=True)
+         WHERE lt.parent='{test_name}' AND lt.parenttype='{parent_type}' AND {where_stmt} AND lt.result_value != "" AND lt.result_value IS NOT NULL AND lt.control_type='Upload File'
+    """.format(test_name=test_doc.name, where_stmt=where_stmt, parent_type=parent_type), as_dict=True)
     return tests
 
 def get_uploaded_tests_with_content(tests, result_content=None):
@@ -1306,7 +1306,7 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
         INNER JOIN `tabLab Test Template` as tltt
         ON tltt.name=lt.template
         {prev_join_stmt}
-        WHERE lt.parent='{test_name}' AND lt.parenttype='Lab Test' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
+        WHERE lt.parent='{test_name}' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         ORDER BY ltt.order, tltt.order
         """.format(test_name=test_doc.name, order= order, item_group=item_group, where_stmt=where_stmt, prev_join_stmt=prev_join_stmt, prev_select_stmt=prev_select_stmt), as_dict=True)
 

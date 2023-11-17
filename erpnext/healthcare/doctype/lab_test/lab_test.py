@@ -302,10 +302,13 @@ def create_or_delete_items(sales_invoice, removed_items, added_items):
 	# if lab not created create lab test
 	lab_test = frappe.db.exists("Lab Test", {"sales_invoice": sales_invoice.name}, "name")
 	rad_test = frappe.db.exists("Radiology Test", {"sales_invoice": sales_invoice.name}, "name")
+	clnc_test = frappe.db.exists("Clinical Testing", {"sales_invoice": sales_invoice.name}, "name")
 	print("create_or_delete_items------------------------------------------------------")
 	print(removed_items)
 	if rad_test:
 		remove_items_lab_test(None, removed_items, rad_test)
+	if clnc_test:
+		remove_items_lab_test(None, removed_items, None, clnc_test)
 	if not lab_test:
 		create_lab_test_from_invoice(sales_invoice.name, added_items)
 		return
@@ -325,7 +328,7 @@ def add_new_items_lab_test(lab_test, new_items, invoice):
 		lab_test = frappe.get_doc("Lab Test", lab_test)
 		add_test_from_template(lab_test, lab_templates)
 
-def remove_items_lab_test(lab_test, removed_items, rad_test=None):
+def remove_items_lab_test(lab_test, removed_items, rad_test=None, clnc_test=None):
 	if rad_test:
 		for rmv_item in removed_items:
 			frappe.db.sql("""
@@ -357,6 +360,19 @@ def remove_items_lab_test(lab_test, removed_items, rad_test=None):
 				""", {"lab_test": lab_test.sample, "item":rmv_item.item_code})
 		lab_test = frappe.get_doc("Lab Test", lab_test.name)
 		lab_test.set_test_status()
+	elif clnc_test:
+		clnc_test = frappe.get_doc("Clinical Testing", clnc_test)
+		for rmv_item in removed_items:
+			frappe.db.sql("""
+				UPDATE `tabNormal Test Result` as ntr set status='Rejected'
+				WHERE ntr.parent=%(clnc_test)s AND ntr.item=%(item)s
+			""", {"clnc_test": clnc_test.name, "item":rmv_item.item_code })
+			frappe.db.sql("""
+				UPDATE `tabLab Test Template Table` as ntr set is_rejected=1
+				WHERE ntr.parent=%(clnc_test)s AND ntr.item=%(item)s
+			""", {"clnc_test": clnc_test.name, "item":rmv_item.item_code})
+		clnc_test = frappe.get_doc("Clinical Testing", clnc_test.name)
+		clnc_test.set_test_status()
 	print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 		#if not template: continue
 		# if template.lab_test_template_type == "Grouped":
@@ -414,12 +430,15 @@ def create_lab_test_joined(sales_invoice, added_items=[]):
 	invoice = frappe.get_doc('Sales Invoice', sales_invoice)
 	lab_test = None
 	rad_test = frappe.db.get_value("Radiology Test", {"sales_invoice": sales_invoice}, "name")
+	clnc_test = frappe.db.get_value("Clinical Testing", {"sales_invoice": sales_invoice}, "name")
 	if rad_test: rad_test = frappe.get_doc("Radiology Test", rad_test)
+	if clnc_test: clnc_test = frappe.get_doc("Clinical Testing", clnc_test)
 	invoice_items = added_items if len(added_items) > 0 else invoice.items
 	if invoice and invoice.patient:
 		patient = frappe.get_doc('Patient', invoice.patient)
 		test_created = False
 		rad_created = False if not rad_test else True
+		clnc_created = False if not clnc_test else True
 		for item in invoice_items:
 			template = get_lab_test_template(item.item_code)
 			if template:
@@ -435,18 +454,36 @@ def create_lab_test_joined(sales_invoice, added_items=[]):
 						template_row.item = item.item_code
 						if len(added_items)> 0 :
 							load_rad_result_format(rad_test, template, item=item.item_code)
-				elif (template.lab_test_group == "Lab Test Packages" or template.lab_test_group == "Package" ) and template.has_radiology():
-					if not rad_created:
-						rad_test = create_rad_test_doc(patient, template, invoice, item=item.item_code)
-						if len(added_items)> 0 :
-							load_rad_result_format(rad_test, template, item=item.item_code)
-						rad_created = True
+				elif template.lab_test_group == 'Clinical Services':
+					if not clnc_created:
+						clnc_test = create_clnc_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, item.item_code)
+						clnc_created = True
 					else:
-						template_row = rad_test.append("template")
+						template_row = clnc_test.append("template")
 						template_row.template = template.name
 						template_row.item = item.item_code
-						if len(added_items)> 0 :
-							load_rad_result_format(rad_test, template, item=item.item_code)
+
+				elif (template.lab_test_group == "Lab Test Packages" or template.lab_test_group == "Package" ) :
+					if template.has_radiology():
+						if not rad_created:
+							rad_test = create_rad_test_doc(patient, template, invoice, item=item.item_code)
+							if len(added_items)> 0 :
+								load_rad_result_format(rad_test, template, item=item.item_code)
+							rad_created = True
+						else:
+							template_row = rad_test.append("template")
+							template_row.template = template.name
+							template_row.item = item.item_code
+							if len(added_items)> 0 :
+								load_rad_result_format(rad_test, template, item=item.item_code)
+					if template.has_clinical():
+						if not clnc_created:
+							clnc_test = create_clnc_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, item.item_code)
+							clnc_created = True
+						else:
+							template_row = clnc_created.append("template")
+							template_row.template = template.name
+							template_row.item = item.item_code
 					if not test_created:
 						lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, item.item_code)
 						test_created = True
@@ -468,6 +505,10 @@ def create_lab_test_joined(sales_invoice, added_items=[]):
 			lab_tests_created = lab_test.name
 		if rad_test:
 			rad_test.save(ignore_permissions = True)
+		if clnc_test:
+			clnc_test.sales_invoice = sales_invoice
+			clnc_test.load_test_from_templates()
+			clnc_test.save(ignore_permissions = True)
 	return lab_tests_created
 
 
@@ -475,20 +516,25 @@ def create_lab_test_joined(sales_invoice, added_items=[]):
 def add_new_items_lab_test_joined(invoice, new_items):
 	lab_test = None
 	rad_test = None
+	clnc_test = None
 	lab_templates = []
+	clnc_templates = []
 	if invoice and invoice.patient:
 		patient = frappe.get_doc('Patient', invoice.patient)
 		for item in new_items:
-			print("line 400-------------------------")
-			print(item.item_code)
 			template = get_lab_test_template(item.item_code)
-			print("template", template)
 			if template:
 				if template.lab_test_group == "Radiology Services":
 					rad_test = add_or_create_rad_test_doc(patient, template, invoice, item=item.item_code)
-						
-				elif (template.lab_test_group == "Lab Test Packages" or template.lab_test_group == "Package" )  and template.has_radiology():
-					rad_test = add_or_create_rad_test_doc(patient, template, invoice, item=item.item_code)
+				elif template.lab_test_group == "Clinical Services":
+					clnc_test = add_or_create_clnc_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, invoice.name, item=item.item_code)
+					clnc_templates.append({"template": template, "item": item.item_code})
+				elif (template.lab_test_group == "Lab Test Packages" or template.lab_test_group == "Package" ):
+					if  template.has_radiology():
+						rad_test = add_or_create_rad_test_doc(patient, template, invoice, item=item.item_code)
+					if template.has_clinical():
+						clnc_test = add_or_create_clnc_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, invoice.name, item=item.item_code)
+						clnc_templates.append({"template": template, "item": item.item_code})
 					lab_test = add_or_create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company, invoice.name, item=item.item_code)
 					lab_templates.append({"template": template, "item": item.item_code})	
 				else:
@@ -499,6 +545,10 @@ def add_new_items_lab_test_joined(invoice, new_items):
 			lab_test.save(ignore_permissions = True)
 		if rad_test:
 			rad_test.save(ignore_permissions = True)
+		if clnc_test:
+			clnc_test.sales_invoice = invoice.name
+			clnc_test.add_test_from_template(clnc_templates)
+			clnc_test.save(ignore_permissions = True)
 	return lab_templates
 
 def create_lab_test_separated(sales_invoice):
@@ -588,6 +638,25 @@ def create_lab_test_doc(invoiced, practitioner, patient, template, company, item
 	lab_test.company = company
 	return lab_test
 
+def create_clnc_test_doc(invoiced, practitioner, patient, template, company, item=None):
+	lab_test = frappe.new_doc('Clinical Testing')
+	lab_test.invoiced = invoiced
+	lab_test.practitioner = practitioner
+	lab_test.patient = patient.name
+	lab_test.patient_age = patient.get_age()
+	lab_test.patient_sex = patient.sex
+	lab_test.email = patient.email
+	lab_test.mobile = patient.mobile
+	#lab_test.template = template.name
+	template_row = lab_test.append("template")
+	template_row.template = template.name
+	if item:
+		template_row.item = item
+	lab_test.lab_test_group = template.lab_test_group
+	lab_test.result_date = getdate()
+	lab_test.company = company
+	return lab_test
+
 
 def add_or_create_lab_test_doc(invoiced, practitioner, patient, template, company, sales_invoice, item=None):
 	print("Start Creating")
@@ -602,6 +671,20 @@ def add_or_create_lab_test_doc(invoiced, practitioner, patient, template, compan
 	lab_test.save(ignore_permissions=True)
 	print("Done Creating")
 	return lab_test
+
+
+def add_or_create_clnc_test_doc(invoiced, practitioner, patient, template, company, sales_invoice, item=None):
+	clnc_test = frappe.db.get_value('Clinical Testing', {"sales_invoice": sales_invoice}, ['name'])
+	if not clnc_test: return create_clnc_test_doc(invoiced, practitioner, patient, template, company)
+	clnc_test = frappe.get_doc('Clinical Testing', {"sales_invoice": sales_invoice})
+	template_row = clnc_test.append("template")
+	template_row.template = template.name
+	if item:
+		template_row.item = item
+
+	clnc_test.save(ignore_permissions=True)
+
+	return clnc_test
 
 def create_normals(template, lab_test, group_template=None, item=None):
 	if template.company and template.company != lab_test.company: return
@@ -844,6 +927,7 @@ def remove_sample_collection(sample_collection, template, depth=1):
 					sample_collection.remove(sample_template)
 
 def load_result_format(lab_test, template, prescription, invoice, depth=1,item=None):
+	if template.lab_test_group =='Clinical Services': return lab_test
 	if depth > 3 : return lab_test
 	if template.lab_test_template_type == 'Single':
 		create_normals(template, lab_test, item=item)

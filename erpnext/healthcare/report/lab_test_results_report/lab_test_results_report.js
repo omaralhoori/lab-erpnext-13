@@ -85,8 +85,34 @@ const print_result = (msg, with_header, print_previous) =>
 			}
 		}
 })
-	
 }
+const print_clinical = (msg, with_header, print_previous) =>
+{
+	frappe.call({
+		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.check_invoice_paid",
+		args: {
+			doctype: "Lab Test",
+			docname: msg
+		},
+		callback: function(res){
+			if (res.message){
+				var prev= ''
+				if (print_previous){
+					prev = '&previous=1'
+				}
+				let url = `/api/method/erpnext.healthcare.doctype.clinical_testing.clinical_testing.clnc_test_result?lab_test=${msg}&head=${with_header}&only_finilized=1${prev}`;
+				window.open(url, '_blank');
+			}else{
+				frappe.msgprint({
+					title: __('Warning'),
+					indicator: 'red',
+					message: __("The invoice for this test has not been paid")
+				});
+			}
+		}
+})
+}
+
 
 const print_xray = (msg, with_header) =>
 {
