@@ -134,7 +134,6 @@ def get_tests(filters, additional_query_columns=[]):
 	if "Operation User Print" not in user_roles and "Operation User Print Previous" not in user_roles:
 		print_permission = 'hide'
 	with_previous = 1 if "Operation User Print Previous" in user_roles else 0
-	print("0000000000000000000000000")
 	invoices = frappe.db.sql("""
 		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient as patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
@@ -149,5 +148,4 @@ def get_tests(filters, additional_query_columns=[]):
 		LEFT JOIN `tabClinical Testing` as ct ON ct.sales_invoice=si.name
 		where %s order by si.creation""".format(cover_btn or '', with_header, print_permission, with_previous) %
 		conditions, filters, as_dict=1)
-	print(invoices)
 	return invoices
