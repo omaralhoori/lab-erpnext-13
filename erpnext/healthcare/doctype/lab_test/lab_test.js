@@ -579,6 +579,12 @@ frappe.ui.form.on('Lab Test', {
 							let res = window.open(url, '_blank')
 
 						})
+					}else{
+						frm.add_custom_button(__('Print All'), function(){
+							let url = `/api/method/erpnext.healthcare.doctype.clinical_testing.clinical_testing.print_all_reports?lab_test=${frm.doc.name}`
+							let res = window.open(url, '_blank')
+
+						})
 					}
 				}})
 			

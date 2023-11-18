@@ -1,10 +1,13 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from erpnext.healthcare.doctype.lab_test.lab_test_print import format_patient_result_link, get_asset_file, get_print_asset, get_print_body, get_print_header, get_print_html_base, get_print_style, get_print_tbody, get_uploaded_tests, get_uploaded_tests_with_content, remove_asset
+from erpnext.healthcare.doctype.lab_test.lab_test_print import get_pdf_writer, format_patient_result_link, get_asset_file,get_xray_report, get_print_asset, get_print_body, get_print_header, get_print_html_base, get_print_style, get_print_tbody, get_uploaded_tests, get_uploaded_tests_with_content, remove_asset, lab_test_result
 import frappe
 import json
 import pdfkit
+from frappe.utils.pdf import get_file_data_from_writer
+from PyPDF2 import PdfFileReader, PdfFileWriter
+import io
 from frappe.model.document import Document
 
 class ClinicalTesting(Document):
@@ -176,7 +179,7 @@ def apply_test_button_action(action, tests, test_name):
 
 
 @frappe.whitelist()
-def clnc_test_result(lab_test, previous=None, only_finilized=False, head=None):
+def clnc_test_result(lab_test, previous=None, only_finilized=False, head=None, return_html=False):
     test_doc = frappe.get_doc("Clinical Testing", lab_test)
     if not test_doc:
         frappe.throw("Lab Test not found")
@@ -217,6 +220,28 @@ def clnc_test_result(lab_test, previous=None, only_finilized=False, head=None):
     if len(uploaded_tests) > 0:
         output = get_uploaded_tests_with_content(uploaded_tests, output)
     remove_asset(footer_link)
+    if return_html: return output
     frappe.local.response.filename = "Test.pdf"
     frappe.local.response.filecontent = output  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
+
+@frappe.whitelist()
+def print_all_reports(lab_test):
+	sales_invoice = frappe.db.get_value("Lab Test", lab_test, "sales_invoice")
+	clnc =None
+	result = lab_test_result(lab_test, return_html=True)
+	xray = get_xray_report(sales_invoice, return_html=True)
+	clnc_doc = frappe.db.get_value("Clinical Testing", {"sales_invoice": sales_invoice}, "name")
+	if clnc_doc:
+		clnc = clnc_test_result(clnc_doc, return_html=True)
+	writer = get_pdf_writer(result)
+	if xray and xray != "":
+		reader = PdfFileReader(io.BytesIO(xray))
+		writer.appendPagesFromReader(reader)
+	if clnc and clnc != "":
+		reader = PdfFileReader(io.BytesIO(clnc))
+		writer.appendPagesFromReader(reader)
+	output = get_file_data_from_writer(writer)
+	frappe.local.response.filename = "Test Result"
+	frappe.local.response.filecontent = output #get_pdf(html)
+	frappe.local.response.type = "pdf"
