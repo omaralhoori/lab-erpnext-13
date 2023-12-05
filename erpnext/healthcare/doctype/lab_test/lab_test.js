@@ -653,7 +653,7 @@ frappe.ui.form.on('Lab Test', {
 				get_lab_test_prescribed(frm);
 			});
 		}
-		if (frappe.user.has_role('LabTest Approver')) {
+		if (frappe.user.has_role('SMS_Sender_After_Finilize')) {
 			// frm.add_custom_button(__('Reject Sample'), function () {
 			// 	get_rejects_sample(frm);
 			// });
