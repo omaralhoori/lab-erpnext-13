@@ -133,7 +133,7 @@ const format_tests_html = (tests) => {
 		<button class='btn refresh-btn btn-primary'>Refresh</button>
 		`
 	var defultOption = 'only_received';
-	if (frappe.user.has_role('LabTest Approver')){
+	if (frappe.user.has_role('Clinical Test Approver')){
 		buttons = `
 		<button class='btn test-selected-btn' name='Released' disabled>Release Selected</button>
 		<button class='btn test-selected-btn' name='unrelease' disabled>Unrelease</button>
