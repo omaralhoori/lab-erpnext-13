@@ -186,14 +186,14 @@ def clnc_test_result(lab_test, previous=None, only_finilized=False, head=None, r
     html = get_print_html_base()
     margin_top = None
     if head:
-        head = get_print_asset('lab_assets', 'Header', test_doc.company, False)
+        head = get_print_asset('clinical_assets', 'Header', test_doc.company, False)
         if head:
             head, margin_top = head
     header = get_print_header(test_doc, head)
     document_status = "Released"
     if test_doc.status == 'Finalized' or only_finilized:
         document_status = 'Finalized'
-    footer, margin_bottom =  get_print_asset('lab_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
+    footer, margin_bottom =  get_print_asset('clinical_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
     if footer:
         result_link = format_patient_result_link(test_doc)
         footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})

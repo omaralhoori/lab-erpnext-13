@@ -11,6 +11,8 @@
   "radiology_assets",
   "lab_reports_section",
   "lab_assets",
+  "clinical_reports_section",
+  "clinical_assets",
   "print_options_section",
   "print_previous_hematology",
   "print_previous_routine",
@@ -89,12 +91,23 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "clinical_reports_section",
+   "fieldtype": "Section Break",
+   "label": "Clinical Reports"
+  },
+  {
+   "fieldname": "clinical_assets",
+   "fieldtype": "Table",
+   "label": "Clinical Assets",
+   "options": "Branch User Print Format Asset"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-25 01:49:42.517659",
+ "modified": "2023-12-30 21:49:29.927420",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Report Settings",

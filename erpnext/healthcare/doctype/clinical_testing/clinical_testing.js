@@ -420,7 +420,7 @@ frappe.ui.form.on('Clinical Testing', {
 			frm.toggle_display('normal_test_items', true);
 		}
 		if (!frm.is_new()){
-			if (frappe.user.has_role('Lab User Print')){
+			if (frappe.user.has_role('Clinical Test Approver')){
 				frm.add_custom_button(__('Print'), function(){
 					//let url = `/printview?doctype=Lab%20Test&name=${frm.doc.name}&trigger_print=1&format=Lab%20Test%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`;
 					frappe.call({
@@ -468,7 +468,7 @@ frappe.ui.form.on('Clinical Testing', {
 					
 				});
 			}
-			if (frappe.user.has_role('Lab User Print Previous')){
+			if (frappe.user.has_role('Clinical Test Approver')){
 				frm.add_custom_button(__('Print With Previous Results'), function(){
 					//let url = `/printview?doctype=Lab%20Test&name=${frm.doc.name}&trigger_print=1&format=Lab%20Test%20Print&no_letterhead=1&letterhead=No%20Letterhead&settings=%7B%7D&_lang=en-US`;
 					frappe.call({
