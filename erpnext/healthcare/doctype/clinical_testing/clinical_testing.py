@@ -1,7 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from erpnext.healthcare.doctype.lab_test.lab_test_print import get_pdf_writer, format_patient_result_link, get_asset_file,get_xray_report, get_print_asset, get_print_body, get_print_header, get_print_html_base, get_print_style, get_print_tbody, get_uploaded_tests, get_uploaded_tests_with_content, remove_asset, lab_test_result
+from erpnext.healthcare.doctype.clinical_testing.clinical_print import get_pdf_writer, format_patient_result_link, get_asset_file,get_xray_report, get_print_asset, get_print_body, get_print_header, get_print_html_base, get_print_style, get_print_tbody, get_uploaded_tests, get_uploaded_tests_with_content, remove_asset, lab_test_result
 import frappe
 import json
 import pdfkit
