@@ -613,7 +613,7 @@ def format_embassy_tests(tests, header, previous_tests={}, previous=None):
 
     
 def get_routine_tests(test_doc, only_finalized=False, selected_tests=[], previous=None):
-    tests = get_tests_by_item_group(test_doc, "Routine", only_finalized, selected_tests=selected_tests, previous=previous)
+    tests = get_tests_by_item_group(test_doc, "Split Report", only_finalized, selected_tests=selected_tests, previous=previous)
     patient = frappe.get_doc("Patient", test_doc.patient)
     if patient:
         for test in tests:
@@ -646,7 +646,12 @@ def format_routine_page_tests(tests, header, test_name):
     normal_test, test_count = "", 0
     prev_normal_test = ""
     prev_date = ""
+    first_title = None
+    second_title = None
     for test in tests:
+        if not first_title:
+            first_title = test['first_report_title'] if test['first_report_title'] else test_name
+            second_title = test['second_report_title'] if test['first_report_title'] else 'MICROSCOPY'
         if test['conv_result']:
             highlight = highlight_abnormal_result(test, test['template'])
             highlight_class = "highlight-result" if highlight else ""
@@ -715,7 +720,7 @@ def format_routine_page_tests(tests, header, test_name):
             <td>
              <table>
            <tr>
-             <td colspan="4" class="center title b-bottom b-top mt-20">MICROSCOPY</td>
+             <td colspan="4" class="center title b-bottom b-top mt-20">{second_title}</td>
            </tr>
            {microscopt_tests}
 
@@ -729,7 +734,7 @@ def format_routine_page_tests(tests, header, test_name):
             <td>
              <table>
            <tr>
-             <td colspan="4" class="center title b-bottom b-top mt-20">MICROSCOPY</td>
+             <td colspan="4" class="center title b-bottom b-top mt-20">{second_title}</td>
            </tr>
            {prev_microscopt_tests}
 
@@ -746,7 +751,7 @@ def format_routine_page_tests(tests, header, test_name):
             <td>
                  <table>
                 <tr>
-            <td colspan="4" class="center title b-bottom">{test_name}</td>
+            <td colspan="4" class="center title b-bottom">{first_title}</td>
 
             </tr>
             </table>
@@ -770,7 +775,7 @@ def format_routine_page_tests(tests, header, test_name):
             <td>
                  <table>
                 <tr>
-            <td colspan="4" class="center title b-bottom">{test_name} Result On {frappe.utils.get_datetime(prev_date).strftime("%d/%m/%Y",)}</td>
+            <td colspan="4" class="center title b-bottom">{first_title} Result On {frappe.utils.get_datetime(prev_date).strftime("%d/%m/%Y",)}</td>
 
             </tr>
             </table>
@@ -944,7 +949,7 @@ def format_hematology_tests(tests, header):
 
 
 def get_chemistry_tests(test_doc, only_finalized=False, selected_tests=[], previous=None, patient=None):
-    tests = get_tests_by_item_group(test_doc, "Chemistry", only_finalized, selected_tests=selected_tests, previous=previous)
+    tests = get_tests_by_item_group(test_doc, "Normal Report", only_finalized, selected_tests=selected_tests, previous=previous)
     #tests.sort(key=lambda x: x['order'])
     if patient:
         for test in tests:
@@ -1133,7 +1138,6 @@ def format_chemistry_tests(tests, header="", patient=None):
             conv = ""
             prev_si = ""
             prev_conv = ""
-            print(test.get('print_all_normal_ranges') and test.get('highlight_abnormal_result'))
             highlight = highlight_abnormal_result(test, normal_ranges)
             if test['si_result'] and test['si_uom']:
                 si =str(format_float_result(test['si_result'], test['si_round_digits'], test['round_si_digits']))+ ' ' + test['si_uom']
@@ -1260,11 +1264,9 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
     if only_finalized: where_stmt = " lt.status IN ('Finalized')"
     order = "tltt.order"
     previous = get_previous_approve(previous, item_group)
-    if item_group == "Chemistry":
-        item_group = "NOT IN ('Routine', 'Hematology')"
+    if item_group == "Normal Report":
         order = "ltt.order"
-    else:
-        item_group = f"IN ('{item_group}')"
+    
     if len(selected_tests)> 0:
         selected_tests = ",".join(selected_tests)
         where_stmt += f" AND lt.name IN ({selected_tests})"
@@ -1299,7 +1301,7 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
         SELECT  
         lt.template, tltt.control_type, tltt.print_all_normal_ranges, tltt.lab_test_name,ltt.group_tests, lt.result_value as conv_result, lt.result_percentage ,lt.lab_test_uom as conv_uom, {order},
         lt.secondary_uom_result as si_result, lt.secondary_uom as si_uom, tltt.round_conventional_digits, tltt.round_si_digits, tltt.conventional_round_digits, tltt.si_round_digits, 
-         lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy, tltt.highlight_abnormal_result, lt.custom_normal_range
+         lt.lab_test_comment as comment, ltt.lab_test_name as parent_template, tltt.is_microscopy, tltt.highlight_abnormal_result, lt.custom_normal_range, ltt.first_report_title, ltt.second_report_title
          {prev_select_stmt}
          FROM `tabNormal Test Result` as lt
         LEFT JOIN `tabLab Test Template` as ltt
@@ -1307,7 +1309,7 @@ def get_tests_by_item_group(test_doc, item_group, only_finalized=False, selected
         INNER JOIN `tabLab Test Template` as tltt
         ON tltt.name=lt.template
         {prev_join_stmt}
-        WHERE lt.parent='{test_name}' AND ltt.lab_test_group {item_group}  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
+        WHERE lt.parent='{test_name}' AND ltt.result_report_type="{item_group}"  AND {where_stmt} AND lt.result_value IS NOT NULL  AND lt.control_type !='Upload File'
         ORDER BY ltt.order, tltt.order
         """.format(test_name=test_doc.name, order= order, item_group=item_group, where_stmt=where_stmt, prev_join_stmt=prev_join_stmt, prev_select_stmt=prev_select_stmt), as_dict=True)
 
@@ -1336,7 +1338,6 @@ def get_embassy_previous_tests(test_name, patient):
     test_results = tests[0]['results'].split("/;/")
     if len(test_templates) != len(test_results): return {}
     tests = {template: result for template, result in zip(test_templates, test_results) }
-    print(tests)
     return tests
 def get_embassy_tests_items(test_name, only_finalized=False, selected_tests=[]):
     where_stmt = " lt.status IN ('Finalized', 'Released')"
@@ -1387,8 +1388,6 @@ def get_test_uploaded_files(lab_test, password, test_name):
     """,as_dict=True)
     if len(file_link) > 0: file_link = file_link[0]['result_value']
     #frappe.db.get_value("Noraml Test Result", {"name": test_name}, ["result_value"])
-    print(file_link)
-    print(frappe.local.site)
     file_content = ""
     sub_dir =  ""  if file_link.startswith("/private") else "/public"
     with open(frappe.local.site + sub_dir + file_link, "rb") as f:
