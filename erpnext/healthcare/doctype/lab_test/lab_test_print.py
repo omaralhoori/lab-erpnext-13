@@ -194,7 +194,7 @@ def print_all_xray_report(invoices):
         if idx == expectedValue:
             writer = get_pdf_writer(xray)
         else:
-            reader = PdfFileReader(io.BytesIO(xray))
+            reader = PdfFileReader(io.BytesIO(xray), strict=False)
             writer.appendPagesFromReader(reader)
     if not writer: return "Tests couldn't printed"
     output = get_file_data_from_writer(writer)
@@ -983,10 +983,10 @@ def get_uploaded_tests_with_content(tests, result_content=None):
         if not writer:
             writer = get_pdf_writer(file_content)
         if not result_content and counter > 1:
-            reader = PdfFileReader(io.BytesIO(file_content))
+            reader = PdfFileReader(io.BytesIO(file_content), strict=False)
             writer.appendPagesFromReader(reader)
         if result_content:
-            reader = PdfFileReader(io.BytesIO(file_content))
+            reader = PdfFileReader(io.BytesIO(file_content), strict=False)
             writer.appendPagesFromReader(reader)
     output = get_file_data_from_writer(writer)
     return output
@@ -1414,7 +1414,7 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 import io
 
 def get_pdf_writer(filedata):
-    reader = PdfFileReader(io.BytesIO(filedata))
+    reader = PdfFileReader(io.BytesIO(filedata), strict=False)
     writer = PdfFileWriter()
     writer.appendPagesFromReader(reader)
     
@@ -1428,10 +1428,10 @@ def print_all_reports(lab_test):
     xray = get_xray_report(sales_invoice, return_html=True)
     writer = get_pdf_writer(result)
     if xray and xray != "":
-        reader = PdfFileReader(io.BytesIO(xray))
+        reader = PdfFileReader(io.BytesIO(xray), strict=False)
         writer.appendPagesFromReader(reader)
     if cover and cover != "":
-        reader = PdfFileReader(io.BytesIO(cover))
+        reader = PdfFileReader(io.BytesIO(cover), strict=False)
         writer.appendPagesFromReader(reader)
     output = get_file_data_from_writer(writer)
     frappe.local.response.filename = "Test Result"

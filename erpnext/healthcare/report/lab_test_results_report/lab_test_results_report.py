@@ -78,6 +78,12 @@ def get_columns( additional_table_columns=[]):
 			'width': 120
 		},
 		{
+			'label': "Send SMS",
+			'fieldname': "sms_btn",
+			'fieldtype': 'html',
+			'width': 120
+		},
+		{
 			'label': "Print Xray",
 			'fieldname': "xray_btn",
 			'fieldtype': 'html',
@@ -133,11 +139,15 @@ def get_tests(filters, additional_query_columns=[]):
 	user_roles = frappe.get_roles()
 	if "Operation User Print" not in user_roles and "Operation User Print Previous" not in user_roles:
 		print_permission = 'hide'
+	show_sms = 'hide'
+	if "SMS_Sender_After_Finilize" in user_roles:
+		show_sms = ""
 	with_previous = 1 if "Operation User Print Previous" in user_roles else 0
 	invoices = frappe.db.sql("""
 		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient as patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {2}'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"), {3})''>Print Test</button>'), '' )as print_btn,
+		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {4}'' data=''', lt.name ,''' onClick=''send_sms(this.getAttribute("data"))''>Send SMS</button>'), '' ) as sms_btn,
 		IF(rt.record_status IN ('Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', si.name ,''' onClick=''print_xray(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Xray</button>'), '' ) as xray_btn,
 		IF(ct.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {2}'' with_header=''{1}'' data=''', ct.name ,''' onClick=''print_clinical(this.getAttribute("data"), this.getAttribute("with_header"), {3})''>Print Clinical</button>'), '' )as clinical_btn
 		 {0}
@@ -146,6 +156,6 @@ def get_tests(filters, additional_query_columns=[]):
 		INNER JOIN `tabPatient` as p ON p.name=si.patient
 		LEFT JOIN `tabRadiology Test` as rt ON rt.sales_invoice=si.name
 		LEFT JOIN `tabClinical Testing` as ct ON ct.sales_invoice=si.name
-		where %s order by si.creation""".format(cover_btn or '', with_header, print_permission, with_previous) %
+		where %s order by si.creation""".format(cover_btn or '', with_header, print_permission, with_previous, show_sms) %
 		conditions, filters, as_dict=1)
 	return invoices

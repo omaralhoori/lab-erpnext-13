@@ -86,6 +86,23 @@ const print_result = (msg, with_header, print_previous) =>
 		}
 })
 }
+
+const send_sms = (lab_test) =>
+{
+	frappe.call({
+		method: "erpnext.healthcare.doctype.lab_test.lab_test.send_patient_result_sms",
+		args: {
+			lab_test: lab_test
+		},
+		callback: function(res){
+			if (res.message){
+				frappe.msgprint("Sms sent successfully")
+			}else{
+				frappe.msgprint("Unable to send sms")
+			}
+		}
+})
+}
 const print_clinical = (msg, with_header, print_previous) =>
 {
 	frappe.call({

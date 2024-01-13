@@ -52,7 +52,7 @@ class LabTest(Document):
 		result_msg = msg if msg else frappe.db.get_single_value("Healthcare Settings", "result_sms_message")
 		if not result_msg or result_msg == "":
 			frappe.msgprint(_("Failed to send sms. Result sms message is empty in Healthcare Settings."))
-			return
+			return 0
 
 		if send_to_payer:
 			receiver_number = frappe.db.get_value("Customer", invoice.insurance_party, "customer_mobile_no")
@@ -60,19 +60,19 @@ class LabTest(Document):
 			receiver_number = frappe.db.get_value("Customer", invoice.customer, "customer_mobile_no")
 		if not receiver_number or receiver_number == "":
 			frappe.msgprint(_("Failed to send sms. Receiver mobile number is empty."))
-			return
+			return 0
 
 		result_url = frappe.db.get_single_value("Healthcare Settings", "result_url")
 		if not result_url or result_url == "":
 			frappe.msgprint(_("Failed to send sms. Result url is empty in Healthcare Settings."))
-			return
+			return 0
 
 		if result_url[-1] != "/":
 			result_url += '/'
 		patient_info = frappe.db.get_value("Patient", invoice.patient, ["patient_password", "patient_number"])
 		if not patient_info:
 			frappe.msgprint(_("Failed to send sms. Patient information is incomplete."))
-			return
+			return 0
 		patient_password, patient_number = patient_info
 		#result_url += "test-result?usercode=" + patient_password + "_" + patient_number.replace(" ", "%20")
 		#result_msg += "\n"  + result_url
@@ -80,6 +80,7 @@ class LabTest(Document):
 		result_msg = result_msg.format(url=result_url, patient=invoice.patient_name)
 		send_sms(msg=result_msg, receiver_list=[receiver_number])
 		self.db_set('sms_sent', 1)
+		return 1
 
 	def before_save(self):
 		for lab_test in self.normal_test_items:
@@ -218,7 +219,7 @@ def send_patient_result_sms(lab_test):
 	lab_test = frappe.get_doc("Lab Test", lab_test)
 	if not lab_test:
 		frappe.throw("Test not found")
-	lab_test.send_result_sms()
+	return lab_test.send_result_sms()
 
 
 def create_test_from_template(lab_test):
