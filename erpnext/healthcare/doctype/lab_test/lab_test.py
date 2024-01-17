@@ -44,7 +44,10 @@ class LabTest(Document):
 		send_to_payer = False
 		receiver_number = None
 		invoice = frappe.get_doc("Sales Invoice", self.sales_invoice)
-
+		if invoice.outstanding_amount > 0:
+			return 0
+		if invoice.insurance_party_type == 'Payer' or invoice.insurance_party_type == 'Insurance Company': 
+			return 0
 		if invoice:
 			if invoice.sms_to_payer and invoice.sms_to_payer == 1:
 				send_to_payer= True
