@@ -6,4 +6,4 @@ def patient_results(invoice, password):
     if not patient: return
     if frappe.db.get_value("Patient", patient, 'patient_password') != password: return
     #lab_test = frappe.db.get_value("Lab Test", {"sales_invoice": invoice}, "name")
-    return lab_test_result(invoice, only_finilized=True, head=True)
+    return lab_test_result(invoice, only_finilized=True, head=True, previous=True)

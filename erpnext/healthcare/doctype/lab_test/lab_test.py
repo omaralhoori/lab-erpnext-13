@@ -40,14 +40,15 @@ class LabTest(Document):
 		if frappe.db.get_value("Sales Invoice", self.sales_invoice, "outstanding_amount") != 0:
 			frappe.throw(_("Invoice is not paid"))
 	
-	def send_result_sms(self, msg=None):
+	def send_result_sms(self, msg=None, no_payer=False):
 		send_to_payer = False
 		receiver_number = None
 		invoice = frappe.get_doc("Sales Invoice", self.sales_invoice)
 		if invoice.outstanding_amount > 0:
 			return 0
-		if invoice.insurance_party_type == 'Payer' or invoice.insurance_party_type == 'Insurance Company': 
-			return 0
+		if no_payer:	
+			if invoice.insurance_party_type == 'Payer' or invoice.insurance_party_type == 'Insurance Company': 
+				return 0
 		if invoice:
 			if invoice.sms_to_payer and invoice.sms_to_payer == 1:
 				send_to_payer= True
@@ -172,11 +173,11 @@ class LabTest(Document):
 		if frappe.db.get_single_value("Healthcare Settings", "result_sms_once") and self.sms_sent: return
 
 		if self.status == "Finalized":
-			self.send_result_sms()
+			self.send_result_sms(no_payer=True)
 			return
 
 		if self.status == "Partially Finalized" and frappe.db.get_single_value("Healthcare Settings", "partially_result_sms") == 0: return
-		self.send_result_sms(msg=frappe.db.get_single_value("Healthcare Settings", "partial_result_sms_message"))
+		self.send_result_sms(msg=frappe.db.get_single_value("Healthcare Settings", "partial_result_sms_message"), no_payer=True)
 	def after_insert(self):
 		if self.prescription:
 			frappe.db.set_value('Lab Prescription', self.prescription, 'lab_test_created', 1)
