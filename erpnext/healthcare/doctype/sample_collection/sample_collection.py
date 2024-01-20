@@ -40,7 +40,7 @@ class SampleCollection(Document):
 			send_received_msg_order(self.name, test_name, self.company)
 			frappe.db.set_value("Lab Test", test_name, {"status": "Received", "sample_collected": 1})
 			frappe.db.sql("""
-				UPDATE `tabNormal Test Result` SET status='Received'
+				UPDATE `tabNormal Test Result` SET status='Received', collection_time=now()
 			WHERE parent='{test_name}' AND status IS NULL
 			""".format(test_name=test_name))
 		if not self.sms_sent and frappe.db.get_single_value("Healthcare Settings", "sample_collection_sms"):

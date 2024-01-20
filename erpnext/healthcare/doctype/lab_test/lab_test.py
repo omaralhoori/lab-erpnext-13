@@ -1389,6 +1389,7 @@ def get_lab_test_form_tests(lab_test):
 @frappe.whitelist()
 def apply_test_button_action(action, tests, test_name, sample):
 	where_stmt = ""
+	update_stmt = ""
 	if action == "Received":
 		if frappe.db.get_value("Sample Collection", sample, ["docstatus"]) != 1:
 			frappe.throw("Sample is not collected")
@@ -1397,6 +1398,7 @@ def apply_test_button_action(action, tests, test_name, sample):
 		where_stmt = "status='Received' AND result_value !='' AND result_value IS NOT NULL "
 	elif action == 'Finalized':
 		where_stmt = "status='Released'"
+		update_stmt = ", finalize_time=IFNULL(finalize_time,now())"
 	elif action == 'Rejected':
 		where_stmt = "(status is NULL or status not in ('Finalized'))"
 	elif action == 'definalize':
@@ -1409,9 +1411,9 @@ def apply_test_button_action(action, tests, test_name, sample):
 	tests = json.loads(tests)
 	tests = [f"'{s}'" for s in tests]
 	query= """
-	UPDATE `tabNormal Test Result` SET status='{action}'
+	UPDATE `tabNormal Test Result` SET status='{action}' {update_stmt}
 	WHERE name in ({tests}) AND {where_stmt}
-	""".format(action=action, tests=",".join(tests), where_stmt=where_stmt)
+	""".format(action=action, tests=",".join(tests), where_stmt=where_stmt, update_stmt=update_stmt)
 	frappe.db.sql(query)
 	frappe.db.commit()
 	lab_test = frappe.get_doc('Lab Test', test_name)
