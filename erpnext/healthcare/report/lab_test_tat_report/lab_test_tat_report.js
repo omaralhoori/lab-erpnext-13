@@ -24,7 +24,6 @@ frappe.query_reports["Lab Test TAT Report"] = {
 			"label": __("Lab Test"),
 			"fieldtype": "Link",
 			"options": "Lab Test Template",
-			"reqd": 1,
 			"get_query": function() {
 				return {
 					"filters": {

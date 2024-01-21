@@ -6,7 +6,6 @@ from frappe import _
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
-	print(data)
 	return columns, data
 
 def get_columns():
@@ -51,6 +50,12 @@ def get_columns():
 			'width': 200
 		},
 		{
+			"label": _('Release Date'),
+			"fieldname": "release_time",
+			"fieldtype": "Datetime",
+			'width': 200
+		},
+		{
 			"label": _('Finalized Date'),
 			"fieldname": "finalize_time",
 			"fieldtype": "Datetime",
@@ -81,6 +86,40 @@ def get_columns():
 import datetime 
 
 def get_data(filters=None):
+	from_date = datetime.datetime.strptime(filters.get('from_date'), '%Y-%m-%d') 
+	to_date = datetime.datetime.strptime(filters.get('to_date'), '%Y-%m-%d') + datetime.timedelta(days=1)
+	lab_test = ''
+	if filters.get('lab_test'):
+		lab_test = ' AND res.template=%(lab_test)s'
+	tests = frappe.db.sql("""
+		SELECT res.creation as requested_date, res.parent as test_id,
+		lab.patient, practitioner_name as doctor_name, res.template as test_code,
+		res.collection_time, res.release_time, res.finalize_time,
+		TIMEDIFF(res.finalize_time, res.collection_time) AS actual_tat,
+		0 as tat_flag
+		FROM `tabNormal Test Result` as res
+		INNER JOIN `tabLab Test` as lab ON lab.name=res.parent
+		WHERE lab.creation >= %(from_date)s AND lab.creation <= %(to_date)s {lab_test}
+	""".format(lab_test=lab_test), {
+		"lab_test": filters.get('lab_test'), 
+		"from_date": from_date, "to_date":
+		  to_date,}, as_dict=True)
+	for test in tests:
+		test_tat = frappe.db.get_value('Lab Test Template', test.get('test_code'), ['expected_tat', 'expected_tat_unit'])
+		if test_tat:
+			total_tat_seconds = get_tat_time_seconds(test_tat[0], test_tat[1])
+			test['expected_tat'] = str(test_tat[0]) + " " + str(test_tat[1])
+			if test['finalize_time']:
+				time_difference = test['finalize_time'] - test['collection_time']
+			if time_difference.total_seconds() > total_tat_seconds:
+				test['tat_flag'] = 1
+	return tests
+
+
+ 
+
+
+def get_data_old(filters=None):
 	from_date = datetime.datetime.strptime(filters.get('from_date'), '%Y-%m-%d') 
 	to_date = datetime.datetime.strptime(filters.get('to_date'), '%Y-%m-%d') + datetime.timedelta(days=1)
 	test_tat = frappe.db.get_value('Lab Test Template', filters.get('lab_test'), ['expected_tat', 'expected_tat_unit'])

@@ -1396,6 +1396,7 @@ def apply_test_button_action(action, tests, test_name, sample):
 		where_stmt = "(status is NULL or status not in ('Released', 'Finalized', 'Rejected'))"
 	elif action == "Released":
 		where_stmt = "status='Received' AND result_value !='' AND result_value IS NOT NULL "
+		update_stmt = ", release_time=IFNULL(release_time,now())"
 	elif action == 'Finalized':
 		where_stmt = "status='Released'"
 		update_stmt = ", finalize_time=IFNULL(finalize_time,now())"
