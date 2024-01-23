@@ -109,10 +109,10 @@ def get_data(filters=None):
 		if test_tat:
 			total_tat_seconds = get_tat_time_seconds(test_tat[0], test_tat[1])
 			test['expected_tat'] = str(test_tat[0]) + " " + str(test_tat[1])
-			if test['finalize_time']:
+			if test['finalize_time'] and test['collection_time']:
 				time_difference = test['finalize_time'] - test['collection_time']
-			if time_difference.total_seconds() > total_tat_seconds:
-				test['tat_flag'] = 1
+				if time_difference.total_seconds() > total_tat_seconds:
+					test['tat_flag'] = 1
 	return tests
 
 
