@@ -96,25 +96,53 @@ def get_data(filters=None):
 	lab_test = ''
 	if filters.get('lab_test'):
 		lab_test = ' AND res.template=%(lab_test)s'
-	tests = frappe.db.sql("""
-		SELECT res.creation as requested_date, res.parent as test_id,
-		lab.patient, practitioner_name as doctor_name, res.template as test_code,
-		res.collection_time, res.release_time, res.finalize_time,
-		CONCAT(FORMAT(tmplt.expected_tat, 1), " " , tmplt.expected_tat_unit) as expected_tat,
-		TIMEDIFF(res.finalize_time, res.collection_time) AS actual_tat,
-		1 as test_count,
-		CASE
-   		 	WHEN TIMESTAMPDIFF(SECOND, res.collection_time, res.finalize_time) > tmplt.expected_tat_seconds THEN 1
-			ELSE 0
-		END AS tat_flag
-		FROM `tabNormal Test Result` as res
-		INNER JOIN `tabLab Test` as lab ON lab.name=res.parent
-		INNER JOIN `tabLab Test Template` as tmplt ON tmplt.name=res.template
-		WHERE lab.creation >= %(from_date)s AND lab.creation <= %(to_date)s {lab_test}
-	""".format(lab_test=lab_test), {
-		"lab_test": filters.get('lab_test'), 
-		"from_date": from_date, "to_date":
-		  to_date,}, as_dict=True)
+	if filters.get('group_invoice'):
+		tests = frappe.db.sql("""
+			SELECT res.creation as requested_date, res.parent as test_id,
+			lab.patient, practitioner_name as doctor_name, res.template as test_code,
+			res.collection_time, res.release_time, res.finalize_time,
+			CONCAT(FORMAT(tmplt.expected_tat, 1), " " , tmplt.expected_tat_unit) as expected_tat,
+			TIMEDIFF(res.finalize_time, res.collection_time) AS actual_tat,
+			joinTbl.test_count,
+			CASE
+				WHEN TIMESTAMPDIFF(SECOND, res.collection_time, res.finalize_time) > tmplt.expected_tat_seconds THEN 1
+				ELSE 0
+			END AS tat_flag
+			FROM `tabNormal Test Result` as res
+			INNER JOIN `tabLab Test` as lab ON lab.name=res.parent
+			INNER JOIN `tabLab Test Template` as tmplt ON tmplt.name=res.template
+			JOIN (
+				SELECT res2.parent, MAX(tmplt2.expected_tat_seconds) as max_seconds, count(res2.name) as test_count
+				FROM `tabNormal Test Result` as res2
+				INNER JOIN `tabLab Test Template` as tmplt2 ON tmplt2.name=res2.template
+				GROUP BY res2.parent
+			) as joinTbl ON joinTbl.parent = res.parent and joinTbl.max_seconds=tmplt.expected_tat_seconds
+			WHERE lab.creation >= %(from_date)s AND lab.creation <= %(to_date)s {lab_test}
+			GROUP BY res.parent
+		""".format(lab_test=lab_test), {
+			"lab_test": filters.get('lab_test'), 
+			"from_date": from_date, "to_date":
+			to_date,}, as_dict=True)
+	else:
+		tests = frappe.db.sql("""
+			SELECT res.creation as requested_date, res.parent as test_id,
+			lab.patient, practitioner_name as doctor_name, res.template as test_code,
+			res.collection_time, res.release_time, res.finalize_time,
+			CONCAT(FORMAT(tmplt.expected_tat, 1), " " , tmplt.expected_tat_unit) as expected_tat,
+			TIMEDIFF(res.finalize_time, res.collection_time) AS actual_tat,
+			1 as test_count,
+			CASE
+				WHEN TIMESTAMPDIFF(SECOND, res.collection_time, res.finalize_time) > tmplt.expected_tat_seconds THEN 1
+				ELSE 0
+			END AS tat_flag
+			FROM `tabNormal Test Result` as res
+			INNER JOIN `tabLab Test` as lab ON lab.name=res.parent
+			INNER JOIN `tabLab Test Template` as tmplt ON tmplt.name=res.template
+			WHERE lab.creation >= %(from_date)s AND lab.creation <= %(to_date)s {lab_test}
+		""".format(lab_test=lab_test), {
+			"lab_test": filters.get('lab_test'), 
+			"from_date": from_date, "to_date":
+			to_date,}, as_dict=True)
 	# invoice_tests = {}
 	# for test in tests:
 	# 	test_tat = frappe.db.get_value('Lab Test Template', test.get('test_code'), ['expected_tat', 'expected_tat_unit'])
