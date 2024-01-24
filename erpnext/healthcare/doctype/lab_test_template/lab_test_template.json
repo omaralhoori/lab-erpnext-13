@@ -102,6 +102,7 @@
   "minimum_amount",
   "expected_tat",
   "expected_tat_unit",
+  "expected_tat_seconds",
   "is_published_online",
   "report_code",
   "worksheet_report_code",
@@ -903,6 +904,12 @@
    "fieldname": "second_report_title",
    "fieldtype": "Data",
    "label": "Second Report Title"
+  },
+  {
+   "fieldname": "expected_tat_seconds",
+   "fieldtype": "Float",
+   "label": "Expected TAT Seconds",
+   "read_only": 1
   }
  ],
  "links": [
@@ -914,7 +921,7 @@
    "table_fieldname": "test_results"
   }
  ],
- "modified": "2024-01-08 19:43:39.283746",
+ "modified": "2024-01-25 00:15:04.022797",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

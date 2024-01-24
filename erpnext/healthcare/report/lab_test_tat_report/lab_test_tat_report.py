@@ -44,6 +44,11 @@ def get_columns():
 			"options": "Lab Test Template",
 		},
 		{
+			"label": _('Test Count'),
+			"fieldname": "test_count",
+			"fieldtype": "Int",
+		},
+		{
 			"label": _('Collection Date'),
 			"fieldname": "collection_time",
 			"fieldtype": "Datetime",
@@ -95,24 +100,36 @@ def get_data(filters=None):
 		SELECT res.creation as requested_date, res.parent as test_id,
 		lab.patient, practitioner_name as doctor_name, res.template as test_code,
 		res.collection_time, res.release_time, res.finalize_time,
+		CONCAT(FORMAT(tmplt.expected_tat, 1), " " , tmplt.expected_tat_unit) as expected_tat,
 		TIMEDIFF(res.finalize_time, res.collection_time) AS actual_tat,
-		0 as tat_flag
+		1 as test_count,
+		CASE
+   		 	WHEN TIMESTAMPDIFF(SECOND, res.collection_time, res.finalize_time) > tmplt.expected_tat_seconds THEN 1
+			ELSE 0
+		END AS tat_flag
 		FROM `tabNormal Test Result` as res
 		INNER JOIN `tabLab Test` as lab ON lab.name=res.parent
+		INNER JOIN `tabLab Test Template` as tmplt ON tmplt.name=res.template
 		WHERE lab.creation >= %(from_date)s AND lab.creation <= %(to_date)s {lab_test}
 	""".format(lab_test=lab_test), {
 		"lab_test": filters.get('lab_test'), 
 		"from_date": from_date, "to_date":
 		  to_date,}, as_dict=True)
-	for test in tests:
-		test_tat = frappe.db.get_value('Lab Test Template', test.get('test_code'), ['expected_tat', 'expected_tat_unit'])
-		if test_tat:
-			total_tat_seconds = get_tat_time_seconds(test_tat[0], test_tat[1])
-			test['expected_tat'] = str(test_tat[0]) + " " + str(test_tat[1])
-			if test['finalize_time'] and test['collection_time']:
-				time_difference = test['finalize_time'] - test['collection_time']
-				if time_difference.total_seconds() > total_tat_seconds:
-					test['tat_flag'] = 1
+	# invoice_tests = {}
+	# for test in tests:
+	# 	test_tat = frappe.db.get_value('Lab Test Template', test.get('test_code'), ['expected_tat', 'expected_tat_unit'])
+	# 	if test_tat:
+	# 		total_tat_seconds = get_tat_time_seconds(test_tat[0], test_tat[1])
+	# 		# if not invoice_tests.get(test.get('test_id')):
+	# 		# 	invoice_tests[test.get('test_id')] = {
+	# 		# 		"test": test,
+	# 		# 		"total_tat_seconds": total_tat_seconds
+	# 		# 	}
+	# 		test['expected_tat'] = str(test_tat[0]) + " " + str(test_tat[1])
+	# 		if test['finalize_time'] and test['collection_time']:
+	# 			time_difference = test['finalize_time'] - test['collection_time']
+	# 			if time_difference.total_seconds() > total_tat_seconds:
+	# 				test['tat_flag'] = 1
 	return tests
 
 

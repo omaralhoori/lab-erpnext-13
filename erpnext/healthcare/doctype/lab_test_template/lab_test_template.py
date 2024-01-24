@@ -56,9 +56,25 @@ class LabTestTemplate(Document):
 
 		elif not self.is_billable and self.item:
 			frappe.db.set_value('Item', self.item, 'disabled', 1)
-
+		old_doc = self.get_doc_before_save()
+		if not self.expected_tat_seconds or (old_doc and (old_doc.expected_tat != self.expected_tat or old_doc.expected_tat_unit != self.expected_tat_unit)):
+			self.set_tat_seconds()
 		self.reload()
-
+	def set_tat_seconds(self):
+		if self.expected_tat and self.expected_tat_unit:
+				self.expected_tat_seconds = self.get_tat_time_seconds(self.expected_tat, self.expected_tat_unit)
+				self.db_set("expected_tat_seconds", self.expected_tat_seconds)
+	def get_tat_time_seconds(self, tat, tat_unit):
+		import datetime
+		if tat_unit == 'Minute':
+			return datetime.timedelta(minutes=tat).total_seconds()
+		if tat_unit == 'Hour':
+			return datetime.timedelta(hours=tat).total_seconds()
+		if tat_unit == 'Day':
+			return datetime.timedelta(days=tat).total_seconds()
+		if tat_unit == 'Month':
+			return datetime.timedelta(days= tat * 30).total_seconds()
+		return tat
 	def on_trash(self):
 		# Remove template reference from item and disable item
 		if self.item:

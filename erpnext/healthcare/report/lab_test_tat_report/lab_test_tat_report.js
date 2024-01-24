@@ -32,5 +32,10 @@ frappe.query_reports["Lab Test TAT Report"] = {
 				}
 			}
 		},
+		{
+			"fieldname":"group_invoice",
+			"label": __("Group By Invoice"),
+			"fieldtype": "Check",
+		},
 	]
 };
