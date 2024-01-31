@@ -12,6 +12,7 @@
   "age",
   "status",
   "destination",
+  "referred_by",
   "column_break_5",
   "nationality",
   "passport_no",
@@ -134,11 +135,18 @@
    "fieldname": "patient_history",
    "fieldtype": "Small Text",
    "label": "Patient History"
+  },
+  {
+   "fetch_from": "sales_invoice.referred_by",
+   "fetch_if_empty": 1,
+   "fieldname": "referred_by",
+   "fieldtype": "Data",
+   "label": "Referred By"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-07-27 13:24:25.639302",
+ "modified": "2024-01-31 08:07:18.127162",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Embassy Report",

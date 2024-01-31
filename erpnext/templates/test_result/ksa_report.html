@@ -114,13 +114,16 @@
                             Name: <span class="rtl">{{patient_name}}</span> <br />
                         Sex: {{gender}} &emsp;&emsp; Age: {{age}}  &emsp;&emsp; Statue: {{status}}  &emsp;&emsp; Nationality: {{nationality}} <br />
                         Passport No: {{passport_no}} &emsp; Place & Date of Issue: &emsp; {{passport_date}} &emsp; {{passport_place}} <br />
-                        Position Applied for <br />
+                         <br />
                         Dear sir:
                         </div>
                         <div class="ml-30">
                             Please arrange to examine the above-mentioned candidate whether he / she is fit for above mentioned position
                         </div>
                         <div>Date: &emsp;{{report_date}}</div>
+                        {% if referred_by %}
+                        <div>Referred By: {{referred_by}}</div>
+                        {% endif %}
                     </div>
             </div>
             <div class="history-section">

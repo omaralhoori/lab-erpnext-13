@@ -19,6 +19,7 @@ class EmbassyReport(Document):
 			"passport_place": self.passport_place_of_issue,
 			"cover_title": self.cover_title,
 			"patient_history": self.patient_history or "",
+			"referred_by": self.referred_by,
 			"report_date": frappe.utils.get_datetime(invoice_date).strftime("%d/%m/%Y",) if invoice_date else frappe.utils.get_datetime().strftime("%d/%m/%Y",)
 		}
 		attributes = frappe.db.sql(f"""
