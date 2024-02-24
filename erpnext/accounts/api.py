@@ -167,7 +167,8 @@ def get_formatted_result_for_invoice_items(doc):
 			for res in result:
 				price_list_for_res = frappe.db.get_value("Item Price", {"price_list": doc.selling_price_list,"selling": 1,"item_code": res['lab_test_name']}, ["price_list_rate"]) or 0
 				org_test_price += price_list_for_res
-			
+			if org_test_price == 0:
+				frappe.throw(res['lab_test_name'])
 			diff_percentage = 0.0
 			diff_percentage = package_test_price / org_test_price
 

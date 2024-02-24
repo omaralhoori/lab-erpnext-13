@@ -223,7 +223,7 @@ def send_patient_result_sms(lab_test):
 	lab_test = frappe.get_doc("Lab Test", lab_test)
 	if not lab_test:
 		frappe.throw("Test not found")
-	return lab_test.send_result_sms()
+	return lab_test.send_result_sms(no_payer=True)
 
 
 def create_test_from_template(lab_test):
