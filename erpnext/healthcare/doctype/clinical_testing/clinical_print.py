@@ -260,7 +260,7 @@ def lab_test_result_selected(lab_test, selected_tests):
     footer, margin_bottom =  get_print_asset('lab_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
     if footer:
         result_link = format_patient_result_link(test_doc)
-        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
+        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link, "qrcode_gen": qrcode_gen})
     footer_link = get_asset_file(lab_test,footer)
     default_margin_top = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_top")
     default_margin_left = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_left")
@@ -309,7 +309,7 @@ def lab_test_result(lab_test, previous=None, only_finilized=False, head=None, re
     footer, margin_bottom =  get_print_asset('lab_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
     if footer:
         result_link = format_patient_result_link(test_doc)
-        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
+        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link, "qrcode_gen": qrcode_gen})
     footer_link = get_asset_file(lab_test,footer)
     tbody = get_print_tbody(test_doc, header, previous=previous, only_finalized=only_finilized)
     body = get_print_body(header, tbody)
@@ -375,7 +375,7 @@ def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=N
     footer, margin_bottom =  get_print_asset('lab_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
     if footer:
         result_link = format_patient_result_link(test_doc)
-        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
+        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link, "qrcode_gen": qrcode_gen})
     footer_link = get_asset_file(lab_test,footer)
     default_margin_top = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_top")
     default_margin_left = frappe.db.get_single_value("Healthcare Report Settings", "default_lab_margin_left")

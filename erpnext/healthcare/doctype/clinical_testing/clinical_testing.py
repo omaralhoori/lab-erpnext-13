@@ -1,7 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from erpnext.healthcare.doctype.clinical_testing.clinical_print import get_pdf_writer, format_patient_result_link, get_asset_file,get_xray_report, get_print_asset, get_print_body, get_print_header, get_print_html_base, get_print_style, get_print_tbody, get_uploaded_tests, get_uploaded_tests_with_content, remove_asset, lab_test_result
+from erpnext.healthcare.doctype.clinical_testing.clinical_print import get_pdf_writer, format_patient_result_link, get_asset_file,get_xray_report, get_print_asset, get_print_body, get_print_header, get_print_html_base, get_print_style, get_print_tbody, get_uploaded_tests, get_uploaded_tests_with_content, remove_asset, lab_test_result, qrcode_gen
 import frappe
 import json
 import pdfkit
@@ -35,7 +35,6 @@ class ClinicalTesting(Document):
 		elif all_released: status='Released'
 		elif partially_released: status='Partially Released'
 		if len(self.normal_test_items) == 0: status = 'Draft'
-		print(all_finalized, all_released, all_rejected, partially_finalized, partially_released)
 		self.db_set('status', status)
 
 	def get_patient_file(self):
@@ -196,7 +195,7 @@ def clnc_test_result(lab_test, previous=None, only_finilized=False, head=None, r
     footer, margin_bottom =  get_print_asset('clinical_assets', 'Footer', test_doc.company, False, document_status=document_status)# get_lab_result_footer(test_doc)
     if footer:
         result_link = format_patient_result_link(test_doc)
-        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link})
+        footer = frappe.render_template(footer, {"username":frappe.utils.get_fullname(), "result_link": result_link, "qrcode_gen": qrcode_gen})
     footer_link = get_asset_file(lab_test,footer)
     tbody = get_print_tbody(test_doc, header, previous=previous, only_finalized=only_finilized)
     body = get_print_body(header, tbody)
@@ -213,7 +212,6 @@ def clnc_test_result(lab_test, previous=None, only_finilized=False, head=None, r
     "quiet":""}
     output = pdfkit.from_string(html, False, options)
     uploaded_tests = get_uploaded_tests(test_doc, True, parent_type='Clinical Testing')
-    print(uploaded_tests)
     if not frappe.db.get_single_value("Healthcare Settings","print_empty_result"):
         if not tbody or tbody == "":
             output = None
@@ -236,10 +234,10 @@ def print_all_reports(lab_test):
 		clnc = clnc_test_result(clnc_doc, return_html=True)
 	writer = get_pdf_writer(result)
 	if xray and xray != "":
-		reader = PdfFileReader(io.BytesIO(xray))
+		reader = PdfFileReader(io.BytesIO(xray), strict=False)
 		writer.appendPagesFromReader(reader)
 	if clnc and clnc != "":
-		reader = PdfFileReader(io.BytesIO(clnc))
+		reader = PdfFileReader(io.BytesIO(clnc),  strict=False)
 		writer.appendPagesFromReader(reader)
 	output = get_file_data_from_writer(writer)
 	frappe.local.response.filename = "Test Result"
