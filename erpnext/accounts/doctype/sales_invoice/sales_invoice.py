@@ -278,7 +278,7 @@ class SalesInvoice(SellingController):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
-		self.update_sales()
+		# self.update_sales()
 		self.validate_pos_paid_amount()
 
 		if not self.auto_repeat:
