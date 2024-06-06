@@ -280,7 +280,7 @@ def lab_test_result_selected(lab_test, selected_tests):
     if len(uploaded_tests) > 0:
         output = get_uploaded_tests_with_content(uploaded_tests, output)
     remove_asset(footer_link)
-    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filename = test_doc.patient_name + ".pdf"
     frappe.local.response.filecontent = output  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
@@ -333,7 +333,7 @@ def lab_test_result(lab_test, previous=None, only_finilized=False, head=None, re
         output = get_uploaded_tests_with_content(uploaded_tests, output)
     remove_asset(footer_link)
     if return_html: return output
-    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filename = test_doc.patient_name + ".pdf"
     frappe.local.response.filecontent = output  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 

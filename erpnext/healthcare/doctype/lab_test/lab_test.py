@@ -85,6 +85,29 @@ class LabTest(Document):
 		send_sms(msg=result_msg, receiver_list=[receiver_number])
 		self.db_set('sms_sent', 1)
 		return 1
+	def get_result_msg(self, msg=None):
+		result_msg = msg if msg else frappe.db.get_single_value("Healthcare Settings", "result_sms_message")
+		if not result_msg or result_msg == "":
+			frappe.msgprint(_("Failed to send sms. Result sms message is empty in Healthcare Settings."))
+			return 0
+
+		result_url = frappe.db.get_single_value("Healthcare Settings", "result_url")
+		if not result_url or result_url == "":
+			frappe.msgprint(_("Failed to send sms. Result url is empty in Healthcare Settings."))
+			return 0
+
+		if result_url[-1] != "/":
+			result_url += '/'
+		patient_info = frappe.db.get_value("Patient", self.patient, ["patient_password", "patient_number"])
+		if not patient_info:
+			frappe.msgprint(_("Failed to send sms. Patient information is incomplete."))
+			return 0
+		patient_password, patient_number = patient_info
+		#result_url += "test-result?usercode=" + patient_password + "_" + patient_number.replace(" ", "%20")
+		#result_msg += "\n"  + result_url
+		result_url += 'api/method/erpnext.api.patient_results?invoice=' + self.name + '&password=' + patient_password
+		result_msg = result_msg.format(url=result_url, patient=self.patient_name)
+		return result_msg
 
 	def before_save(self):
 		for lab_test in self.normal_test_items:
