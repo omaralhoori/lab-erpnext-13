@@ -31,7 +31,8 @@
   "amended_from",
   "sales_invoice",
   "collection_serial",
-  "sms_sent"
+  "sms_sent",
+  "image"
  ],
  "fields": [
   {
@@ -222,11 +223,22 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "SMS Sent"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "patient.image",
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Image"
   }
  ],
+ "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-22 16:55:12.293387",
+ "max_attachments": 50,
+ "modified": "2024-05-14 11:34:51.437766",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

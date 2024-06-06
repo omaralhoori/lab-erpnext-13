@@ -50,7 +50,8 @@
   "encounter_comment",
   "sb_refs",
   "sales_invoice",
-  "amended_from"
+  "amended_from",
+  "image"
  ],
  "fields": [
   {
@@ -338,11 +339,20 @@
    "fieldtype": "Link",
    "label": "Sales Invoice",
    "options": "Sales Invoice"
+  },
+  {
+   "fetch_from": "patient.Image",
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "ignore_user_permissions": 1,
+   "label": "Image"
   }
  ],
+ "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-16 01:51:46.752248",
+ "max_attachments": 50,
+ "modified": "2024-05-14 12:11:11.403930",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

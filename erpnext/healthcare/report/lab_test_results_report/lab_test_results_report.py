@@ -71,6 +71,12 @@ def get_columns( additional_table_columns=[]):
 			'fieldtype': 'Date',
 			'width': 120
 		},
+			{
+			'label': _("SMS Status"),
+			'fieldname': 'sms_status',
+			'fieldtype': 'Data',
+			'width': 120
+		},
 		{
 			'label': "Print Result",
 			'fieldname': "print_btn",
@@ -146,6 +152,7 @@ def get_tests(filters, additional_query_columns=[]):
 	invoices = frappe.db.sql("""
 		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient as patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
+		IF(lt.sms_sent, 'Sent', 'Not Sent') as sms_status,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {2}'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"), {3})''>Print Test</button>'), '' )as print_btn,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {4}'' data=''', lt.name ,''' onClick=''send_sms(this.getAttribute("data"))''>Send SMS</button>'), '' ) as sms_btn,
 		IF(rt.record_status IN ('Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', si.name ,''' onClick=''print_xray(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Xray</button>'), '' ) as xray_btn,

@@ -1003,6 +1003,7 @@ def get_bin_details(item_code, warehouse, company=None):
 			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 	if company:
 		bin_details['company_total_stock'] = get_company_total_stock(item_code, company)
+	bin_details['warehouse_qty'] = bin_details.get('actual_qty')
 	return bin_details
 
 def get_company_total_stock(item_code, company):

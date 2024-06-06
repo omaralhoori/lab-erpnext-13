@@ -27,7 +27,8 @@
   "patient_age",
   "results_section",
   "test_results",
-  "amended_from"
+  "amended_from",
+  "image"
  ],
  "fields": [
   {
@@ -171,11 +172,20 @@
    "label": "Finalize Date",
    "read_only": 1,
    "set_only_once": 1
+  },
+  {
+   "fetch_from": "patient.image",
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Image"
   }
  ],
+ "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-20 10:19:00.306791",
+ "modified": "2024-05-14 11:39:35.349263",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",
