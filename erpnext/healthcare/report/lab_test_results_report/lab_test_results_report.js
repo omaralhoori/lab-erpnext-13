@@ -103,6 +103,12 @@ const send_sms = (lab_test) =>
 		}
 })
 }
+
+const send_whatsapp = (lab_test) =>
+{
+	window.open('/api/method/erpnext.healthcare.report.lab_test_results_report.lab_test_results_report.get_patient_result_whatsapp?lab_test='+lab_test, "_blank")
+	
+}
 const print_clinical = (msg, with_header, print_previous) =>
 {
 	frappe.call({

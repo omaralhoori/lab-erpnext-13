@@ -12,6 +12,16 @@ def execute(filters=None):
 
 
 def get_columns( additional_table_columns=[]):
+	show_whatsapp_button = frappe.db.get_single_value("LIS Settings", "show_whatsapp_send_button")
+	if show_whatsapp_button:
+		send_whatsapp = {
+			'label': "Send Whatsapp",
+			'fieldname': "whatsapp_btn",
+			'fieldtype': 'html',
+			'width': 120
+		}
+	else:
+		send_whatsapp = {}
 	"""return columns based on filters"""
 	columns = [
 		{
@@ -82,7 +92,12 @@ def get_columns( additional_table_columns=[]):
 			'fieldname': "sms_btn",
 			'fieldtype': 'html',
 			'width': 120
-		},
+		},		
+	]
+	if show_whatsapp_button:
+		columns += [send_whatsapp]
+
+	columns += [
 		{
 			'label': "Print Xray",
 			'fieldname': "xray_btn",
@@ -96,6 +111,7 @@ def get_columns( additional_table_columns=[]):
 			'width': 120
 		}
 	]
+
 	if frappe.local.conf.is_embassy:
 		columns += [{
 			'label': "Print Cover",
@@ -148,6 +164,7 @@ def get_tests(filters, additional_query_columns=[]):
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {2}'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"), {3})''>Print Test</button>'), '' )as print_btn,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {4}'' data=''', lt.name ,''' onClick=''send_sms(this.getAttribute("data"))''>Send SMS</button>'), '' ) as sms_btn,
+		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {4}'' data=''', lt.name ,''' onClick=''send_whatsapp(this.getAttribute("data"))''>Send Whatsapp</button>'), '' ) as whatsapp_btn,
 		IF(rt.record_status IN ('Finalized'), CONCAT('<button class=''btn btn-sm'' with_header=''{1}'' data=''', si.name ,''' onClick=''print_xray(this.getAttribute("data"), this.getAttribute("with_header"))''>Print Xray</button>'), '' ) as xray_btn,
 		IF(ct.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {2}'' with_header=''{1}'' data=''', ct.name ,''' onClick=''print_clinical(this.getAttribute("data"), this.getAttribute("with_header"), {3})''>Print Clinical</button>'), '' )as clinical_btn
 		 {0}
@@ -159,3 +176,18 @@ def get_tests(filters, additional_query_columns=[]):
 		where %s order by si.creation""".format(cover_btn or '', with_header, print_permission, with_previous, show_sms) %
 		conditions, filters, as_dict=1)
 	return invoices
+
+
+@frappe.whitelist()
+def get_patient_result_whatsapp(lab_test):
+	lab_test_doc = frappe.get_doc("Lab Test", lab_test)
+	result_msg = lab_test_doc.get_result_msg()
+	url = 'https://api.whatsapp.com/send?phone={mobile}&text={msg}'.format(mobile=format_mobile_number(lab_test_doc.patient_mobile), msg=result_msg)
+	frappe.flags.redirect_location = url
+	frappe.local.flags.redirect_location = url
+	frappe.local.response["type"] = "redirect"
+	frappe.local.response["location"] = url
+def format_mobile_number(mobile_number):
+	if mobile_number.startswith("+"):
+		return mobile_number
+	return "+" + mobile_number

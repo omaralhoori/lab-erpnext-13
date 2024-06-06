@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-06-07 00:49:06.708748",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "show_whatsapp_send_button"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "show_whatsapp_send_button",
+   "fieldtype": "Check",
+   "label": "Show Whatsapp Send Button"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-06-07 00:49:06.708748",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "LIS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
