@@ -6,7 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "show_whatsapp_send_button"
+  "show_whatsapp_send_button",
+  "send_test_order_remotely",
+  "remote_order_server",
+  "remote_server_token"
  ],
  "fields": [
   {
@@ -14,12 +17,28 @@
    "fieldname": "show_whatsapp_send_button",
    "fieldtype": "Check",
    "label": "Show Whatsapp Send Button"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_test_order_remotely",
+   "fieldtype": "Check",
+   "label": "Send Test Order Remotely"
+  },
+  {
+   "fieldname": "remote_order_server",
+   "fieldtype": "Data",
+   "label": "Remote Order Server"
+  },
+  {
+   "fieldname": "remote_server_token",
+   "fieldtype": "Data",
+   "label": "Remote Server Token"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-07 00:49:06.708748",
+ "modified": "2024-06-14 01:50:23.681256",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "LIS Settings",

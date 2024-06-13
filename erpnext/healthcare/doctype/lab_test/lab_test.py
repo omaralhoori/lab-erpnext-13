@@ -16,6 +16,7 @@ from erpnext.healthcare.doctype.patient.patient import validate_invoice_paid
 
 import re
 from .lab_test_print import get_lab_test_result
+import json
 
 class LabTest(Document):
 	def validate(self):
@@ -1113,7 +1114,7 @@ def get_tests_dict(tests):
 				dic[test_code['host_name']] = [test_code['host_code']]
 	dic = { k : list(set(dic[k])) for k in dic}
 	return dic#json.dumps(dic)
-
+import requests
 def send_order_msg_with_patient(test_name,sample, tests_dict):
 	lab_test = frappe.get_doc("Lab Test", test_name)
 	patient = frappe.get_doc("Patient", lab_test.patient)
@@ -1138,8 +1139,18 @@ def send_order_msg_with_patient(test_name,sample, tests_dict):
 			}
 		}
 	#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), infinty_tests, 107)
-	sent = save_order_msgs_db(machine_orders)
+	if frappe.db.get_single_value("LIS Settings", "send_test_order_remotely"):
+		if frappe.db.get_single_value("LIS Settings", "remote_order_server"):
+			res = requests.post(frappe.db.get_single_value("LIS Settings", "remote_order_server"), headers= {'Authorization': frappe.db.get_single_value("LIS Settings", "remote_server_token")},{"machine_orders": json.dumps(machine_orders)})
+			sent = res.json()['message']
+	else:
+		sent = save_order_msgs_db(machine_orders)
 	return sent
+
+@frappe.whitelist()
+def receive_order_msg(machine_orders):
+	machine_orders= json.loads(machine_orders)
+	return save_order_msgs_db(machine_orders)
 
 def send_infinty_msg_with_patient(test_name,sample, infinty_tests):
 	lab_test = frappe.get_doc("Lab Test", test_name)
@@ -1208,7 +1219,7 @@ def get_reject_sample(docname):
 	
 	return sample_status
 
-import json
+
 @frappe.whitelist(allow_guest=True)
 def receive_infinty_results():
 	lab_tests = json.loads(frappe.request.data)
