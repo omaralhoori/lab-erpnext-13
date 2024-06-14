@@ -1141,7 +1141,7 @@ def send_order_msg_with_patient(test_name,sample, tests_dict):
 	#print(patient.patient_number, dob, gender, sample.collection_serial.split("-")[-1], sample.creation.strftime("%Y%m%d%H%M%S"), infinty_tests, 107)
 	if frappe.db.get_single_value("LIS Settings", "send_test_order_remotely"):
 		if frappe.db.get_single_value("LIS Settings", "remote_order_server"):
-			res = requests.post(frappe.db.get_single_value("LIS Settings", "remote_order_server"), headers= {'Authorization': frappe.db.get_single_value("LIS Settings", "remote_server_token")},{"machine_orders": json.dumps(machine_orders)})
+			res = requests.post(frappe.db.get_single_value("LIS Settings", "remote_order_server"), headers= {'Authorization': frappe.db.get_single_value("LIS Settings", "remote_server_token")}, data={"machine_orders": json.dumps(machine_orders)})
 			sent = res.json()['message']
 	else:
 		sent = save_order_msgs_db(machine_orders)
