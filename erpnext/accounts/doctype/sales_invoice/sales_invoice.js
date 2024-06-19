@@ -196,6 +196,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 
+		if (!cur_frm.is_new()){
+			cur_frm.add_custom_button(__('Discount Request'), function () {
+				cur_frm.events.show_discount_request_form(cur_frm)
+			}, __('Create'))
+		}
+
 
 	},
 
@@ -670,6 +676,12 @@ cur_frm.set_query("asset", "items", function (doc, cdt, cdn) {
 		]
 	}
 });
+
+// frappe.ui.form.on("Sales Invoice Item", "cash_discount", function(frm, cdt, cdn) { // notice the presence of cdt and cdn
+	
+// 	console.log("testssssssssssssssss")
+// 	console.log(frm.doc.total_cash_discount)
+// 	});
 
 frappe.ui.form.on('Sales Invoice', {
 	setup: function (frm) {
@@ -1707,7 +1719,47 @@ frappe.ui.form.on('Sales Invoice', {
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 			frm: frm
 		});
-	}
+	},
+	show_discount_request_form: function(frm){
+		let d = new frappe.ui.Dialog({
+			title: 'Enter details',
+			fields: [
+				{
+					label: 'Request From',
+					fieldname: 'request_from',
+					fieldtype: 'Link',
+					options: 'Cash Discount Approver',
+					reqd: 1
+				},
+				{
+					label: 'Discount Amount',
+					fieldname: 'discount_amount',
+					fieldtype: 'Float',
+					value: frm.doc.total_cash_discount,
+					default: frm.doc.total_cash_discount,
+					reqd: 1
+				},
+			],
+			size: 'small', // small, large, extra-large 
+			primary_action_label: 'Submit',
+			primary_action(values) {
+				frappe.call({
+					"method": "request_cash_discount",
+					"doc": frm.doc,
+					"args": values,
+					"callback": (res)=>{
+						if (res.message){
+							frappe.msgprint(res.message)
+						}
+					}
+				})
+				d.hide();
+			}
+		});
+		
+		d.show();
+		
+	},
 });
 
 

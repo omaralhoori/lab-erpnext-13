@@ -230,6 +230,7 @@ class SalesInvoice(SellingController):
 
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
+		self.validate_allowed_cash_discount()
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
@@ -552,10 +553,45 @@ class SalesInvoice(SellingController):
 				(not self.project and not data.sales_invoice) or \
 				(not sales_invoice and data.sales_invoice == self.name):
 				data.sales_invoice = sales_invoice
-	#ibrahim 2022
+	@frappe.whitelist()
+	def request_cash_discount(self, request_from, discount_amount):
+		if frappe.db.exists("Cash Discount Request", {
+			"sales_invoice": self.name,
+			"from_user": frappe.session.user,
+			"to_user": request_from
+		}):
+			return "You have asked for this invoice before!"
+		frappe.get_doc({
+			"doctype": "Cash Discount Request",
+			"sales_invoice": self.name,
+			"from_user": frappe.session.user,
+			"to_user": request_from,
+			"requested_discount": discount_amount,
+			"allowed_discount": discount_amount
+		}).insert(ignore_permissions=True)
+		return "Your request has been submitted successfully"
+
+	def validate_allowed_cash_discount(self):
+		allowed_discount_percentage = frappe.db.get_value("Cash Discount Permissions", frappe.session.user, "allowed_discount_percentage", cache=True)
+		if not allowed_discount_percentage and allowed_discount_percentage != 0:
+			return
+		
+		allowed_discount = (self.total * allowed_discount_percentage) / 100
+		if self.total_cash_discount > allowed_discount:
+			allowed_discount_from_admin = frappe.db.get_value("Cash Discount Request", {
+				"from_user": frappe.session.user,
+				"sales_invoice": self.name,
+				"docstatus":1
+			}, ["allowed_discount"])
+			if not allowed_discount_from_admin:
+				frappe.throw(_("You are not allowed to give a discount of more than {0} percentage of the total! Please contact your administrator.").format( allowed_discount_percentage))
+			if self.total_cash_discount > allowed_discount_from_admin:
+				frappe.throw(_("You are not allowed to give a discount of more than {0}.").format( allowed_discount_from_admin))
 	def on_update_after_submit(self):
 		#frappe.msgprint('bbbbbbbb')
 		#frappe.msgprint(self.docstatus)
+		self.validate_allowed_cash_discount()
+
 		old_invoice = self.get_doc_before_save()
 		added_items, removed_items = self.get_created_or_deleted_items(old_invoice.items, self.items)
 		if len(removed_items) > 0 or len(added_items) > 0:

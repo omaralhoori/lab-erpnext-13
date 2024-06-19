@@ -174,7 +174,7 @@ def user_test_result(lab_test, get_html=True):
     # if get_html:
     #     return html
     options = { "quiet":""}
-    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filename = test_doc.patient_name + ".pdf" #"Test.pdf"
     frappe.local.response.filecontent = pdfkit.from_string(html, False, options)  or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
@@ -231,7 +231,7 @@ def print_report_result(lab_test, with_header=False):
     uploaded_tests = get_uploaded_tests(test_doc, True)
     if len(uploaded_tests) > 0:
         output = get_uploaded_tests_with_content(uploaded_tests, output)
-    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filename = test_doc.patient_name + ".pdf" #"Test.pdf"
     frappe.local.response.filecontent =   output or ''#get_pdf(html)
     frappe.local.response.type = "pdf"
 
@@ -391,7 +391,7 @@ def embassy_test_result(lab_test, return_html = False, selected_tests=[], head=N
     pdf_content =  pdfkit.from_string( html, False, options)  or ''
     remove_asset(footer_link)
     if return_html: return pdf_content
-    frappe.local.response.filename = "Test.pdf"
+    frappe.local.response.filename = test_doc.patient_name + ".pdf"#"Test.pdf"
     frappe.local.response.filecontent = pdf_content#get_pdf(html)
     frappe.local.response.type = "pdf"
 
@@ -1486,7 +1486,7 @@ def get_xray_report(sales_invoice, return_html = False, with_header=False):
         #     f.write(html)
         pdf_content =  pdfkit.from_string( html, False, options)  or ''
         if return_html : return pdf_content
-        frappe.local.response.filename = "Test.pdf"
+        frappe.local.response.filename = xray_test.patient_name + ".pdf"#"Test.pdf"
         frappe.local.response.filecontent = pdf_content#get_pdf(html)
         frappe.local.response.type = "pdf"
     except:

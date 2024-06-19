@@ -14,14 +14,21 @@ def execute(filters=None):
 def get_columns( additional_table_columns=[]):
 	show_whatsapp_button = frappe.db.get_single_value("LIS Settings", "show_whatsapp_send_button")
 	if show_whatsapp_button:
-		send_whatsapp = {
+		send_whatsapp = [
+			{
+			'label': _("Whatsapp Status"),
+			'fieldname': 'whatsapp_status',
+			'fieldtype': 'Data',
+			'width': 120
+		},
+			{
 			'label': "Send Whatsapp",
 			'fieldname': "whatsapp_btn",
 			'fieldtype': 'html',
 			'width': 120
-		}
+		}]
 	else:
-		send_whatsapp = {}
+		send_whatsapp = []
 	"""return columns based on filters"""
 	columns = [
 		{
@@ -101,7 +108,7 @@ def get_columns( additional_table_columns=[]):
 		},		
 	]
 	if show_whatsapp_button:
-		columns += [send_whatsapp]
+		columns += send_whatsapp
 
 	columns += [
 		{
@@ -168,7 +175,7 @@ def get_tests(filters, additional_query_columns=[]):
 	invoices = frappe.db.sql("""
 		select si.name as sales_invoice,p.passport_no, si.creation as visiting_date, si.insurance_party, si.patient as patient, si.mobile_no as mobile,
 		p.dob as birth_date, lt.status as lab_status, rt.record_status as rad_status,
-		IF(lt.sms_sent, 'Sent', 'Not Sent') as sms_status,
+		IF(lt.sms_sent, 'Sent', 'Not Sent') as sms_status, IF(lt.whatsapp_status, 'Sent', 'Not Sent') as whatsapp_status,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {2}'' with_header=''{1}'' data=''', lt.name ,''' onClick=''print_result(this.getAttribute("data"), this.getAttribute("with_header"), {3})''>Print Test</button>'), '' )as print_btn,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {4}'' data=''', lt.name ,''' onClick=''send_sms(this.getAttribute("data"))''>Send SMS</button>'), '' ) as sms_btn,
 		IF(lt.status IN ('Finalized', 'Partially Finalized'), CONCAT('<button class=''btn btn-sm {4}'' data=''', lt.name ,''' onClick=''send_whatsapp(this.getAttribute("data"))''>Send Whatsapp</button>'), '' ) as whatsapp_btn,
@@ -190,6 +197,8 @@ def get_patient_result_whatsapp(lab_test):
 	lab_test_doc = frappe.get_doc("Lab Test", lab_test)
 	result_msg = lab_test_doc.get_result_msg()
 	url = 'https://web.whatsapp.com/send?phone={mobile}&text={msg}'.format(mobile=format_mobile_number(lab_test_doc.patient_mobile), msg=result_msg)
+	frappe.db.set_value("Lab Test", lab_test, "whatsapp_status", 1)
+	frappe.db.commit()
 	frappe.flags.redirect_location = url
 	frappe.local.flags.redirect_location = url
 	frappe.local.response["type"] = "redirect"

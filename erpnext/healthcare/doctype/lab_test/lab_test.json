@@ -67,6 +67,7 @@
   "section_break_50",
   "email_sent",
   "sms_sent",
+  "whatsapp_status",
   "printed",
   "normal_toggle",
   "descriptive_toggle",
@@ -599,10 +600,16 @@
   {
    "fieldname": "section_break_40",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "whatsapp_status",
+   "fieldtype": "Check",
+   "label": "Whatsapp Status"
   }
  ],
  "links": [],
- "modified": "2024-05-19 19:29:11.326854",
+ "modified": "2024-06-19 22:54:21.322865",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
