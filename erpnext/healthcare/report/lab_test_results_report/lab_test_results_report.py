@@ -196,7 +196,7 @@ def get_tests(filters, additional_query_columns=[]):
 def get_patient_result_whatsapp(lab_test):
 	lab_test_doc = frappe.get_doc("Lab Test", lab_test)
 	result_msg = lab_test_doc.get_result_msg()
-	url = 'https://web.whatsapp.com/send?phone={mobile}&text={msg}'.format(mobile=format_mobile_number(lab_test_doc.patient_mobile), msg=result_msg)
+	url = 'https://{wtype}.whatsapp.com/send?phone={mobile}&text={msg}'.format(wtype=frappe.db.get_single_value("LIS Settings", "whatsapp_type"),mobile=format_mobile_number(lab_test_doc.patient_mobile), msg=result_msg)
 	frappe.db.set_value("Lab Test", lab_test, "whatsapp_status", 1)
 	frappe.db.commit()
 	frappe.flags.redirect_location = url

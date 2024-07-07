@@ -151,7 +151,7 @@ def get_url(site):
     if site == "embassy":
         return "josante-emb.erp:8002"
     elif site == "lab":
-        return "josante-outpatient.erp:8085"
+        return "josante-outpatient.erp"
     else: return site
 
 
