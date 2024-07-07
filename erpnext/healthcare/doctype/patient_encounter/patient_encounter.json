@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_copy": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "beta": 1,
@@ -341,7 +340,8 @@
    "options": "Sales Invoice"
   },
   {
-   "fetch_from": "patient.Image",
+   "allow_on_submit": 1,
+   "fetch_from": "patient.image",
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "ignore_user_permissions": 1,
@@ -351,8 +351,8 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "max_attachments": 50,
- "modified": "2024-05-14 12:11:11.403930",
+ "max_attachments": 600,
+ "modified": "2024-07-03 10:37:58.941026",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
