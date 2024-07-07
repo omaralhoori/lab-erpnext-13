@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "show_whatsapp_send_button",
+  "whatsapp_type",
   "send_test_order_remotely",
   "remote_order_server",
   "remote_server_token"
@@ -33,12 +34,18 @@
    "fieldname": "remote_server_token",
    "fieldtype": "Data",
    "label": "Remote Server Token"
+  },
+  {
+   "fieldname": "whatsapp_type",
+   "fieldtype": "Select",
+   "label": "Whatsapp Type",
+   "options": "api\nweb"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-14 01:50:23.681256",
+ "modified": "2024-06-24 04:35:47.942039",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "LIS Settings",

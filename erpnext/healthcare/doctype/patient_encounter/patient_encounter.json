@@ -137,8 +137,7 @@
   {
    "fieldname": "encounter_time",
    "fieldtype": "Time",
-   "label": "Encounter Time",
-   "reqd": 1
+   "label": "Encounter Time"
   },
   {
    "default": "0",
@@ -151,6 +150,7 @@
   {
    "fieldname": "sb_symptoms",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Encounter Impression"
   },
   {
@@ -197,22 +197,26 @@
    "collapsible": 1,
    "fieldname": "codification",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Medical Coding"
   },
   {
    "fieldname": "codification_table",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Medical Codes",
    "options": "Codification Table"
   },
   {
    "fieldname": "sb_drug_prescription",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Medications"
   },
   {
    "fieldname": "drug_prescription",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Drug Prescription",
    "options": "Drug Prescription"
   },
@@ -230,6 +234,7 @@
   {
    "fieldname": "sb_procedures",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Procedures"
   },
   {
@@ -258,6 +263,7 @@
   {
    "fieldname": "rehabilitation_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Rehabilitation"
   },
   {
@@ -352,7 +358,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 50,
- "modified": "2024-05-14 12:11:11.403930",
+ "modified": "2024-07-03 02:19:16.038472",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

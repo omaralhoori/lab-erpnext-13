@@ -29,6 +29,7 @@
   "qty_info_sec_break",
   "min_order_qty",
   "projected_qty",
+  "safety_stock",
   "qty_info_col_break",
   "actual_qty",
   "ordered_qty",
@@ -471,13 +472,20 @@
    "fieldname": "company_total_stock",
    "fieldtype": "Float",
    "label": "Available Qty at Company"
+  },
+  {
+   "fetch_from": "item_code.safety_stock",
+   "fieldname": "safety_stock",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Safety Stock"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-23 02:47:19.809907",
+ "modified": "2024-06-28 01:06:17.639345",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

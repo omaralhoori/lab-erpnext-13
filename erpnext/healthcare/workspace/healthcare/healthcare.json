@@ -70,8 +70,19 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Medical Examination Template",
+   "link_to": "Medical Examination Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Consultation Setup",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -149,6 +160,7 @@
    "is_query_report": 0,
    "label": "Consultation",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -207,6 +219,7 @@
    "label": "Facility Management",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -235,6 +248,7 @@
    "label": "Medical Coding",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -262,6 +276,7 @@
    "is_query_report": 0,
    "label": "Settings",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -581,7 +596,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-11-04 14:43:56.733260",
+ "modified": "2024-07-07 21:50:20.608361",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",

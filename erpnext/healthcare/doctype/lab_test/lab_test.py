@@ -106,7 +106,7 @@ class LabTest(Document):
 		patient_password, patient_number = patient_info
 		#result_url += "test-result?usercode=" + patient_password + "_" + patient_number.replace(" ", "%20")
 		#result_msg += "\n"  + result_url
-		result_url += 'api/method/erpnext.api.patient_results?invoice=' + self.name + '&password=' + patient_password
+		result_url += 'api/method/erpnext.api.patient_results?invoice=' + self.name + '%26password=' + patient_password
 		result_msg = result_msg.format(url=result_url, patient=self.patient_name)
 		return result_msg
 

@@ -2363,8 +2363,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "migration_hash": "ce89f04a5aff3f0f6ad2838e38a498df",
- "modified": "2023-06-03 22:52:50.298195",
+ "modified": "2024-07-04 10:10:21.359112",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
