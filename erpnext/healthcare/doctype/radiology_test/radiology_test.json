@@ -177,7 +177,6 @@
    "fetch_from": "patient.image",
    "fieldname": "image",
    "fieldtype": "Attach Image",
-   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Image"
   }
@@ -185,7 +184,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-14 11:39:35.349263",
+ "modified": "2024-07-08 12:42:19.552351",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Radiology Test",
