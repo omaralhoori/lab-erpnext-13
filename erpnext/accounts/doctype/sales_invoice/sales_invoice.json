@@ -227,7 +227,8 @@
   "column_break_140",
   "auto_repeat",
   "update_auto_repeat_reference",
-  "against_income_account"
+  "against_income_account",
+  "fiscal_year"
  ],
  "fields": [
   {
@@ -2351,6 +2352,13 @@
    "fieldtype": "Data",
    "label": "Practitioner Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Fiscal Year",
+   "options": "Fiscal Year",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2363,7 +2371,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-07-04 10:10:21.359112",
+ "modified": "2024-07-18 21:09:10.286533",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
