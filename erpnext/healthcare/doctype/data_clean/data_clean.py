@@ -9,86 +9,107 @@ class DataClean(Document):
 
 @frappe.whitelist()
 def clean_data_enque(to_date):
-	frappe.enqueue('clean_data', queue='long', timeout=20000,to_date=to_date)
-	#clean_data(to_date=to_date)
+	#frappe.enqueue('clean_data', queue='long', timeout=20000,to_date=to_date)
+	clean_data(to_date=to_date)
 	#clean_data_query(to_date)
 @frappe.whitelist()
 def clean_data(to_date):
-	try:
-		patients = frappe.db.get_all("Patient", {"creation": ["<=", to_date]}, ["name", "customer"])
+	# try:
+	patients = frappe.db.get_all("Patient", {"creation": ["<=", to_date]}, ["name", "customer"])
+	print(len(patients))
+	
+	for patient in patients:
+		# delete contact
+		frappe.db.set_single_value("Data Clean", "current_patient", patient.name)
 		
+
+		# try:
+		# 	#delete patient
+		# 	frappe.delete_doc("Patient", patient.name)
+		# 	frappe.delete_doc("Customer", patient.customer)
+		# except:
+			
+			# delete lab test
+		tests = frappe.db.get_all("Lab Test", {"patient": patient.name, "creation": ["<=", to_date] }, "name")
+		for lab_test in tests:
+			frappe.delete_doc("Lab Test", lab_test.name)
+		# cancel and delete sample collection
+		collections = frappe.db.get_all("Sample Collection", {"patient": patient.name , "creation": ["<=", to_date]}, "name")
+		for collection in collections:
+			#frappe.delete_doc("Sample Collection", collection.name)
+			sc = frappe.get_doc("Sample Collection", collection.name)
+			try:
+				sc.cancel()
+			except:
+				pass
+			sc.delete()
+		# delete Embassy Report
+		reports = frappe.db.get_all("Embassy Report", {"patient": patient.name, "creation": ["<=", to_date]}, "name")
+		for report in reports:
+			frappe.delete_doc("Embassy Report", report.name)
+		# delete Radiology Test
+		for radiology in frappe.db.get_all("Radiology Test", {"patient": patient.name, "creation": ["<=", to_date]}, "name"):
+			frappe.delete_doc("Radiology Test", radiology.name)
+		# cancel gl enties against pe
+
+		# cancel and delete payment entry
+		for payment_entry in frappe.db.get_all("Payment Entry", {"party": patient.name, "creation": ["<=", to_date]}, "name"):
+			pe = frappe.get_doc("Payment Entry", payment_entry.name)
+			try:
+				pe.cancel()
+			except:
+				pass
+			pe.delete()
+		print(patient.name)
+		invoices = frappe.db.get_all("Sales Invoice", {"customer": patient.customer, "creation": ["<=", to_date]}, "name")
+		#print(invoices)
+		#print({"customer": patient.customer, "creation": ["<=", to_date]})
+		for sales_invoice in invoices:
+			# cancel all gl entries against si and party patient
+			#for gl_entry in frappe.db.get_all("GL Entry"# cancel gl enties against pe
+			#print(sales_invoice)
+			reports = frappe.db.get_all("Embassy Report", {"sales_invoice": sales_invoice.name}, "name")
+			for report in reports:
+				frappe.delete_doc("Embassy Report", report.name)
+			encounters = frappe.db.get_all("Patient Encounter", {"sales_invoice": sales_invoice.name}, "name")
+			for encounter in encounters:
+				encounter_doc = frappe.get_doc("Patient Encounter", encounter.name)
+				try:
+					encounter_doc.cancel()
+				except:
+					pass
+				encounter_doc.delete()
+				#frappe.delete_doc("Patient Encounter", encounter.name)
+			am_si = frappe.db.exists("Sales Invoice", {"amended_from": sales_invoice.name})
+			if am_si:
+				frappe.db.set_value("Sales Invoice", am_si, "amended_from", "")
+			si = frappe.get_doc("Sales Invoice", sales_invoice.name)
+			try:
+				si.cancel()
+			except:
+				pass
+			si.delete()
+	# cancel and delete payment entry, ""):
+		# cancel and delete sales invoice
+
+	# # delete contact
+	# for contact in frappe.db.get_all("Dynamic Link", {"link_doctype": "Patient", "link_name": patient.name, "parenttype": "Contact"}, "parent"):
+	# 	frappe.delete_doc("Contact", contact.parent)
+
+		#delete patient
 		
-		for patient in patients:
-			# delete contact
-			frappe.db.set_single_value("Data Clean", "current_patient", patient.name)
+		try:
 			for contact in frappe.db.get_all("Dynamic Link", {"link_doctype": "Patient", "link_name": patient.name, "parenttype": "Contact"}, "parent"):
 				frappe.delete_doc("Contact", contact.parent)
-
-			try:
-				#delete patient
-				frappe.delete_doc("Patient", patient.name)
-				frappe.delete_doc("Customer", patient.customer)
-			except:
-				
-				# delete lab test
-				tests = frappe.db.get_all("Lab Test", {"patient": patient.name}, "name")
-				for lab_test in tests:
-					frappe.delete_doc("Lab Test", lab_test.name)
-				# cancel and delete sample collection
-				collections = frappe.db.get_all("Sample Collection", {"patient": patient.name}, "name")
-				for collection in collections:
-					#frappe.delete_doc("Sample Collection", collection.name)
-					sc = frappe.get_doc("Sample Collection", collection.name)
-					try:
-						sc.cancel()
-					except:
-						pass
-					sc.delete()
-				# delete Embassy Report
-				reports = frappe.db.get_all("Embassy Report", {"patient": patient.name}, "name")
-				for report in reports:
-					frappe.delete_doc("Embassy Report", report.name)
-				# delete Radiology Test
-				for radiology in frappe.db.get_all("Radiology Test", {"patient": patient.name}, "name"):
-					frappe.delete_doc("Radiology Test", radiology.name)
-				# cancel gl enties against pe
-
-				# cancel and delete payment entry
-				for payment_entry in frappe.db.get_all("Payment Entry", {"party": patient.name}, "name"):
-					pe = frappe.get_doc("Payment Entry", payment_entry.name)
-					try:
-						pe.cancel()
-					except:
-						pass
-					pe.delete()
-
-				for sales_invoice in frappe.db.get_all("Sales Invoice", {"patient": patient.name}, "name"):
-					# cancel all gl entries against si and party patient
-					#for gl_entry in frappe.db.get_all("GL Entry"# cancel gl enties against pe
-					reports = frappe.db.get_all("Embassy Report", {"sales_invoice": sales_invoice.name}, "name")
-					for report in reports:
-						frappe.delete_doc("Embassy Report", report.name)
-					si = frappe.get_doc("Sales Invoice", sales_invoice.name)
-					try:
-						si.cancel()
-					except:
-						pass
-					si.delete()
-			# cancel and delete payment entry, ""):
-				# cancel and delete sales invoice
-
-			# # delete contact
-			# for contact in frappe.db.get_all("Dynamic Link", {"link_doctype": "Patient", "link_name": patient.name, "parenttype": "Contact"}, "parent"):
-			# 	frappe.delete_doc("Contact", contact.parent)
-
-				#delete patient
-				frappe.delete_doc("Patient", patient.name)
-				frappe.delete_doc("Customer", patient.customer)
-			frappe.db.commit()
-		frappe.db.set_single_value("Data Clean", "status", "Success")
-	except Exception as e:
-		frappe.db.set_single_value("Data Clean", "status", "Error")
-		frappe.db.set_single_value("Data Clean", "error", repr(e))
+			frappe.delete_doc("Patient", patient.name)
+			frappe.delete_doc("Customer", patient.customer)
+		except:
+			pass
+		frappe.db.commit()
+		# frappe.db.set_single_value("Data Clean", "status", "Success")
+	# except Exception as e:
+	# 	frappe.db.set_single_value("Data Clean", "status", "Error")
+	# 	frappe.db.set_single_value("Data Clean", "error", repr(e))
 
 def clean_data_query(to_date):
 	print("start deleting -----------------------")
